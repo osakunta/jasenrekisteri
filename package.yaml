@@ -1,0 +1,53 @@
+name: jasenrekisteri
+version: 0.1.0.0
+synopsis: Member register of Satakuntalainen Osakunta
+description: The software
+author: Oleg Grenrus <oleg.grenrus@iki.fi>
+maintainer: Oleg Grenrus <oleg.grenrus@iki.fi>
+license: BSD3
+github: satakuntalainen-osakunta/jasenrekisteri
+category: Web
+tested-with: GHC==7.8.4, GHC==7.10.2
+extra-source-files:
+- README.md
+
+ghc-options: -Wall
+
+dependencies:
+- base >=4.7 && <4.9
+- aeson
+- aeson-extra >=0.2.2
+- base-compat
+- bytestring
+- cassava
+- hashable
+- lens
+- semigroups
+- text
+- unordered-containers
+- vector
+- vector-instances
+
+library:
+  source-dirs: src
+
+executables:
+  excel:
+    main: Excel.hs
+    ghc-options: -threaded
+    source-dirs: excel/
+    dependencies:
+      - jasenrekisteri
+
+  jasenrekisteri-server:
+    main: Main.hs
+    ghc-options: -threaded
+    source-dirs: server/
+    dependencies:
+      - jasenrekisteri
+      - lucid
+      - servant        >=0.4.4.5
+      - servant-lucid  >=0.4.4.5
+      - servant-server >=0.4.4.5
+      - wai
+      - warp

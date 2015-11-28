@@ -1,0 +1,32 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
+module Jasenrekisteri.Pages.Members (membersPage) where
+
+import Prelude        ()
+import Prelude.Compat
+
+import Control.Lens
+import Data.Monoid  ((<>))
+import Data.Vector  (Vector)
+import Lucid
+
+import qualified Data.Text   as T
+import qualified Data.Vector as V
+
+import Jasenrekisteri.HtmlUtils
+import Jasenrekisteri.Person
+
+membersPage :: Vector Person -> Html ()
+membersPage members = template' "Jäsenet" $ do
+    h2_ "Jäsenet"
+    p_ $ toHtml $ "Yhteensä: " <> T.pack (show $ V.length members)
+    ul_ [class_ "members"] $ ifoldMapOf folded memberHtml members
+
+memberHtml :: Int -> Person -> Html ()
+memberHtml i Person{..} =
+    li_ $ a_ [href_ linkHref] $ do
+        span_ [class_ "etu"] $ toHtml personFirstNames
+        " "
+        span_ [class_ "suku"] $ toHtml personLastName
+  where
+    linkHref = "/member/" <> T.pack (show i)

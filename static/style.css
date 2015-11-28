@@ -1,0 +1,206 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+*, li, input {
+	font-family: monospace;
+	font-size: 14px;
+}
+
+/* HTML5 elements */
+header, footer, aside, nav, article {
+    display: block;
+}
+
+/* Default */
+body {
+	margin: 10px;
+    background: #eeeeee;
+}
+
+h1, h2 {
+	color: #333;
+	font-weight: bold;
+	margin-top: 1em;
+}
+
+a {
+	color: #369;
+}
+
+a:hover {
+	color: #69c;
+}
+
+a:visited {
+	color: #396;
+}
+
+/* Footer padding */
+section {
+	padding-bottom: 20px;
+}
+
+section.errors li {
+	color: #cc0000;
+}
+
+/* Form elements */
+
+input[type="text"], input[type="email"], input[type="password"] {
+	padding: 3px 5px;
+	border: 1px solid #333;
+	margin: 0 2px 5px 2px;
+}
+
+
+
+/* Definition list */
+dl:before, dl:after {
+	display: table;
+	content: "";
+}
+dl:after{
+	clear: both;
+}
+
+dt
+{
+	clear: left;
+	float: left;
+	display: inline-block;
+	color: #333;
+}
+
+dt:after {
+	content: ":";
+	margin-right: .5em;
+}
+
+dd
+{
+	float: left;
+	display: inline-block;
+	color: #666;
+}
+
+/* Navigation */
+nav {
+    width: 100%;
+}
+
+/* clear fix of navigation */
+nav:before, nav:after {
+	display: table;
+	content: "";
+}
+nav:after{
+	clear: both;
+}
+
+nav ul {
+    list-style: none;
+}
+
+nav ul li {
+    float: left;
+}
+
+nav ul li a {
+	display: block;
+	margin: 0 10px 0 0;
+	text-align: center;
+	color: #369;
+}
+
+nav ul li a:hover {
+	color: #69c;
+}
+
+nav ul li:visited a {
+	color: #396;
+}
+
+nav ul li.logout a {
+	color: #c00;
+}
+
+nav ul li.logout a:hover {
+	color: #c33;
+}
+
+/* Facebook image */
+img.facebook {
+	width: 104px;
+	border: 1px solid #333;
+	background: #fff;
+	padding:2px;
+	margin: 5px 0 5px 0;
+}
+
+/* Members list */
+ul.members {
+	list-style: none;
+}
+
+ul.members li a {
+	text-decoration: none;
+}
+
+/* Tags */
+
+ul.tags {
+	list-style: none;
+}
+
+ul.tags:before, ul.tags:after {
+	display: table;
+	content: "";
+}
+ul.tags:after{
+	clear: both;
+}
+
+ul.tags li {
+	float: left;
+	margin: 3px 5px 0 0;
+}
+
+a.tag {
+	border: 1px solid #4a4a4a;
+	border-radius: 4px;
+	padding: 0px 5px;
+	color: #4a4a4a;
+	background-color: #ebebeb;
+	text-decoration: none;
+}
+
+a.tag:hover { color: #ebebeb; background-color: #4a4a4a; }
+
+a.tag1 { border-color: #990000; color: #990000; background-color: #ffbd98; }
+a.tag1:hover { color: #ffbd98; background-color: #990000 }
+
+a.tag2 { border-color: #6c4000; color: #6c4000; background-color: #ffdf81; }
+a.tag2:hover { color: #ffdf81; background-color: #6c4000 }
+
+a.tag3 { border-color: #1f5600; color: #1f5600; background-color: #cafc71; }
+a.tag3:hover { color: #cafc71; background-color: #1f5600 }
+
+a.tag4 { border-color: #005b00; color: #005b00; background-color: #91ff77; }
+a.tag4:hover { color: #91ff77; background-color: #005b00 }
+
+a.tag5 { border-color: #00592d; color: #00592d; background-color: #8affc8; }
+a.tag5:hover { color: #8affc8; background-color: #00592d }
+
+a.tag6 { border-color: #004f80; color: #004f80; background-color: #b2f1ff; }
+a.tag6:hover { color: #b2f1ff; background-color: #004f80 }
+
+a.tag7 { border-color: #4829c1; color: #4829c1; background-color: #ffcbff; }
+a.tag7:hover { color: #ffcbff; background-color: #4829c1 }
+
+a.tag8 { border-color: #7215a4; color: #7215a4; background-color: #ffc3ff; }
+a.tag8:hover { color: #ffc3ff; background-color: #7215a4 }
+
+a.tag9 { border-color: #930061; color: #930061; background-color: #ffbdff; }
+a.tag9:hover { color: #ffbdff; background-color: #930061 }

@@ -1,0 +1,11 @@
+language: haskell-stack
+
+env:
+  - GHCVER=7.8.4 STACK_YAML=stack-lts-2.yaml PEDANTIC=YES
+
+matrix:
+  fast_finish: true
+
+branches:
+  only:
+    - master

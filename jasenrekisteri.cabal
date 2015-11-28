@@ -1,0 +1,104 @@
+-- This file has been generated from package.yaml by hpack version 0.8.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           jasenrekisteri
+version:        0.1.0.0
+synopsis:       Member register of Satakuntalainen Osakunta
+description:    The software
+category:       Web
+homepage:       https://github.com/satakuntalainen-osakunta/jasenrekisteri#readme
+bug-reports:    https://github.com/satakuntalainen-osakunta/jasenrekisteri/issues
+author:         Oleg Grenrus <oleg.grenrus@iki.fi>
+maintainer:     Oleg Grenrus <oleg.grenrus@iki.fi>
+license:        BSD3
+tested-with:    GHC==7.8.4, GHC==7.10.2
+build-type:     Simple
+cabal-version:  >= 1.10
+
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/satakuntalainen-osakunta/jasenrekisteri
+
+library
+  hs-source-dirs:
+      src
+  ghc-options: -Wall
+  build-depends:
+      base >=4.7 && <4.9
+    , aeson
+    , aeson-extra >=0.2.2
+    , base-compat
+    , bytestring
+    , cassava
+    , hashable
+    , lens
+    , semigroups
+    , text
+    , unordered-containers
+    , vector
+    , vector-instances
+  exposed-modules:
+      Jasenrekisteri.AesonUtils
+      Jasenrekisteri.Person
+      Jasenrekisteri.Tag
+  default-language: Haskell2010
+
+executable jasenrekisteri-server
+  main-is: Main.hs
+  hs-source-dirs:
+      server/
+  ghc-options: -Wall -threaded
+  build-depends:
+      base >=4.7 && <4.9
+    , aeson
+    , aeson-extra >=0.2.2
+    , base-compat
+    , bytestring
+    , cassava
+    , hashable
+    , lens
+    , semigroups
+    , text
+    , unordered-containers
+    , vector
+    , vector-instances
+    , jasenrekisteri
+    , lucid
+    , servant        >=0.4.4.5
+    , servant-lucid  >=0.4.4.5
+    , servant-server >=0.4.4.5
+    , wai
+    , warp
+  other-modules:
+      Jasenrekisteri.API
+      Jasenrekisteri.HtmlUtils
+      Jasenrekisteri.Pages.Member
+      Jasenrekisteri.Pages.Members
+      Jasenrekisteri.Pages.Tags
+  default-language: Haskell2010
+
+executable excel
+  main-is: Excel.hs
+  hs-source-dirs:
+      excel/
+  ghc-options: -Wall -threaded
+  build-depends:
+      base >=4.7 && <4.9
+    , aeson
+    , aeson-extra >=0.2.2
+    , base-compat
+    , bytestring
+    , cassava
+    , hashable
+    , lens
+    , semigroups
+    , text
+    , unordered-containers
+    , vector
+    , vector-instances
+    , jasenrekisteri
+  default-language: Haskell2010
