@@ -14,16 +14,20 @@ extra-source-files:
 ghc-options: -Wall
 
 dependencies:
-- base >=4.7 && <4.9
+- base >=4.8 && <4.9
 - aeson
-- aeson-extra >=0.2.2
+- aeson-compat
+- aeson-extra
 - base-compat
 - bytestring
 - cassava
+- containers
+- exceptions
 - hashable
 - lens
 - semigroups
 - text
+- transformers
 - unordered-containers
 - vector
 - vector-instances

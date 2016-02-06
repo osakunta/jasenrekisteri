@@ -28,21 +28,28 @@ library
       src
   ghc-options: -Wall
   build-depends:
-      base >=4.7 && <4.9
+      base >=4.8 && <4.9
     , aeson
-    , aeson-extra >=0.2.2
+    , aeson-compat
+    , aeson-extra
     , base-compat
     , bytestring
     , cassava
+    , containers
+    , exceptions
     , hashable
     , lens
     , semigroups
     , text
+    , transformers
     , unordered-containers
     , vector
     , vector-instances
   exposed-modules:
+      Data.ByteString.Lazy.Extra
+      Data.Csv.Extra
       Jasenrekisteri.AesonUtils
+      Jasenrekisteri.Context
       Jasenrekisteri.Person
       Jasenrekisteri.Tag
   default-language: Haskell2010
@@ -53,16 +60,20 @@ executable jasenrekisteri-server
       server/
   ghc-options: -Wall -threaded
   build-depends:
-      base >=4.7 && <4.9
+      base >=4.8 && <4.9
     , aeson
-    , aeson-extra >=0.2.2
+    , aeson-compat
+    , aeson-extra
     , base-compat
     , bytestring
     , cassava
+    , containers
+    , exceptions
     , hashable
     , lens
     , semigroups
     , text
+    , transformers
     , unordered-containers
     , vector
     , vector-instances
@@ -79,6 +90,7 @@ executable jasenrekisteri-server
       Jasenrekisteri.Pages.Member
       Jasenrekisteri.Pages.Members
       Jasenrekisteri.Pages.Tags
+      Jasenrekisteri.Types
   default-language: Haskell2010
 
 executable excel
@@ -87,16 +99,20 @@ executable excel
       excel/
   ghc-options: -Wall -threaded
   build-depends:
-      base >=4.7 && <4.9
+      base >=4.8 && <4.9
     , aeson
-    , aeson-extra >=0.2.2
+    , aeson-compat
+    , aeson-extra
     , base-compat
     , bytestring
     , cassava
+    , containers
+    , exceptions
     , hashable
     , lens
     , semigroups
     , text
+    , transformers
     , unordered-containers
     , vector
     , vector-instances
