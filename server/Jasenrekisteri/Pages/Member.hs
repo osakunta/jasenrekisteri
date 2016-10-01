@@ -7,14 +7,14 @@ import Prelude ()
 
 import Lucid hiding (for_)
 
-import Jasenrekisteri.Context
 import Jasenrekisteri.HtmlUtils
 import Jasenrekisteri.Person
 import Jasenrekisteri.Tag
 import Jasenrekisteri.Types
+import Jasenrekisteri.World
 
-memberPage :: JasenContext -> UserId -> Html ()
-memberPage ctx (UserId uid) = case ctx ^? ctxMembers . ix uid of
+memberPage :: World -> UserId -> Html ()
+memberPage world (UserId uid) = case world ^? worldMembers . ix uid of
     -- TODO: not found page
     Nothing -> pure ()
     Just p@Person {..} ->  template' (_personFirstNames <> " " <> _personLastName) $ do
@@ -30,6 +30,6 @@ memberPage ctx (UserId uid) = case ctx ^? ctxMembers . ix uid of
                 toHtml $ _personZipcode <> " " <> _personCity
         h2_ "Tagit"
         ul_ [class_ "tags"] $
-            for_ (p ^. personTags . _TagNames) $ \tn -> 
+            for_ (p ^. personTags . _TagNames) $ \tn ->
                 -- TODO: render tag
                 li_ $ toHtml (show tn)

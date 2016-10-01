@@ -4,18 +4,17 @@ module Jasenrekisteri.Pages.Tags (tagsPage) where
 import Futurice.Prelude
 import Prelude ()
 
-import Lucid         hiding (for_)
+import Lucid hiding (for_)
 
-import Jasenrekisteri.Context
 import Jasenrekisteri.HtmlUtils
--- import Jasenrekisteri.Tag
+import Jasenrekisteri.World
 
-tagsPage :: JasenContext -> Html ()
-tagsPage _ctx = template' "Tagit" $ do
+tagsPage :: World -> Html ()
+tagsPage _world = template' "Tagit" $ do
     h2_ "Enemmän kuin yksi"
     h2_ "Yksikkötagit"
     h2_ "TODO"
     ul_ [class_ "tags"] $
         -- TODO: render tag
         for_ [()] $ (li_ . toHtml . show)
--- (sort . HM.keys . getChildTags $ ctxTags ctx)
+-- (sort . HM.keys . getChildTags $ worldTags world)

@@ -136,7 +136,11 @@ instance Graph.IsNode Tag where
     nodeNeighbors = toList . getTagNames . _tagChildren
 
 instance A.ToJSON Tag where toJSON = sopToJSON
-instance A.FromJSON Tag where parseJSON = sopParseJSON
+instance A.FromJSON Tag where
+    parseJSON = A.withObject "Tag" $ \obj -> Tag
+        <$> obj A..: "name"
+        <*> obj A..:? "colour" A..!= 0
+        <*> obj A..:? "children" A..!= mempty
 
 -------------------------------------------------------------------------------
 -- TagHierarchy

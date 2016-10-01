@@ -7,7 +7,7 @@ maintainer: Oleg Grenrus <oleg.grenrus@iki.fi>
 license: BSD3
 github: satakuntalainen-osakunta/jasenrekisteri
 category: Web
-tested-with: GHC==7.8.4, GHC==7.10.2
+tested-with: GHC==8.0.1
 extra-source-files:
 - README.md
 
@@ -31,6 +31,7 @@ dependencies:
 - text
 - transformers
 - unordered-containers
+- uuid
 - vector
 - vector-instances
 - futurice-prelude

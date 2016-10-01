@@ -14,16 +14,16 @@ import qualified Data.Vector as V
 
 import Jasenrekisteri.HtmlUtils
 import Jasenrekisteri.Person
-import Jasenrekisteri.Context
 import Jasenrekisteri.Types
+import Jasenrekisteri.World
 
-membersPage :: JasenContext -> Html ()
-membersPage ctx = template' "Jäsenet" $ do
+membersPage :: World -> Html ()
+membersPage world = template' "Jäsenet" $ do
     h2_ "Jäsenet"
     p_ $ toHtml $ "Yhteensä: " <> T.pack (show $ V.length members)
     ul_ [class_ "members"] $ foldMapOf folded (uncurry memberHtml) members'
   where
-    members = ctx ^. ctxMembers
+    members = world ^. worldMembers
 
     members' :: [(UserId, Person)]
     members'

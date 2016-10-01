@@ -13,23 +13,23 @@ import qualified Data.ByteString.Lazy     as LBS
 import qualified Network.Wai.Handler.Warp as Warp
 
 import Jasenrekisteri.API
-import Jasenrekisteri.Context
 import Jasenrekisteri.HtmlUtils
 import Jasenrekisteri.Pages.Member
 import Jasenrekisteri.Pages.Members
 import Jasenrekisteri.Pages.Tags
-import Jasenrekisteri.Tag
 import Jasenrekisteri.Person
+import Jasenrekisteri.Tag
+import Jasenrekisteri.World
 
-server :: JasenContext -> Server JasenrekisteriAPI
-server ctx = pure (template' "Jäsenrekisteri" $ pure ())
-    :<|> pure (membersPage ctx)
-    :<|> (\i -> pure $ memberPage ctx i)
-    :<|> pure (tagsPage ctx)
+server :: World -> Server JasenrekisteriAPI
+server world = pure (template' "Jäsenrekisteri" $ pure ())
+    :<|> pure (membersPage world)
+    :<|> (\i -> pure $ memberPage world i)
+    :<|> pure (tagsPage world)
     :<|> pure (template' "Kirjaudu ulos" $ pure ())
     :<|> serveDirectory "static"
 
-app :: JasenContext-> Application
+app :: World-> Application
 app = serve jasenrekisteriAPI . server
 
 main :: IO ()
@@ -42,6 +42,6 @@ main = do
             -- mapM_ print $ V.filter (not . (== mempty) . _personTags) persons
             contentsTags <- LBS.readFile filepathTags
             tags <- decode contentsTags :: IO [Tag]
-            let context = mkContext persons tags
-            Warp.run 8000 $ app context
+            let world = mkWorld persons tags
+            Warp.run 8000 $ app world
         _ -> putStrLn "Usage: ./jasenrekisteri-server data.json tags.json"
