@@ -4,7 +4,8 @@
 module Jasenrekisteri.Person (
     -- * Person
     Person(..),
-    personHasTag,
+    -- * Person identifier
+    PersonId,
     -- ** Lenses
     personBirthday,
     personBirthplace,
@@ -27,11 +28,13 @@ module Jasenrekisteri.Person (
 import Futurice.Generics
 import Futurice.Prelude
 import Prelude ()
-import Control.Lens
+--import Control.Lens
 
 import qualified Data.Csv as Csv
 
 import Jasenrekisteri.Tag
+
+type PersonId = UUID
 
 data Person = Person
     { _personBirthday        :: !Text
@@ -43,7 +46,8 @@ data Person = Person
     , _personAffiliationDate :: !Text
     , _personUniversity      :: !Text
     , _personTDK             :: !Text
-    , _personTags           :: !TagNames
+    , _personTags            :: !TagNames
+      -- ^ person's direct tags
     , _personAddress         :: !Text
     , _personZipcode         :: !Text
     , _personCity            :: !Text
@@ -61,6 +65,3 @@ instance Csv.ToRecord Person
 
 instance ToJSON Person where toJSON = sopToJSON
 instance FromJSON Person where parseJSON = sopParseJSON
-
-personHasTag :: TagName -> Person -> Bool
-personHasTag tag p = has (personTags . ix tag) p

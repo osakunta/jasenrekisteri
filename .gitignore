@@ -1,4 +1,4 @@
 .stack-work/
-data/
-data.json
-tags.json
+/data/
+/data.json
+/tags.json

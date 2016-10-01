@@ -20,7 +20,7 @@ type JasenrekisteriAPI =
     :<|> "members" :> HTMLEndpoint
     :<|> "member" :> Capture "id" UserId :> HTMLEndpoint
     :<|> "tags" :> HTMLEndpoint
-    -- tag
+    -- TODO: tag
     :<|> "logout" :> HTMLEndpoint
     :<|> Raw
 
