@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds             #-}
 {-# LANGUAGE DeriveDataTypeable    #-}
 {-# LANGUAGE DeriveGeneric         #-}
+{-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
@@ -20,14 +21,18 @@ module Jasenrekisteri.Tag (
     tagColour,
     tagChildren,
     TagColour,
-    TagHierarchy (..),
+    TagHierarchy,
     tagHierarchyOf,
+    ifoldedTagHierarchy,
     ) where
 
 import Control.Lens
+import Control.Lens.Att
 import Futurice.Generics
 import Futurice.Prelude
 import Prelude ()
+
+import Lucid (ToHtml (..))
 
 import           Sato.Graph (Graph)
 import qualified Sato.Graph as Graph
@@ -63,6 +68,10 @@ instance A.ToJSONKey TagName where
 
 instance A.FromJSONKey TagName where
     fromJSONKey = A.fromJSONKeyCoerce
+
+instance ToHtml TagName where
+    toHtmlRaw = toHtmlRaw . getTagName
+    toHtml = toHtml . getTagName
 
 ------------------------------------------------------------------------------
 -- TagNames
@@ -146,11 +155,15 @@ instance A.FromJSON Tag where
 -- TagHierarchy
 -------------------------------------------------------------------------------
 
+-- | Tag hierachy.
+--
+--
 newtype TagHierarchy = TagHierarchy { getTagHierarcy :: Graph Tag }
 
-instance ToJSON TagHierarchy where
-    toJSON = toJSON . Graph.toMap . getTagHierarcy
+ifoldedTagHierarchy :: IndexedFold TagName TagHierarchy Tag
+ifoldedTagHierarchy = to (Graph.toMap . getTagHierarcy) . ifolded
 
+--
 -- |
 --
 -- @
@@ -158,3 +171,25 @@ instance ToJSON TagHierarchy where
 -- @
 tagHierarchyOf :: Getting _ s Tag -> s -> TagHierarchy
 tagHierarchyOf g s = TagHierarchy . Graph.fromList $ toListOf g s
+
+instance ToJSON TagHierarchy where
+    toJSON = toJSON . Graph.toMap . getTagHierarcy
+
+type instance Index TagHierarchy = TagName
+type instance IxValue TagHierarchy = Tag
+
+instance Ixed TagHierarchy where
+    ix = att
+
+instance Att TagHierarchy where
+    att name = lens getter setter
+      where
+        emptyTag = Tag name 0 mempty
+        getter (TagHierarchy g) = fromMaybe emptyTag $ Graph.lookup name g
+        setter (TagHierarchy g) tag = TagHierarchy $ Graph.insert tag g
+{-
+We could strip empty flags out, but then we couldn't find them while iterating.
+
+            | tag == emptyTag = TagHierarchy $ Graph.insert tag g
+            | otherwise       = TagHierarchy $ Graph.deleteKey name g
+-}

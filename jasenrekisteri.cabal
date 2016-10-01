@@ -40,6 +40,7 @@ library
     , exceptions
     , hashable
     , lens
+    , lucid
     , semigroups
     , strict-base-types
     , text
@@ -50,6 +51,7 @@ library
     , vector-instances
     , futurice-prelude
   exposed-modules:
+      Control.Lens.Att
       Data.ByteString.Lazy.Extra
       Data.Csv.Extra
       Jasenrekisteri.AesonUtils
@@ -77,6 +79,7 @@ executable excel
     , exceptions
     , hashable
     , lens
+    , lucid
     , semigroups
     , strict-base-types
     , text
@@ -107,6 +110,7 @@ executable jasenrekisteri-server
     , exceptions
     , hashable
     , lens
+    , lucid
     , semigroups
     , strict-base-types
     , text
@@ -117,7 +121,6 @@ executable jasenrekisteri-server
     , vector-instances
     , futurice-prelude
     , jasenrekisteri
-    , lucid
     , servant        ==0.9.*
     , servant-lucid
     , servant-server ==0.9.*

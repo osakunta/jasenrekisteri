@@ -26,6 +26,7 @@ dependencies:
 - exceptions
 - hashable
 - lens
+- lucid
 - semigroups
 - strict-base-types
 - text
@@ -53,7 +54,6 @@ executables:
     source-dirs: server/
     dependencies:
       - jasenrekisteri
-      - lucid
       - servant        ==0.9.*
       - servant-lucid
       - servant-server ==0.9.*
