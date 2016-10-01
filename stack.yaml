@@ -1,1 +1,16 @@
-stack-lts-5.yaml
+resolver: nightly-2016-10-01
+packages:
+- '.'
+- location:
+    git: https://github.com/futurice/haskell-futurice-prelude.git
+    commit: 630d9e3366f7d28e4b81b8981fe241e8537d8385
+  extra-dep: true
+- location:
+    git: https://github.com/phadej/github.git
+    commit: d47f3165d62feab85e85cc271d519cf87d1d3b78
+  extra-dep: true
+extra-deps:
+- ansi-pretty-0.1.2.0
+- hsc2hs-0.68
+flags: {}
+extra-package-dbs: []

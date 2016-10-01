@@ -2,32 +2,34 @@
 {-# LANGUAGE RecordWildCards   #-}
 module Jasenrekisteri.Pages.Member (memberPage) where
 
-import Prelude        ()
-import Prelude.Compat
+import Futurice.Prelude
+import Prelude ()
 
-import Data.Foldable (traverse_)
-import Data.Monoid   ((<>))
-import Lucid
+import Lucid hiding (for_)
 
 import Jasenrekisteri.Context
 import Jasenrekisteri.HtmlUtils
 import Jasenrekisteri.Person
 import Jasenrekisteri.Tag
+import Jasenrekisteri.Types
 
-memberPage :: JasenContext -> Person -> Html ()
-memberPage ctx Person{..} = template' name $ do
-    dl_ $ do
-        dt_ "Sähköposti"
-        dd_ $ a_ [href_ $ "mailto:" <> personEmail] $ toHtml personEmail
-        dt_ "Puhelin"
-        dd_ $ a_ [href_ $ "tel:" <> personPhone] $ toHtml personPhone
-        dt_ "Osoite"
-        dd_ $ do
-            toHtml personAddress
-            br_ []
-            toHtml $ personZipcode <> " " <> personCity
-    h2_ "Tagit"
-    ul_ [class_ "tags"] $
-        traverse_ (li_ . renderTag (ctxColours ctx)) $ getTags _personTags
-  where
-    name = personFirstNames <> " " <> personLastName
+memberPage :: JasenContext -> UserId -> Html ()
+memberPage ctx (UserId uid) = case ctx ^? ctxMembers . ix uid of
+    -- TODO: not found page
+    Nothing -> pure ()
+    Just p@Person {..} ->  template' (_personFirstNames <> " " <> _personLastName) $ do
+        dl_ $ do
+            dt_ "Sähköposti"
+            dd_ $ a_ [href_ $ "mailto:" <> _personEmail] $ toHtml _personEmail
+            dt_ "Puhelin"
+            dd_ $ a_ [href_ $ "tel:" <> _personPhone] $ toHtml _personPhone
+            dt_ "Osoite"
+            dd_ $ do
+                toHtml _personAddress
+                br_ []
+                toHtml $ _personZipcode <> " " <> _personCity
+        h2_ "Tagit"
+        ul_ [class_ "tags"] $
+            for_ (p ^. personTags . _TagNames) $ \tn -> 
+                -- TODO: render tag
+                li_ $ toHtml (show tn)

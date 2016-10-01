@@ -2,10 +2,11 @@ module Jasenrekisteri.Types where
 
 import Servant
 
+-- TODO: use uuid
 newtype UserId = UserId Int
 
-instance FromText UserId where
-    fromText = fmap UserId . fromText
+instance FromHttpApiData UserId where
+    parseUrlPiece = fmap UserId . parseUrlPiece
 
 getUserId :: UserId -> Int
 getUserId (UserId uid) = uid

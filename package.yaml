@@ -1,5 +1,5 @@
 name: jasenrekisteri
-version: 0.1.0.0
+version: "0"
 synopsis: Member register of Satakuntalainen Osakunta
 description: The software
 author: Oleg Grenrus <oleg.grenrus@iki.fi>
@@ -14,9 +14,10 @@ extra-source-files:
 ghc-options: -Wall
 
 dependencies:
-- base >=4.8 && <4.9
-- aeson
+- base >=4.9 && <4.10
+- aeson ==1.0.*
 - aeson-compat
+- array
 - aeson-extra
 - base-compat
 - bytestring
@@ -26,11 +27,13 @@ dependencies:
 - hashable
 - lens
 - semigroups
+- strict-base-types
 - text
 - transformers
 - unordered-containers
 - vector
 - vector-instances
+- futurice-prelude
 
 library:
   source-dirs: src
@@ -50,8 +53,8 @@ executables:
     dependencies:
       - jasenrekisteri
       - lucid
-      - servant        >=0.4.4.5
-      - servant-lucid  >=0.4.4.5
-      - servant-server >=0.4.4.5
+      - servant        ==0.9.*
+      - servant-lucid
+      - servant-server ==0.9.*
       - wai
       - warp

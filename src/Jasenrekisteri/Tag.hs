@@ -1,142 +1,156 @@
-{-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE DeriveDataTypeable    #-}
+{-# LANGUAGE DeriveGeneric         #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE TemplateHaskell       #-}
+{-# LANGUAGE TypeFamilies          #-}
+{-# OPTIONS_GHC -Wno-partial-type-signatures #-}
 module Jasenrekisteri.Tag (
-    Tag(..),
-    Tags(..),
-    tagsLength,
-    TagHierarchy(..),
+    -- * Tag name
+    TagName (..),
+    TagNames (..),
+    _TagNames,
+    tagNamesOf,
+    -- * Full Tag
+    Tag (..),
+    tagName,
+    tagColour,
+    tagChildren,
     TagColour,
-    TagColours(..),
-    TagData(..),
-    tagHierarchy,
-    tagColours,
+    TagHierarchy (..),
+    tagHierarchyOf,
     ) where
 
-import Prelude        ()
-import Prelude.Compat
-
 import Control.Lens
-import Data.Hashable       (Hashable)
-import Data.HashMap.Strict (HashMap)
-import Data.Semigroup      (Semigroup (..))
-import Data.Set            (Set)
-import Data.Text           (Text)
-import GHC.Generics        (Generic)
+import Futurice.Generics
+import Futurice.Prelude
+import Prelude ()
 
-import qualified Data.Aeson.Extra    as A
-import qualified Data.Csv            as Csv
-import qualified Data.HashMap.Strict as HM
-import qualified Data.Set            as Set
-import qualified Data.Text           as T
-import qualified Data.Text.Encoding  as TE
+import           Sato.Graph (Graph)
+import qualified Sato.Graph as Graph
+
+import Data.Set.Lens (setOf)
+
+import qualified Data.Aeson         as A
+import qualified Data.Aeson.Types   as A
+import qualified Data.Csv           as Csv
+import qualified Data.Set           as Set
+import qualified Data.Text          as T
+import qualified Data.Text.Encoding as TE
 
 ------------------------------------------------------------------------------
--- Tag
+-- TagName
 ------------------------------------------------------------------------------
 
-newtype Tag = Tag { getTag :: Text }
+newtype TagName = TagName { getTagName :: Text }
     deriving (Eq, Ord, Show, Read, Generic)
 
-instance Hashable Tag
+makeWrapped ''TagName
 
-instance A.FromJSON Tag where
-    parseJSON = fmap Tag . A.parseJSON
+instance Hashable TagName
 
-instance A.ToJSON Tag where
-    toJSON = A.toJSON . getTag
+instance A.FromJSON TagName where
+    parseJSON = fmap TagName . A.parseJSON
 
-instance A.FromJSONKey Tag where
-    parseJSONKey = fmap Tag . A.parseJSONKey
+instance A.ToJSON TagName where
+    toJSON = A.toJSON . getTagName
 
-instance A.ToJSONKey Tag where
-    toJSONKey = A.toJSONKey . getTag
+instance A.ToJSONKey TagName where
+    toJSONKey = A.toJSONKeyText getTagName
+
+instance A.FromJSONKey TagName where
+    fromJSONKey = A.fromJSONKeyCoerce
 
 ------------------------------------------------------------------------------
--- Tags
+-- TagNames
 ------------------------------------------------------------------------------
 
-newtype Tags = Tags { getTags :: Set Tag }
+newtype TagNames = TagNames { getTagNames :: Set TagName }
     deriving (Eq, Ord, Show, Read, Generic)
 
-makeLenses ''Tags
+makePrisms ''TagNames
 
-tagsLength :: Tags -> Int
-tagsLength = Set.size . getTags
+-- |
+--
+-- @
+-- tagNamesOf :: Fold s TagName       -> s -> TagNames
+-- @
+tagNamesOf :: Getting _ s TagName -> s -> TagNames
+tagNamesOf l s = TagNames $ setOf (l . filtered (/= TagName "")) s
 
-instance Semigroup Tags where
-    Tags a <> Tags b = Tags (a <> b)
+instance Semigroup TagNames where
+    TagNames a <> TagNames b = TagNames (a <> b)
 
-instance Monoid Tags where
-    mempty = Tags mempty
+instance Monoid TagNames where
+    mempty = TagNames mempty
     mappend = (<>)
 
-instance Csv.FromField Tags where
-    parseField = pure
-               . Tags . Set.delete (Tag "") . Set.fromList
-               . map (Tag . T.strip)
-               .  T.splitOn "," . TE.decodeUtf8
+instance Csv.FromField TagNames where
+    parseField bs = pure $ tagNamesOf folded ts
+      where
+        ts = TagName . T.strip <$> T.splitOn "," (TE.decodeUtf8 bs)
 
-instance Csv.ToField Tags where
+instance Csv.ToField TagNames where
     toField =
-        TE.encodeUtf8 . T.intercalate "," . map getTag . Set.toList . getTags
+        TE.encodeUtf8 . T.intercalate "," . map getTagName . Set.toList . getTagNames
 
-instance A.FromJSON Tags where
-    parseJSON = fmap (Tags . Set.delete (Tag "")) . A.parseJSON
+instance A.FromJSON TagNames where
+    parseJSON = fmap (tagNamesOf folded) . (A.parseJSON :: A.Value -> A.Parser [TagName])
 
-instance A.ToJSON Tags where
-    toJSON = A.toJSON . getTags
+instance A.ToJSON TagNames where
+    toJSON = A.toJSON . getTagNames
 
-------------------------------------------------------------------------------
--- TagHierarchy
-------------------------------------------------------------------------------
+type instance Index TagNames = TagName
+type instance IxValue TagNames = ()
 
-newtype TagHierarchy = TagHierarchy { getChildTags :: HashMap Tag Tags }
-    deriving (Eq, Show, Read, Generic)
-
-instance A.ToJSON TagHierarchy where
-    toJSON = A.toJSON . A.M . getChildTags
-
-instance A.FromJSON TagHierarchy where
-    parseJSON = fmap (TagHierarchy . A.getMap) . A.parseJSON
+instance Ixed TagNames where
+    ix i = _TagNames . ix i
 
 ------------------------------------------------------------------------------
--- TagColours
+-- TagColour
 ------------------------------------------------------------------------------
 
 type TagColour = Int
 
-newtype TagColours = TagColours { getTagColours :: HashMap Tag TagColour }
-    deriving (Eq, Show, Read, Generic)
+-------------------------------------------------------------------------------
+-- Tag
+-------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
--- TagData
-------------------------------------------------------------------------------
-
-newtype TagData = TagData { getTagData :: HashMap Tag (Tags, TagColour) }
-
-data TagDatum = TagDatum
-    { _tdName     :: Tag
-    , _tdColour   :: TagColour
-    , _tdChildren :: Tags
+data Tag = Tag
+    { _tagName     :: !TagName
+    , _tagColour   :: !TagColour
+    , _tagChildren :: !TagNames
     }
-    deriving (Eq, Show, Read, Generic)
+  deriving
+    (Eq, Ord, Show, Generic, Typeable)
 
-instance A.FromJSON TagDatum where
-    parseJSON = A.withObject "Tag data" $ \obj ->
-        TagDatum <$> obj A..: "name"
-                 <*> obj A..: "color"
-                 <*> obj A..: "children"
+deriveGeneric ''Tag
+makeLenses ''Tag
 
-instance A.FromJSON TagData where
-    parseJSON = fmap mkTagData . A.parseJSON
+instance Graph.IsNode Tag where
+    type Key Tag  = TagName
+    nodeKey       = _tagName
+    nodeNeighbors = toList . getTagNames . _tagChildren
 
-mkTagData :: [TagDatum] -> TagData
-mkTagData = TagData . HM.fromList . map toPair
-  where toPair (TagDatum n c ts) = (n, (ts, c))
+instance A.ToJSON Tag where toJSON = sopToJSON
+instance A.FromJSON Tag where parseJSON = sopParseJSON
 
-tagHierarchy :: TagData -> TagHierarchy
-tagHierarchy = TagHierarchy . HM.map fst . getTagData
+-------------------------------------------------------------------------------
+-- TagHierarchy
+-------------------------------------------------------------------------------
 
-tagColours :: TagData -> TagColours
-tagColours = TagColours . HM.map snd . getTagData
+newtype TagHierarchy = TagHierarchy { getTagHierarcy :: Graph Tag }
+
+instance ToJSON TagHierarchy where
+    toJSON = toJSON . Graph.toMap . getTagHierarcy
+
+-- |
+--
+-- @
+-- tagHierarchyOf :: Fold s Tag       -> s -> TagHierarchy
+-- @
+tagHierarchyOf :: Getting _ s Tag -> s -> TagHierarchy
+tagHierarchyOf g s = TagHierarchy . Graph.fromList $ toListOf g s

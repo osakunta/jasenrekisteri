@@ -1,52 +1,66 @@
-{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE DeriveGeneric, DataKinds, TypeFamilies     #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell   #-}
 module Jasenrekisteri.Person (
-	Person(..),
+    -- * Person
+    Person(..),
     personHasTag,
+    -- ** Lenses
+    personBirthday,
+    personBirthplace,
+    personLastName,
+    personFirstNames,
+    personUnusedField,
+    personMatrikkeli,
+    personAffiliationDate,
+    personUniversity,
+    personTDK,
     personTags,
+    personAddress,
+    personZipcode,
+    personCity,
+    personCountry,
+    personEmail,
+    personPhone,
     ) where
 
-import Prelude        ()
-import Prelude.Compat
-
+import Futurice.Generics
+import Futurice.Prelude
+import Prelude ()
 import Control.Lens
-import Data.Aeson.TH
-import Data.Text     (Text)
-import GHC.Generics  (Generic)
 
 import qualified Data.Csv as Csv
-import qualified Data.Set as Set
 
-import Jasenrekisteri.AesonUtils
 import Jasenrekisteri.Tag
 
 data Person = Person
-    { personBirthday        :: !Text
-    , personBirthplace      :: !Text
-    , personLastName        :: !Text
-    , personFirstNames      :: !Text
-    , personUnusedField     :: !Text
-    , personMatrikkeli      :: !Text
-    , personAffiliationDate :: !Text
-    , personUniversity      :: !Text
-    , personTDK             :: !Text
-    , _personTags           :: !Tags
-    , personAddress         :: !Text
-    , personZipcode         :: !Text
-    , personCity            :: !Text
-    , personCountry         :: !Text
-    , personEmail           :: !Text
-    , personPhone           :: !Text
+    { _personBirthday        :: !Text
+    , _personBirthplace      :: !Text
+    , _personLastName        :: !Text
+    , _personFirstNames      :: !Text
+    , _personUnusedField     :: !Text
+    , _personMatrikkeli      :: !Text
+    , _personAffiliationDate :: !Text
+    , _personUniversity      :: !Text
+    , _personTDK             :: !Text
+    , _personTags           :: !TagNames
+    , _personAddress         :: !Text
+    , _personZipcode         :: !Text
+    , _personCity            :: !Text
+    , _personCountry         :: !Text
+    , _personEmail           :: !Text
+    , _personPhone           :: !Text
     }
     deriving (Eq, Ord, Show, Read, Generic)
 
 makeLenses ''Person
+deriveGeneric ''Person
 
 instance Csv.FromRecord Person
 instance Csv.ToRecord Person
 
-$(deriveJSON (recordOptions 6) ''Person)
+instance ToJSON Person where toJSON = sopToJSON
+instance FromJSON Person where parseJSON = sopParseJSON
 
-personHasTag :: Tag -> Person -> Bool
-personHasTag tag p = Set.member tag (getTags $ p ^. personTags)
+personHasTag :: TagName -> Person -> Bool
+personHasTag tag p = has (personTags . ix tag) p

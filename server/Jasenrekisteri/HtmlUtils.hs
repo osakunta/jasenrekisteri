@@ -5,12 +5,11 @@ module Jasenrekisteri.HtmlUtils (
     renderTag,
     ) where
 
-import Data.Maybe     (fromMaybe)
-import Data.Semigroup ((<>))
-import Data.Text
+import Futurice.Prelude
+import Prelude ()
+
 import Lucid
 
-import qualified Data.HashMap.Strict as HM
 import qualified Data.Text           as T
 
 import Jasenrekisteri.Tag
@@ -40,11 +39,11 @@ navigation = nav_ $ ul_ $ do
     li_ $ a_ [href_ "/algebra"] "Algebra"
     li_ [class_ "logout"] $ a_ [href_ "/logout"] "Kirjaudu ulos"
 
-renderTag :: TagColours -> Tag -> Html ()
-renderTag (TagColours tc) tag@(Tag tagName) =
+renderTag :: TagHierarchy -> TagName -> Html ()
+renderTag _ _tag@(TagName tag) =
     -- TODO: color
-    a_ [class_ $ "tag" <> colourAttr, href_ $ "/tag/" <> tagName] $ toHtml tagName
+    a_ [class_ $ "tag" <> colourAttr, href_ $ "/tag/" <> tag] $ toHtml tag
   where
-    colour = fromMaybe 0 $ HM.lookup tag tc
+    colour = (0 :: TagColour) -- fromMaybe 0 $ HM.lookup tag tc
     colourAttr | colour == 0 = ""
                | otherwise   = " tag" <> T.pack (show colour)
