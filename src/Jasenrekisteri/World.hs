@@ -17,7 +17,8 @@ import Control.Lens
 import Futurice.Prelude
 import Prelude ()
 
-import Data.Vector.Lens (toVectorOf)
+import           Futurice.IdMap (IdMap)
+import qualified Futurice.IdMap as IdMap
 
 import Jasenrekisteri.Person
 import Jasenrekisteri.Tag
@@ -25,7 +26,7 @@ import Jasenrekisteri.Tag
 -- | 'World' contains all the data we display.
 --
 data World = World
-    { _worldMembers :: !(Vector Person)
+    { _worldMembers :: !(IdMap Person)
     , _worldTags    :: !TagHierarchy
 
     -- Lazy fields, constructed on need:
@@ -47,10 +48,10 @@ mkWorld
     -> f' Tag
     -> World
 mkWorld persons tags = mkWorld'
-    (toVectorOf folded persons)
+    (IdMap.idMapOf folded persons)
     (tagHierarchyOf folded tags)
 
-mkWorld' :: Vector Person -> TagHierarchy -> World
+mkWorld' :: IdMap Person -> TagHierarchy -> World
 mkWorld' persons tags = World
     { _worldMembers = persons
     , _worldTags    = tags
@@ -63,7 +64,7 @@ mkWorld' persons tags = World
 -- Lenses
 -------------------------------------------------------------------------------
 
-worldMembers :: Lens' World (Vector Person)
+worldMembers :: Lens' World (IdMap Person)
 worldMembers = lens _worldMembers $ \world members ->
     mkWorld' members (world ^. worldTags)
 

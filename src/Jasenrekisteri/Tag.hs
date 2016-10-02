@@ -28,14 +28,15 @@ module Jasenrekisteri.Tag (
 
 import Control.Lens
 import Control.Lens.Att
+import Futurice.IdMap    (HasKey (..))
 import Futurice.Generics
 import Futurice.Prelude
 import Prelude ()
 
 import Lucid (ToHtml (..))
 
-import           Sato.Graph (Graph)
-import qualified Sato.Graph as Graph
+import           Futurice.Graph (Graph)
+import qualified Futurice.Graph as Graph
 
 import Data.Set.Lens (setOf)
 
@@ -139,9 +140,11 @@ data Tag = Tag
 deriveGeneric ''Tag
 makeLenses ''Tag
 
+instance HasKey Tag where
+    type Key Tag = TagName
+    key = tagName
+
 instance Graph.IsNode Tag where
-    type Key Tag  = TagName
-    nodeKey       = _tagName
     nodeNeighbors = toList . getTagNames . _tagChildren
 
 instance A.ToJSON Tag where toJSON = sopToJSON

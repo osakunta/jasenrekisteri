@@ -1,17 +1,20 @@
-{-# LANGUAGE DeriveGeneric, DataKinds, TypeFamilies     #-}
+{-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE TypeFamilies      #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Jasenrekisteri.Person (
     -- * Person
     Person(..),
     -- * Person identifier
     PersonId,
     -- ** Lenses
+    personUuid,
     personBirthday,
     personBirthplace,
     personLastName,
     personFirstNames,
-    personUnusedField,
     personMatrikkeli,
     personAffiliationDate,
     personUniversity,
@@ -26,9 +29,9 @@ module Jasenrekisteri.Person (
     ) where
 
 import Futurice.Generics
+import Futurice.IdMap    (HasKey (..))
 import Futurice.Prelude
 import Prelude ()
---import Control.Lens
 
 import qualified Data.Csv as Csv
 
@@ -37,11 +40,11 @@ import Jasenrekisteri.Tag
 type PersonId = UUID
 
 data Person = Person
-    { _personBirthday        :: !Text
+    { _personUuid            :: !PersonId
+    , _personBirthday        :: !Text
     , _personBirthplace      :: !Text
     , _personLastName        :: !Text
     , _personFirstNames      :: !Text
-    , _personUnusedField     :: !Text
     , _personMatrikkeli      :: !Text
     , _personAffiliationDate :: !Text
     , _personUniversity      :: !Text
@@ -65,3 +68,7 @@ instance Csv.ToRecord Person
 
 instance ToJSON Person where toJSON = sopToJSON
 instance FromJSON Person where parseJSON = sopParseJSON
+
+instance HasKey Person where
+    type Key Person = UUID
+    key = personUuid

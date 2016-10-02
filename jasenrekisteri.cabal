@@ -50,6 +50,7 @@ library
     , vector
     , vector-instances
     , futurice-prelude
+    , uuid-aeson
   exposed-modules:
       Control.Lens.Att
       Data.ByteString.Lazy.Extra
@@ -58,7 +59,6 @@ library
       Jasenrekisteri.Person
       Jasenrekisteri.Tag
       Jasenrekisteri.World
-      Sato.Graph
   default-language: Haskell2010
 
 executable excel
@@ -89,6 +89,7 @@ executable excel
     , vector
     , vector-instances
     , futurice-prelude
+    , uuid-aeson
     , jasenrekisteri
   default-language: Haskell2010
 
@@ -120,6 +121,7 @@ executable jasenrekisteri-server
     , vector
     , vector-instances
     , futurice-prelude
+    , uuid-aeson
     , jasenrekisteri
     , servant        ==0.9.*
     , servant-lucid
@@ -132,5 +134,4 @@ executable jasenrekisteri-server
       Jasenrekisteri.Pages.Member
       Jasenrekisteri.Pages.Members
       Jasenrekisteri.Pages.Tags
-      Jasenrekisteri.Types
   default-language: Haskell2010

@@ -10,11 +10,10 @@ import Lucid hiding (for_)
 import Jasenrekisteri.HtmlUtils
 import Jasenrekisteri.Person
 import Jasenrekisteri.Tag
-import Jasenrekisteri.Types
 import Jasenrekisteri.World
 
-memberPage :: World -> UserId -> Html ()
-memberPage world (UserId uid) = case world ^? worldMembers . ix uid of
+memberPage :: World -> PersonId -> Html ()
+memberPage world personId = case world ^? worldMembers . ix personId of
     -- TODO: not found page
     Nothing -> pure ()
     Just p@Person {..} ->  template' (_personFirstNames <> " " <> _personLastName) $ do

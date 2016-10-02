@@ -36,6 +36,7 @@ dependencies:
 - vector
 - vector-instances
 - futurice-prelude
+- uuid-aeson
 
 library:
   source-dirs: src
