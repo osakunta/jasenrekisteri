@@ -17,6 +17,5 @@ tagsPage world = template' "Tagit" $ do
     h2_ "Yksikkötagit"
     h2_ "TODO"
     ul_ [class_ "tags"] $
-        -- TODO: render tag
-        iforOf_ (worldTags . ifoldedTagHierarchy) world $ \tagname _tag ->
-            li_ $ a_ [ href_ "#", class_ "tag" ] $ toHtml tagname
+        iforOf_ (worldTags . ifoldedTagHierarchy) world $ \_tagname tag ->
+            li_ $ tagLink_ tag

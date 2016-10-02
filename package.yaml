@@ -17,14 +17,16 @@ dependencies:
 - base >=4.9 && <4.10
 - aeson ==1.0.*
 - aeson-compat
-- array
 - aeson-extra
+- array
 - base-compat
 - bytestring
 - cassava
 - containers
 - exceptions
+- futurice-prelude
 - hashable
+- http-api-data
 - lens
 - lucid
 - semigroups
@@ -33,10 +35,9 @@ dependencies:
 - transformers
 - unordered-containers
 - uuid
+- uuid-aeson
 - vector
 - vector-instances
-- futurice-prelude
-- uuid-aeson
 
 library:
   source-dirs: src

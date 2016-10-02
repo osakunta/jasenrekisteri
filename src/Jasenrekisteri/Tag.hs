@@ -28,17 +28,17 @@ module Jasenrekisteri.Tag (
 
 import Control.Lens
 import Control.Lens.Att
-import Futurice.IdMap    (HasKey (..))
 import Futurice.Generics
+import Futurice.IdMap    (HasKey (..))
 import Futurice.Prelude
 import Prelude ()
 
-import Lucid (ToHtml (..))
+import Lucid           (ToHtml (..))
+import Web.HttpApiData (FromHttpApiData (..), ToHttpApiData (..))
 
+import           Data.Set.Lens  (setOf)
 import           Futurice.Graph (Graph)
 import qualified Futurice.Graph as Graph
-
-import Data.Set.Lens (setOf)
 
 import qualified Data.Aeson         as A
 import qualified Data.Aeson.Types   as A
@@ -73,6 +73,12 @@ instance A.FromJSONKey TagName where
 instance ToHtml TagName where
     toHtmlRaw = toHtmlRaw . getTagName
     toHtml = toHtml . getTagName
+
+instance ToHttpApiData TagName where
+    toUrlPiece = getTagName
+
+instance FromHttpApiData TagName where
+    parseUrlPiece = pure . TagName
 
 ------------------------------------------------------------------------------
 -- TagNames

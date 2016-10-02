@@ -2,17 +2,22 @@
 module Jasenrekisteri.HtmlUtils (
     template,
     template',
-    renderTag,
+    tagNameLink_,
+    tagLink_,
     ) where
 
+import Control.Lens.Att
+import Futurice.IdMap   (key)
 import Futurice.Prelude
 import Prelude ()
 
 import Lucid
 
-import qualified Data.Text           as T
+import qualified Data.Text as T
 
+import Jasenrekisteri.API
 import Jasenrekisteri.Tag
+import Jasenrekisteri.World
 
 template :: Text -> Html () -> Html () -> Html ()
 template title nav inner = doctypehtml_ $ do
@@ -39,11 +44,14 @@ navigation = nav_ $ ul_ $ do
     li_ $ a_ [href_ "/algebra"] "Algebra"
     li_ [class_ "logout"] $ a_ [href_ "/logout"] "Kirjaudu ulos"
 
-renderTag :: TagHierarchy -> TagName -> Html ()
-renderTag _ _tag@(TagName tag) =
-    -- TODO: color
-    a_ [class_ $ "tag" <> colourAttr, href_ $ "/tag/" <> tag] $ toHtml tag
+tagNameLink_ :: World -> TagName -> Html ()
+tagNameLink_ world tagname = tagLink_ (world ^. worldTags . att tagname)
+
+tagLink_ :: Tag -> Html ()
+tagLink_ tag =
+    a_ [class_ $ "tag" <> colourAttr, tagHref name] $ toHtml name
   where
-    colour = (0 :: TagColour) -- fromMaybe 0 $ HM.lookup tag tc
+    name = tag ^. key
+    colour = tag ^. tagColour
     colourAttr | colour == 0 = ""
                | otherwise   = " tag" <> T.pack (show colour)

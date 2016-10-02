@@ -17,6 +17,7 @@ import Jasenrekisteri.HtmlUtils
 import Jasenrekisteri.Pages.Member
 import Jasenrekisteri.Pages.Members
 import Jasenrekisteri.Pages.Tags
+import Jasenrekisteri.Pages.Tag
 import Jasenrekisteri.Person
 import Jasenrekisteri.Tag
 import Jasenrekisteri.World
@@ -26,6 +27,7 @@ server world = pure (template' "Jäsenrekisteri" $ pure ())
     :<|> pure (membersPage world)
     :<|> (\i -> pure $ memberPage world i)
     :<|> pure (tagsPage world)
+    :<|> (\i -> pure $ tagPage world i)
     :<|> pure (template' "Kirjaudu ulos" $ pure ())
     :<|> serveDirectory "static"
 

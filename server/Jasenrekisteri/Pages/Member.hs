@@ -29,6 +29,4 @@ memberPage world personId = case world ^? worldMembers . ix personId of
                 toHtml $ _personZipcode <> " " <> _personCity
         h2_ "Tagit"
         ul_ [class_ "tags"] $
-            for_ (p ^. personTags . _TagNames) $ \tn ->
-                -- TODO: render tag
-                li_ $ toHtml (show tn)
+            for_ (p ^. personTags . _TagNames) (tagNameLink_ world)
