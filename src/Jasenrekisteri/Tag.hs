@@ -187,6 +187,9 @@ instance ToJSON TagHierarchy where
 type instance Index TagHierarchy = TagName
 type instance IxValue TagHierarchy = Tag
 
+instance Semigroup TagHierarchy where
+    TagHierarchy a <> TagHierarchy b = TagHierarchy (a <> b)
+
 instance Ixed TagHierarchy where
     ix = att
 
