@@ -47,13 +47,17 @@ mkWorld
     => f Person
     -> f' Tag
     -> World
-mkWorld persons tags = mkWorld' persons' (tags' <> personTags')
+mkWorld persons tags = mkWorld' persons' (tags' <> personTags' <> childTags)
   where
     persons'    = IdMap.idMapOf folded persons
     tags'       = tagHierarchyOf folded tags
     personTags' = tagHierarchyOf
         (folded . personTags . _TagNames . folded . to toTag)
         persons
+    -- children of specified tags
+    childTags   = tagHierarchyOf
+        (folded . tagChildren . _TagNames . folded . to toTag)
+        tags
 
     toTag :: TagName -> Tag
     toTag tn = Tag tn 0 mempty

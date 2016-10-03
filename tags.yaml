@@ -10,26 +10,49 @@
 - name: 2015-2016
 - name: 2016-2017
 
-- name: fuksi2001
-- name: fuksi2002
-- name: fuksi2003
-- name: fuksi2004
-- name: fuksi2005
-- name: fuksi2006
-- name: fuksi2007
-- name: fuksi2008
-- name: fuksi2009
-- name: fuksi2010
-- name: fuksi2011
-- name: fuksi2012
-- name: fuksi2013
-- name: fuksi2014
-- name: fuksi2015
-- name: fuksi2016
-- name: fuksi2017
+- name: fuksi
+  children:
+    - fuksi2001
+    - fuksi2002
+    - fuksi2003
+    - fuksi2004
+    - fuksi2005
+    - fuksi2006
+    - fuksi2007
+    - fuksi2008
+    - fuksi2009
+    - fuksi2010
+    - fuksi2011
+    - fuksi2012
+    - fuksi2013
+    - fuksi2014
+    - fuksi2015
+    - fuksi2016
+    - fuksi2017
+
+- name: hallitus
+  colour: 3
+  children:
+    - hallitus2011
 
 - name: hallitus2011
+  colour: 2
   children:
     - hpj2011
-  colour: 2
 - name: hpj2011
+
+- name: urho
+  colour: 1
+  children:
+    - urho2005
+    - urho2006
+    - urho2007
+    - urho2008
+    - urho2009
+    - urho2010
+    - urho2011
+    - urho2012
+    - urho2013
+    - urho2014
+    - urho2015
+    - urho2016
