@@ -12,6 +12,7 @@
 module Jasenrekisteri.Tag (
     -- * Tag name
     TagName (..),
+    _TagName,
     TagNames (..),
     _TagNames,
     tagNamesOf,
@@ -22,6 +23,7 @@ module Jasenrekisteri.Tag (
     tagChildren,
     TagColour,
     TagHierarchy,
+    _TagHierarchy,
     tagHierarchyOf,
     ifoldedTagHierarchy,
     ) where
@@ -54,6 +56,7 @@ import qualified Data.Text.Encoding as TE
 newtype TagName = TagName { getTagName :: Text }
     deriving (Eq, Ord, Show, Read, Generic)
 
+makePrisms ''TagName
 makeWrapped ''TagName
 
 instance Hashable TagName
@@ -168,6 +171,8 @@ instance A.FromJSON Tag where
 --
 --
 newtype TagHierarchy = TagHierarchy { getTagHierarcy :: Graph Tag }
+
+makePrisms ''TagHierarchy
 
 ifoldedTagHierarchy :: IndexedFold TagName TagHierarchy Tag
 ifoldedTagHierarchy = to (Graph.toMap . getTagHierarcy) . ifolded

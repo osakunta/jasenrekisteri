@@ -27,3 +27,9 @@
 - name: fuksi2015
 - name: fuksi2016
 - name: fuksi2017
+
+- name: hallitus2011
+  children:
+    - hpj2011
+  colour: 2
+- name: hpj2011
