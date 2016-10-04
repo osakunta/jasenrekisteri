@@ -40,6 +40,10 @@ template title nav inner = page_ title $ do
         header_ $ do
             nav
             row_ $ large_ 12 $ h1_ $ toHtml title
+            -- TODO: remove me
+            row_ $ large_ 12 $ div_ [ class_ "callout alert"] $ do
+                b_ "HUOM!"
+                " Muutokset eivät tallennu pysyvästi"
         section_ inner
 
 template' :: Text -> Html () -> HtmlPage sym
@@ -84,15 +88,12 @@ tagNameLink_ world tagname = tagLink_ (world ^. worldTags . att tagname)
 tagLink' :: Monad m => Tag -> Text -> HtmlT m ()
 tagLink' tag t = do
     -- TODO: do colours
-    a_ [tagHref name] $ span_ [ class_ "label" ] $ toHtml t
+    a_ [tagHref name] $ span_ [ class_ $ "label " <> lblColour ] $ toHtml t
     " "
   where
     name = tag ^. key
-    {-
-    colour = tag ^. tagColour
-    colourAttr | colour == 0 = ""
-               | otherwise   = " tag" <> T.pack (show colour)
-    -}
+    colour = (tag ^. tagColour) `mod` 10
+    lblColour = "lbl" <> (show colour ^. packed)
 
 tagLink_ :: Monad m => Tag -> HtmlT m ()
 tagLink_ tag = tagLink' tag (tag ^. key . _TagName)
