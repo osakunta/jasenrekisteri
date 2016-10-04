@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 module Jasenrekisteri.Pages.Tag (tagPage) where
@@ -17,13 +18,13 @@ import Jasenrekisteri.Person
 import Jasenrekisteri.Tag
 import Jasenrekisteri.World
 
-tagPage :: World -> TagName -> Html ()
+tagPage :: World -> TagName -> HtmlPage "tag"
 tagPage world tn =
     let tag = world ^. worldTags . att tn
     in tagPage' world tag
 
 -- TODO: use closure fields
-tagPage' :: World -> Tag -> Html ()
+tagPage' :: World -> Tag -> HtmlPage "tag"
 tagPage' world tag = template' ("Tagi: " <> tn ^. _TagName) $ do
     subheader_ "Alatagit"
     tagList_ (world ^.. subtagsFold . filtered (\subtag -> subtag ^. tagName /= tn))

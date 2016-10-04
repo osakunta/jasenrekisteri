@@ -11,6 +11,7 @@ import Futurice.Prelude
 import Prelude ()
 
 import Lucid
+import SatO.Foundation    (HtmlPage)
 import Servant
 import Servant.HTML.Lucid
 
@@ -21,19 +22,18 @@ import Jasenrekisteri.Tag
 -- Temporary, use HtmlPage
 -------------------------------------------------------------------------------
 
-type HTMLEndpoint = Get '[HTML] (Html ())
+type HTMLPageEndpoint sym = Get '[HTML] (HtmlPage sym)
 
 -------------------------------------------------------------------------------
 -- API
 -------------------------------------------------------------------------------
 
 type JasenrekisteriAPI =
-    HTMLEndpoint
-    :<|> "members" :> HTMLEndpoint
+    HTMLPageEndpoint "members"
     :<|> MemberEndpoint
-    :<|> "tags" :> HTMLEndpoint
-    :<|> TagEndpoint 
-    :<|> "logout" :> HTMLEndpoint
+    :<|> "tags" :> HTMLPageEndpoint "tags"
+    :<|> TagEndpoint
+    :<|> "logout" :> HTMLPageEndpoint "logout"
     :<|> Raw
 
 jasenrekisteriAPI :: Proxy JasenrekisteriAPI
@@ -43,7 +43,7 @@ jasenrekisteriAPI = Proxy
 -- Endpoints
 -------------------------------------------------------------------------------
 
-type MemberEndpoint = "member" :> Capture "id" PersonId :> HTMLEndpoint
+type MemberEndpoint = "member" :> Capture "id" PersonId :> HTMLPageEndpoint "member"
 
 memberEndpoint :: Proxy MemberEndpoint
 memberEndpoint = Proxy
@@ -52,14 +52,14 @@ memberHref :: PersonId -> Attribute
 memberHref personId =
     href_ $ uriToText $ safeLink jasenrekisteriAPI memberEndpoint personId
 
-type TagEndpoint = "tag" :> Capture "tag" TagName :> HTMLEndpoint
+type TagEndpoint = "tag" :> Capture "tag" TagName :> HTMLPageEndpoint "tag"
 
 tagEndpoint :: Proxy TagEndpoint
 tagEndpoint = Proxy
 
 tagHref :: TagName -> Attribute
 tagHref tn =
-    href_ $ uriToText $ safeLink jasenrekisteriAPI tagEndpoint tn 
+    href_ $ uriToText $ safeLink jasenrekisteriAPI tagEndpoint tn
 
 -------------------------------------------------------------------------------
 -- Utilities

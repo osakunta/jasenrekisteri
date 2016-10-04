@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Jasenrekisteri.HtmlUtils (
     template',
+    page404,
     -- * Headers
     subheader_,
     -- * Tags
@@ -33,15 +34,15 @@ import Jasenrekisteri.Person
 import Jasenrekisteri.Tag
 import Jasenrekisteri.World
 
-template :: Text -> Html () -> Html () -> Html ()
-template title nav inner = toHtml $ page_ title $ do
+template :: Text -> Html () -> Html () -> HtmlPage sym
+template title nav inner = page_ title $ do
     body_ $ do
         header_ $ do
             nav
             row_ $ large_ 12 $ h1_ $ toHtml title
         section_ inner
 
-template' :: Text -> Html () -> Html ()
+template' :: Text -> Html () -> HtmlPage sym
 template' title = template title navigation
 
 -- http://foundation.zurb.com/sites/docs/top-bar.html
@@ -52,7 +53,7 @@ navigation = do
             li_ [ class_ "menu-text"] $ do
                 "Jäsenrekisteri"
                 sup_ "2"
-            li_ $ a_ [href_ "/members"] "Jäsenet"
+            li_ $ a_ [href_ "/"] "Jäsenet"
             li_ $ a_ [href_ "/tags" ] "Tagit"
             li_ $ a_ [tagHref "2014-2015"] "2014-2014"
             li_ $ a_ [tagHref "2015-2016"] "2015-2016"
@@ -62,6 +63,9 @@ navigation = do
         div_ [ class_ "top-bar-right" ] $ ul_ [ class_ "dropdown menu" ] $ do
             li_ [ class_ "menu-text" ] $ "Hello Urho!"
             li_ $ a_ [href_ "/logout" ] "Kirjaudu ulos"
+
+page404 :: HtmlPage sym
+page404 = template' "ei löydy" $ pure ()
 
 -------------------------------------------------------------------------------
 -- Subheader

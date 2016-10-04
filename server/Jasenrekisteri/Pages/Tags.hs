@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Jasenrekisteri.Pages.Tags (tagsPage) where
 
@@ -12,7 +13,7 @@ import Jasenrekisteri.HtmlUtils
 import Jasenrekisteri.Tag
 import Jasenrekisteri.World
 
-tagsPage :: World -> Html ()
+tagsPage :: World -> HtmlPage "tags"
 tagsPage world = template' "Tagit" $ do
     let tagsWithCounts = world ^.. worldTags . ifoldedTagHierarchy . to withCount
     subheader_ "Enemmän kuin yksi"

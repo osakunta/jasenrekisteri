@@ -23,12 +23,11 @@ import Jasenrekisteri.Tag
 import Jasenrekisteri.World
 
 server :: World -> Server JasenrekisteriAPI
-server world = pure (template' "Jäsenrekisteri" $ pure ())
-    :<|> pure (membersPage world)
+server world = pure (membersPage world)
     :<|> (\i -> pure $ memberPage world i)
     :<|> pure (tagsPage world)
     :<|> (\i -> pure $ tagPage world i)
-    :<|> pure (template' "Kirjaudu ulos" $ pure ())
+    :<|> pure (page_ "logout" (pure ()))
     :<|> serveDirectory "static"
 
 app :: World-> Application

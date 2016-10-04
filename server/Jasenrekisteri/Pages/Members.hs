@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 module Jasenrekisteri.Pages.Members (membersPage) where
@@ -8,7 +9,6 @@ import Prelude ()
 import Jasenrekisteri.HtmlUtils
 import Jasenrekisteri.World
 
-membersPage :: World -> Html ()
+membersPage :: World -> HtmlPage "members"
 membersPage world = template' "Jäsenet" $ do
-    subheader_ "Jäsenet"
     memberList_ (world ^.. worldMembers . folded)
