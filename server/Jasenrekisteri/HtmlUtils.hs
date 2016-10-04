@@ -5,6 +5,7 @@ module Jasenrekisteri.HtmlUtils (
     subheader_,
     -- * Tags
     tagLink_,
+    tagLink',
     tagNameLink_,
     tagList_,
     tagnameList_,
@@ -76,10 +77,10 @@ subheader_ = row_ . large_ 12 . h2_ . toHtml
 tagNameLink_ :: Monad m => World -> TagName -> HtmlT m ()
 tagNameLink_ world tagname = tagLink_ (world ^. worldTags . att tagname)
 
-tagLink_ :: Monad m => Tag -> HtmlT m ()
-tagLink_ tag = do
+tagLink' :: Monad m => Tag -> Text -> HtmlT m ()
+tagLink' tag t = do
     -- TODO: do colours
-    a_ [tagHref name] $ span_ [ class_ "label" ] $ toHtml name
+    a_ [tagHref name] $ span_ [ class_ "label" ] $ toHtml t
     " "
   where
     name = tag ^. key
@@ -88,6 +89,9 @@ tagLink_ tag = do
     colourAttr | colour == 0 = ""
                | otherwise   = " tag" <> T.pack (show colour)
     -}
+
+tagLink_ :: Monad m => Tag -> HtmlT m ()
+tagLink_ tag = tagLink' tag (tag ^. key . _TagName)
 
 tagList_ :: Monad m => [Tag] -> HtmlT m ()
 tagList_ = row_ . large_ 12 . traverse_ tagLink_

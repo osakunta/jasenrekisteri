@@ -5,14 +5,12 @@ module Jasenrekisteri.Pages.Tag (tagPage) where
 import Control.Lens
 import Control.Lens.Att
 import Data.Set.Lens    (setOf)
+import Futurice.IdMap   (key)
 import Futurice.Prelude
 import Prelude ()
 
+import qualified Data.Set       as Set
 import qualified Futurice.Graph as G
-import qualified Data.Set as Set
-
-import Futurice.IdMap (key)
-import Lucid hiding (for_)
 
 import Jasenrekisteri.HtmlUtils
 import Jasenrekisteri.Person
@@ -24,6 +22,7 @@ tagPage world tn =
     let tag = world ^. worldTags . att tn
     in tagPage' world tag
 
+-- TODO: use closure fields
 tagPage' :: World -> Tag -> Html ()
 tagPage' world tag = template' ("Tagi: " <> tn ^. _TagName) $ do
     subheader_ "Alatagit"

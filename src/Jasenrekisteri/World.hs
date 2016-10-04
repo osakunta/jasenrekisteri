@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeOperators   #-}
 module Jasenrekisteri.World (
     -- * Creation
     World(..),
@@ -8,18 +9,19 @@ module Jasenrekisteri.World (
     worldTags,
     -- * Getters
     worldPersonTags,
---    worldTagPersons,
+    worldTagPersonCount,
     -- * Misc
     personHasTag,
     ) where
 
 import Control.Lens
+import Futurice.IdMap   (IdMap)
 import Futurice.Prelude
 import Prelude ()
 
-import           Futurice.IdMap (IdMap)
-import qualified Futurice.IdMap as IdMap
+import qualified Data.Set       as Set
 import qualified Futurice.Graph as G
+import qualified Futurice.IdMap as IdMap
 
 import Jasenrekisteri.Person
 import Jasenrekisteri.Tag
@@ -32,10 +34,11 @@ data World = World
 
     -- Lazy fields, constructed on need:
     --
-    , _worldTagClosures :: Map TagName TagNames
+    , _worldTagClosures    :: Map TagName TagNames
     , _worldRevTagClosures :: Map TagName TagNames
 
-    , _worldPersonTags  :: Map PersonId TagNames
+    , _worldPersonTags     :: Map PersonId TagNames
+    , _worldTagPersonCount :: Map TagName (Sum Int)
     }
 
 -------------------------------------------------------------------------------
@@ -68,9 +71,10 @@ mkWorld' persons tags = World
     { _worldMembers = persons
     , _worldTags    = tags
     -- Lazy fields
-    , _worldTagClosures = tagClosures
+    , _worldTagClosures    = tagClosures
     , _worldRevTagClosures = revTagClosures
-    , _worldPersonTags = personTagsClosure
+    , _worldPersonTags     = personTagsClosure
+    , _worldTagPersonCount = tagPersonCounts
     }
   where
     tagClosures = toMapOf (ifoldedTagHierarchy . to tagClosure) tags
@@ -90,6 +94,14 @@ mkWorld' persons tags = World
     personTag person = person ^.
         (personTags . _TagNames . folded. to (\tn -> revTagClosures ^? ix tn) . _Just)
 
+    tagPersonCounts :: Map TagName (Sum Int)
+    tagPersonCounts = tagClosures <&> \cl -> Sum $ sumOf
+        (folded . personTags . filtered (overlaps cl) . to (const 1))
+        persons
+
+overlaps :: TagNames -> TagNames -> Bool
+overlaps tns tns' = not $ null $ Set.intersection
+    (tns ^. _TagNames) (tns' ^. _TagNames)
 
 -------------------------------------------------------------------------------
 -- Lenses
@@ -111,15 +123,13 @@ worldTags = lens _worldTags $ \world tags ->
 worldPersonTags :: (Profunctor p, Contravariant f) => Optic' p f World (Map PersonId TagNames)
 worldPersonTags = to _worldPersonTags
 
-{-
 -- |
 --
 -- @
--- worldTagPersons :: Getter World (Map TagName [Person])
+-- worldTagPersonCount :: Getter World (Map TagName (Sum Int))
 -- @
-worldTagPersons :: (Profunctor p, Contravariant f) => Optic' p f World (Map TagName [Person])
-worldTagPersons = to _worldTagPersons
--}
+worldTagPersonCount :: (Profunctor p, Contravariant f) => Optic' p f World (Map TagName :$ Sum Int)
+worldTagPersonCount = to _worldTagPersonCount
 
 -------------------------------------------------------------------------------
 -- Qiery
