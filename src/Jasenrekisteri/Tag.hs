@@ -183,7 +183,6 @@ makePrisms ''TagHierarchy
 ifoldedTagHierarchy :: IndexedFold TagName TagHierarchy Tag
 ifoldedTagHierarchy = to (Graph.toMap . getTagHierarcy) . ifolded
 
---
 -- |
 --
 -- @

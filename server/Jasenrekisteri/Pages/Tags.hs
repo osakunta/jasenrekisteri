@@ -13,9 +13,7 @@ import Jasenrekisteri.Tag
 
 tagsPage :: World -> Html ()
 tagsPage world = template' "Tagit" $ do
-    h2_ "Enemmän kuin yksi"
-    h2_ "Yksikkötagit"
-    h2_ "TODO"
-    ul_ [class_ "tags"] $
-        iforOf_ (worldTags . ifoldedTagHierarchy) world $ \_tagname tag ->
-            li_ $ tagLink_ tag
+    subheader_ "Enemmän kuin yksi"
+    subheader_ "Yksikkötagit"
+    subheader_ "TODO"
+    tagList_ (world ^.. worldTags . ifoldedTagHierarchy)

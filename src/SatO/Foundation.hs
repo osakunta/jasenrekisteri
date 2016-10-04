@@ -50,6 +50,9 @@ embeddedLodash_ = script_ ($(embedStringFile "lodash.fp.min.js") :: Text)
 embeddedMenrva_ :: Monad m => HtmlT m ()
 embeddedMenrva_ = script_ ($(embedStringFile "menrva.standalone.js") :: Text)
 
+embeddedJasenrekisteri_ :: Monad m => HtmlT m ()
+embeddedJasenrekisteri_ = script_ ($(embedStringFile "jasenrekisteri.js") :: Text)
+
 attrfor_ :: Text -> Attribute
 attrfor_ = L.for_
 
@@ -110,6 +113,7 @@ page_ t b = HtmlPage $ doctypehtml_ $ do
         embeddedFoundationStyle_
         embeddedLodash_
         embeddedMenrva_
+        embeddedJasenrekisteri_
         satoCss_
     body_ b
 

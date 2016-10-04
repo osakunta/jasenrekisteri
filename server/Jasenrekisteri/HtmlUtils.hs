@@ -22,7 +22,10 @@ import Futurice.Prelude
 import Prelude ()
 import SatO.Foundation
 
--- import qualified Data.Text as T
+{-
+import qualified Data.Aeson as A
+-}
+import qualified Data.Text as T
 
 import Jasenrekisteri.API
 import Jasenrekisteri.Person
@@ -53,6 +56,7 @@ navigation = do
             li_ $ a_ [tagHref "2014-2015"] "2014-2014"
             li_ $ a_ [tagHref "2015-2016"] "2015-2016"
             li_ $ a_ [tagHref "2016-2017"] "2016-2017"
+            li_ $ a_ [tagHref "talo"] "Talo"
             li_ $ a_ [href_ "/search" ] "Haku"
         div_ [ class_ "top-bar-right" ] $ ul_ [ class_ "dropdown menu" ] $ do
             li_ [ class_ "menu-text" ] $ "Hello Urho!"
@@ -96,20 +100,28 @@ tagnameList_ world = row_ . large_ 12 . traverse_ (tagNameLink_ world)
 -------------------------------------------------------------------------------
 
 memberList_ :: Monad m => [Person] -> HtmlT m ()
-memberList_ ps = row_ . large_ 12 $ table_ [ class_ "hover" ] $ do
-    p_ $ toHtml $ "Yhteensä: " <> (show $ length ps')
-    br_ []
-    thead_ $ tr_ $ do
-        th_ $ "Nimi"
-        th_ $ "2016-2017"
-    tbody_ $ for_ ps' $ \person -> tr_ $ do
-        td_ $ a_ [ memberHref $ person ^. key ] $ do
-            span_ [class_ "etu"] $ toHtml $ person ^. personFirstNames
-            " "
-            span_ [class_ "suku"] $ toHtml $ person ^. personLastName
-        td_ $ do
-            label_ $ do
-                checkbox_ (person ^. personTags . contains "2016-2017") []
-                "2016-2017"
+memberList_ ps = do
+    row_ $ do
+        largemed_ 6 $ toHtml $  "Yhteensä: " <> (show $ length ps')
+        largemed_ 6 $ label_ $ do
+            "Haku: "
+            input_ [ type_ "text", id_ "member-filter" ]
+    row_ . large_ 12 $ table_ [ id_ "member-list", class_ "hover" ] $ do
+        thead_ $ tr_ $ do
+            th_ $ "Nimi"
+            th_ $ "2016-2017"
+        tbody_ $ for_ ps' $ \person -> do
+            let needle = T.toLower
+                  $ person ^. personFirstNames
+                  <> " " <> person ^. personLastName
+            tr_ [ data_ "member-haystack" needle ] $ do
+                td_ $ a_ [ memberHref $ person ^. key ] $ do
+                    span_ [class_ "etu"] $ toHtml $ person ^. personFirstNames
+                    " "
+                    span_ [class_ "suku"] $ toHtml $ person ^. personLastName
+                td_ $ do
+                    label_ $ do
+                        checkbox_ (person ^. personTags . contains "2016-2017") []
+                        "2016-2017"
   where
     ps' = sortBy (comparing _personFirstNames <> comparing _personLastName) ps

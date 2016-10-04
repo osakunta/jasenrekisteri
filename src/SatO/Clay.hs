@@ -28,4 +28,3 @@ css = do
     span ? satoFontFamily
   where
     satoFontFamily = fontFamily ["Lucida Grande", "Helvetica", "Arial"] [sansSerif]
-        
