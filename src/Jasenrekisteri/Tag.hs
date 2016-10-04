@@ -131,6 +131,9 @@ type instance IxValue TagNames = ()
 instance Ixed TagNames where
     ix i = _TagNames . ix i
 
+instance Contains TagNames where
+    contains i = _TagNames . contains i
+
 ------------------------------------------------------------------------------
 -- TagColour
 ------------------------------------------------------------------------------

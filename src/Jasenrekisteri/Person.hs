@@ -28,12 +28,14 @@ module Jasenrekisteri.Person (
     personPhone,
     ) where
 
+import Control.Lens
 import Futurice.Generics
 import Futurice.IdMap    (HasKey (..))
 import Futurice.Prelude
 import Prelude ()
 
 import qualified Data.Csv as Csv
+import qualified Data.Text as T
 
 import Jasenrekisteri.Tag
 
@@ -67,8 +69,16 @@ instance Csv.FromRecord Person
 instance Csv.ToRecord Person
 
 instance ToJSON Person where toJSON = sopToJSON
-instance FromJSON Person where parseJSON = sopParseJSON
+instance FromJSON Person where parseJSON = fmap addTaloTag . sopParseJSON
 
 instance HasKey Person where
     type Key Person = UUID
     key = personUuid
+
+-- | TODO: use regexp
+addTaloTag :: Person -> Person
+addTaloTag p
+    | "lapinrinne 1" `T.isInfixOf` T.toLower (p ^. personAddress)
+        = p & personTags . contains "talo" .~ True
+    | otherwise
+        = p

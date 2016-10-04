@@ -105,7 +105,7 @@ memberList_ ps = row_ . large_ 12 $ table_ [ class_ "hover" ] $ do
             span_ [class_ "suku"] $ toHtml $ person ^. personLastName
         td_ $ do
             label_ $ do
-                checkbox_ (person ^. personTags . _TagNames . contains "2016-2017") []
+                checkbox_ (person ^. personTags . contains "2016-2017") []
                 "2016-2017"
   where
     ps' = sortBy (comparing _personFirstNames <> comparing _personLastName) ps
