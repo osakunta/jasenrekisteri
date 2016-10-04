@@ -59,6 +59,9 @@ newtype TagName = TagName { getTagName :: Text }
 makePrisms ''TagName
 makeWrapped ''TagName
 
+instance IsString TagName where
+    fromString = TagName . fromString
+
 instance Hashable TagName
 
 instance A.FromJSON TagName where

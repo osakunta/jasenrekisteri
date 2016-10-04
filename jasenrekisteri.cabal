@@ -36,15 +36,20 @@ library
     , base-compat
     , bytestring
     , cassava
+    , clay
     , containers
     , exceptions
+    , file-embed
     , futurice-prelude
     , hashable
     , http-api-data
     , lens
     , lucid
+    , mmorph
     , semigroups
+    , servant-lucid
     , strict-base-types
+    , swagger2
     , text
     , transformers
     , unordered-containers
@@ -60,6 +65,8 @@ library
       Jasenrekisteri.Person
       Jasenrekisteri.Tag
       Jasenrekisteri.World
+      SatO.Clay
+      SatO.Foundation
   default-language: Haskell2010
 
 executable excel
@@ -76,15 +83,20 @@ executable excel
     , base-compat
     , bytestring
     , cassava
+    , clay
     , containers
     , exceptions
+    , file-embed
     , futurice-prelude
     , hashable
     , http-api-data
     , lens
     , lucid
+    , mmorph
     , semigroups
+    , servant-lucid
     , strict-base-types
+    , swagger2
     , text
     , transformers
     , unordered-containers
@@ -109,15 +121,20 @@ executable jasenrekisteri-server
     , base-compat
     , bytestring
     , cassava
+    , clay
     , containers
     , exceptions
+    , file-embed
     , futurice-prelude
     , hashable
     , http-api-data
     , lens
     , lucid
+    , mmorph
     , semigroups
+    , servant-lucid
     , strict-base-types
+    , swagger2
     , text
     , transformers
     , unordered-containers
