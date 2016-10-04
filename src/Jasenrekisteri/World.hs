@@ -8,7 +8,7 @@ module Jasenrekisteri.World (
     worldTags,
     -- * Getters
     worldPersonTags,
-    worldTagPersons,
+--    worldTagPersons,
     -- * Misc
     personHasTag,
     ) where
@@ -19,6 +19,7 @@ import Prelude ()
 
 import           Futurice.IdMap (IdMap)
 import qualified Futurice.IdMap as IdMap
+import qualified Futurice.Graph as G
 
 import Jasenrekisteri.Person
 import Jasenrekisteri.Tag
@@ -31,10 +32,10 @@ data World = World
 
     -- Lazy fields, constructed on need:
     --
-    , _worldPersonTags :: Map PersonId [Tag]
-      -- ^ All flags person has, included children tags
-    , _worldTagPersons :: Map TagName [Person]
-      -- ^ All persons with the tag
+    , _worldTagClosures :: Map TagName TagNames
+    , _worldRevTagClosures :: Map TagName TagNames
+
+    , _worldPersonTags  :: Map PersonId TagNames
     }
 
 -------------------------------------------------------------------------------
@@ -66,10 +67,29 @@ mkWorld' :: IdMap Person -> TagHierarchy -> World
 mkWorld' persons tags = World
     { _worldMembers = persons
     , _worldTags    = tags
-    -- TODO:
-    , _worldPersonTags = mempty
-    , _worldTagPersons = mempty
+    -- Lazy fields
+    , _worldTagClosures = tagClosures
+    , _worldRevTagClosures = revTagClosures
+    , _worldPersonTags = personTagsClosure
     }
+  where
+    tagClosures = toMapOf (ifoldedTagHierarchy . to tagClosure) tags
+    tagClosure tag = tagNamesOf
+        (_Just . folded . tagName)
+        $ G.closure (tags ^. _TagHierarchy) [tag ^. tagName]
+
+    revTagClosures = toMapOf (ifoldedTagHierarchy . to revTagClosure) tags
+    revTagClosure tag = tagNamesOf
+        (_Just . folded . tagName)
+        $ G.revClosure (tags ^. _TagHierarchy) [tag ^. tagName]
+
+    personTagsClosure :: Map PersonId TagNames
+    personTagsClosure = toMapOf (IdMap.ifolded . to personTag) persons
+
+    personTag :: Person -> TagNames
+    personTag person = person ^.
+        (personTags . _TagNames . folded. to (\tn -> revTagClosures ^? ix tn) . _Just)
+
 
 -------------------------------------------------------------------------------
 -- Lenses
@@ -88,9 +108,10 @@ worldTags = lens _worldTags $ \world tags ->
 -- @
 -- worldPersonTags :: Getter World (Map Personid [Tag])
 -- @
-worldPersonTags :: (Profunctor p, Contravariant f) => Optic' p f World (Map PersonId [Tag])
+worldPersonTags :: (Profunctor p, Contravariant f) => Optic' p f World (Map PersonId TagNames)
 worldPersonTags = to _worldPersonTags
 
+{-
 -- |
 --
 -- @
@@ -98,6 +119,7 @@ worldPersonTags = to _worldPersonTags
 -- @
 worldTagPersons :: (Profunctor p, Contravariant f) => Optic' p f World (Map TagName [Person])
 worldTagPersons = to _worldTagPersons
+-}
 
 -------------------------------------------------------------------------------
 -- Qiery

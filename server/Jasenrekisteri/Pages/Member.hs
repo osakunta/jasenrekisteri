@@ -5,7 +5,7 @@ module Jasenrekisteri.Pages.Member (memberPage) where
 import Futurice.Prelude
 import Prelude ()
 
-import Lucid hiding (for_)
+import Futurice.IdMap (HasKey (..))
 
 import Jasenrekisteri.HtmlUtils
 import Jasenrekisteri.Person
@@ -28,4 +28,4 @@ memberPage world personId = case world ^? worldMembers . ix personId of
                 br_ []
                 toHtml $ _personZipcode <> " " <> _personCity
         subheader_ "Tagit"
-        tagnameList_ world (p ^.. personTags . _TagNames . folded)
+        tagnameList_ world (world ^.. worldPersonTags . ix (p ^. key) . _TagNames . folded)
