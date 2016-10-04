@@ -47,6 +47,8 @@ library
     , lens
     , lucid
     , mmorph
+    , regex-applicative
+    , regex-applicative-text
     , semigroups
     , servant-lucid
     , strict-base-types
@@ -94,6 +96,8 @@ executable excel
     , lens
     , lucid
     , mmorph
+    , regex-applicative
+    , regex-applicative-text
     , semigroups
     , servant-lucid
     , strict-base-types
@@ -132,6 +136,8 @@ executable jasenrekisteri-server
     , lens
     , lucid
     , mmorph
+    , regex-applicative
+    , regex-applicative-text
     , semigroups
     , servant-lucid
     , strict-base-types

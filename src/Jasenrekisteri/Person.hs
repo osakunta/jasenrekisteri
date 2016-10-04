@@ -30,11 +30,14 @@ module Jasenrekisteri.Person (
 
 import Control.Lens
 import Futurice.Generics
-import Futurice.IdMap    (HasKey (..))
+import Futurice.IdMap                (HasKey (..))
 import Futurice.Prelude
 import Prelude ()
+import Text.Regex.Applicative.Common (decimal)
+import Text.Regex.Applicative.Text   (RE', match, sym)
 
-import qualified Data.Csv as Csv
+
+import qualified Data.Csv  as Csv
 import qualified Data.Text as T
 
 import Jasenrekisteri.Tag
@@ -69,7 +72,8 @@ instance Csv.FromRecord Person
 instance Csv.ToRecord Person
 
 instance ToJSON Person where toJSON = sopToJSON
-instance FromJSON Person where parseJSON = fmap addTaloTag . sopParseJSON
+instance FromJSON Person where
+    parseJSON = fmap (addTaloTag . addFuksiTag). sopParseJSON
 
 instance HasKey Person where
     type Key Person = UUID
@@ -82,3 +86,14 @@ addTaloTag p
         = p & personTags . contains "talo" .~ True
     | otherwise
         = p
+
+addFuksiTag :: Person -> Person
+addFuksiTag p = case match affYear (p ^. personAffiliationDate) of
+    Nothing   -> p
+    Just year -> p & personTags . contains (fromString $ "fuksi" ++ show year) .~ True
+  where
+    affYear :: RE' Int
+    affYear = decimalInt *> sym '.' *> decimalInt *> sym '.' *> decimalInt
+
+    decimalInt :: RE' Int
+    decimalInt = decimal

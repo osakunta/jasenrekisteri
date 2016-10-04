@@ -32,6 +32,8 @@ dependencies:
 - lens
 - lucid
 - mmorph
+- regex-applicative
+- regex-applicative-text
 - semigroups
 - servant-lucid
 - strict-base-types
