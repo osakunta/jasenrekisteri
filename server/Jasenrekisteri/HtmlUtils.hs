@@ -4,9 +4,10 @@ module Jasenrekisteri.HtmlUtils (
     -- * Headers
     subheader_,
     -- * Tags
-    tagNameLink_,
     tagLink_,
+    tagNameLink_,
     tagList_,
+    tagnameList_,
     -- * Members
     memberList_,
     -- * Re-export
@@ -68,7 +69,7 @@ subheader_ = row_ . large_ 12 . h2_ . toHtml
 -- Tags
 -------------------------------------------------------------------------------
 
-tagNameLink_ :: World -> TagName -> Html ()
+tagNameLink_ :: Monad m => World -> TagName -> HtmlT m ()
 tagNameLink_ world tagname = tagLink_ (world ^. worldTags . att tagname)
 
 tagLink_ :: Monad m => Tag -> HtmlT m ()
@@ -86,6 +87,9 @@ tagLink_ tag = do
 
 tagList_ :: Monad m => [Tag] -> HtmlT m ()
 tagList_ = row_ . large_ 12 . traverse_ tagLink_
+
+tagnameList_ :: Monad m => World -> [TagName] -> HtmlT m ()
+tagnameList_ world = row_ . large_ 12 . traverse_ (tagNameLink_ world)
 
 -------------------------------------------------------------------------------
 -- Members

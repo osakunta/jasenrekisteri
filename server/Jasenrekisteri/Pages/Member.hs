@@ -17,7 +17,7 @@ memberPage world personId = case world ^? worldMembers . ix personId of
     -- TODO: not found page
     Nothing -> pure ()
     Just p@Person {..} ->  template' (_personFirstNames <> " " <> _personLastName) $ do
-        dl_ $ do
+        row_ $ large_ 12 $ dl_ $ do
             dt_ "Sähköposti"
             dd_ $ a_ [href_ $ "mailto:" <> _personEmail] $ toHtml _personEmail
             dt_ "Puhelin"
@@ -27,6 +27,5 @@ memberPage world personId = case world ^? worldMembers . ix personId of
                 toHtml _personAddress
                 br_ []
                 toHtml $ _personZipcode <> " " <> _personCity
-        h2_ "Tagit"
-        ul_ [class_ "tags"] $
-            for_ (p ^. personTags . _TagNames) (tagNameLink_ world)
+        subheader_ "Tagit"
+        tagnameList_ world (p ^.. personTags . _TagNames . folded)
