@@ -1,7 +1,7 @@
 name: jasenrekisteri
 version: "0"
-synopsis: Member register of Satakuntalainen Osakunta
-description: The software
+synopsis: Member registry of Satakuntalainen Osakunta
+description: Member registry of Satakuntalainen Osakunta. See README
 author: Oleg Grenrus <oleg.grenrus@iki.fi>
 maintainer: Oleg Grenrus <oleg.grenrus@iki.fi>
 license: BSD3
