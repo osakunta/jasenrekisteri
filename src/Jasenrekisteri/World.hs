@@ -9,12 +9,14 @@ module Jasenrekisteri.World (
     worldTags,
     -- * Getters
     worldPersonTags,
+    worldTagPersons,
     worldTagPersonCount,
     -- * Misc
     personHasTag,
     ) where
 
 import Control.Lens
+import Data.Set.Lens    (setOf)
 import Futurice.IdMap   (IdMap)
 import Futurice.Prelude
 import Prelude ()
@@ -38,6 +40,7 @@ data World = World
     , _worldRevTagClosures :: Map TagName TagNames
 
     , _worldPersonTags     :: Map PersonId TagNames
+    , _worldTagPersons     :: Map TagName (Set PersonId)
     , _worldTagPersonCount :: Map TagName (Sum Int)
     }
 
@@ -74,6 +77,7 @@ mkWorld' persons tags = World
     , _worldTagClosures    = tagClosures
     , _worldRevTagClosures = revTagClosures
     , _worldPersonTags     = personTagsClosure
+    , _worldTagPersons     = tagPersons
     , _worldTagPersonCount = tagPersonCounts
     }
   where
@@ -94,10 +98,17 @@ mkWorld' persons tags = World
     personTag person = person ^.
         (personTags . _TagNames . folded. to (\tn -> revTagClosures ^? ix tn) . _Just)
 
-    tagPersonCounts :: Map TagName (Sum Int)
-    tagPersonCounts = tagClosures <&> \cl -> Sum $ sumOf
-        (folded . personTags . filtered (overlaps cl) . to (const 1))
+    tagPersons :: Map TagName (Set PersonId)
+    tagPersons = tagClosures <&> \cl -> setOf
+        (folded . filtered (\p -> overlaps (p ^. personTags) cl) . personUuid)
         persons
+
+    tagPersonCounts :: Map TagName (Sum Int)
+    tagPersonCounts = fmap (Sum . length) tagPersons
+
+ {- tagClosures <&> \cl -> Sum $ sumOf
+        (folded . personTags . filtered (overlaps cl) . to (const 1))
+        persons -}
 
 overlaps :: TagNames -> TagNames -> Bool
 overlaps tns tns' = not $ null $ Set.intersection
@@ -122,6 +133,14 @@ worldTags = lens _worldTags $ \world tags ->
 -- @
 worldPersonTags :: (Profunctor p, Contravariant f) => Optic' p f World (Map PersonId TagNames)
 worldPersonTags = to _worldPersonTags
+
+-- |
+--
+-- @
+-- worldTagPersonCount :: Getter World (Map TagName (Sum Int))
+-- @
+worldTagPersons :: (Profunctor p, Contravariant f) => Optic' p f World (Map TagName :$ Set PersonId)
+worldTagPersons = to _worldTagPersons
 
 -- |
 --

@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module SatO.Clay where
 
-import Futurice.Prelude hiding (span)
+import Futurice.Prelude hiding (span, (&))
 import Prelude ()
 import Clay
 import qualified Lucid as L
@@ -30,6 +30,9 @@ css = do
         cls ? do
             backgroundColor col1
             color col2
+            ":hover" & do
+                backgroundColor col2
+                color col1
   where
     satoFontFamily = fontFamily ["Lucida Grande", "Helvetica", "Arial"] [sansSerif]
     tagColors =
