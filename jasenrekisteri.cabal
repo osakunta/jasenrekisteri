@@ -60,16 +60,27 @@ library
     , uuid-aeson
     , vector
     , vector-instances
+    , servant        ==0.9.*
+    , servant-lucid
+    , servant-server ==0.9.*
+    , wai
+    , warp
   exposed-modules:
       Control.Lens.Att
       Data.ByteString.Lazy.Extra
       Data.Csv.Extra
-      Jasenrekisteri.AesonUtils
-      Jasenrekisteri.Person
-      Jasenrekisteri.Tag
-      Jasenrekisteri.World
       SatO.Clay
       SatO.Foundation
+      SatO.Jasenrekisteri.API
+      SatO.Jasenrekisteri.Markup
+      SatO.Jasenrekisteri.Pages.Member
+      SatO.Jasenrekisteri.Pages.Members
+      SatO.Jasenrekisteri.Pages.Tag
+      SatO.Jasenrekisteri.Pages.Tags
+      SatO.Jasenrekisteri.Person
+      SatO.Jasenrekisteri.Server
+      SatO.Jasenrekisteri.Tag
+      SatO.Jasenrekisteri.World
   default-language: Haskell2010
 
 executable excel
@@ -109,6 +120,11 @@ executable excel
     , uuid-aeson
     , vector
     , vector-instances
+    , servant        ==0.9.*
+    , servant-lucid
+    , servant-server ==0.9.*
+    , wai
+    , warp
     , jasenrekisteri
   default-language: Haskell2010
 
@@ -149,17 +165,10 @@ executable jasenrekisteri-server
     , uuid-aeson
     , vector
     , vector-instances
-    , jasenrekisteri
     , servant        ==0.9.*
     , servant-lucid
     , servant-server ==0.9.*
     , wai
     , warp
-  other-modules:
-      Jasenrekisteri.API
-      Jasenrekisteri.HtmlUtils
-      Jasenrekisteri.Pages.Member
-      Jasenrekisteri.Pages.Members
-      Jasenrekisteri.Pages.Tag
-      Jasenrekisteri.Pages.Tags
+    , jasenrekisteri
   default-language: Haskell2010

@@ -5,7 +5,7 @@
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE TypeFamilies          #-}
 {-# LANGUAGE TypeOperators         #-}
-module Jasenrekisteri.API where
+module SatO.Jasenrekisteri.API where
 
 import Futurice.Prelude
 import Prelude ()
@@ -15,8 +15,8 @@ import SatO.Foundation    (HtmlPage)
 import Servant
 import Servant.HTML.Lucid
 
-import Jasenrekisteri.Person
-import Jasenrekisteri.Tag
+import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Tag
 
 -------------------------------------------------------------------------------
 -- Temporary, use HtmlPage

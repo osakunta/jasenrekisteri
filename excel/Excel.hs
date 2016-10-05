@@ -4,18 +4,16 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Main (main) where
 
-import Prelude        ()
-import Prelude.Compat
+import Futurice.Prelude
+import Prelude ()
 
-import Data.Vector           (Vector)
-import Data.Vector.Instances ()
-import System.Environment    (getArgs)
+import System.Environment (getArgs)
 
 import qualified Data.Aeson.Compat          as A
 import qualified Data.ByteString.Lazy.Extra as LBS
 import qualified Data.Csv.Extra             as Csv
 
-import Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Person
 
 run :: FilePath -> FilePath -> IO ()
 run filepathIn filepathOut = do

@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Jasenrekisteri.Pages.Tags (tagsPage) where
+module SatO.Jasenrekisteri.Pages.Tags (tagsPage) where
 
 import Control.Lens
 import Futurice.Prelude
@@ -9,9 +9,9 @@ import Prelude ()
 import Data.Monoid    (Sum (..))
 import Futurice.IdMap (key)
 
-import Jasenrekisteri.HtmlUtils
-import Jasenrekisteri.Tag
-import Jasenrekisteri.World
+import SatO.Jasenrekisteri.Markup
+import SatO.Jasenrekisteri.Tag
+import SatO.Jasenrekisteri.World
 
 tagsPage :: World -> HtmlPage "tags"
 tagsPage world = template' "Tagit" $ do

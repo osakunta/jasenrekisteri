@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
-module Jasenrekisteri.Pages.Tag (tagPage) where
+module SatO.Jasenrekisteri.Pages.Tag (tagPage) where
 
 import Control.Lens
 import Control.Lens.Att
@@ -13,10 +13,10 @@ import Prelude ()
 import qualified Data.Set       as Set
 import qualified Futurice.Graph as G
 
-import Jasenrekisteri.HtmlUtils
-import Jasenrekisteri.Person
-import Jasenrekisteri.Tag
-import Jasenrekisteri.World
+import SatO.Jasenrekisteri.Markup
+import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Tag
+import SatO.Jasenrekisteri.World
 
 tagPage :: World -> TagName -> HtmlPage "tag"
 tagPage world tn =

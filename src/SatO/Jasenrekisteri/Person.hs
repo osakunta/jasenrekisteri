@@ -4,7 +4,7 @@
 {-# LANGUAGE TemplateHaskell   #-}
 {-# LANGUAGE TypeFamilies      #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Jasenrekisteri.Person (
+module SatO.Jasenrekisteri.Person (
     -- * Person
     Person(..),
     -- * Person identifier
@@ -36,11 +36,10 @@ import Prelude ()
 import Text.Regex.Applicative.Common (decimal)
 import Text.Regex.Applicative.Text   (RE', match, sym)
 
-
 import qualified Data.Csv  as Csv
 import qualified Data.Text as T
 
-import Jasenrekisteri.Tag
+import SatO.Jasenrekisteri.Tag
 
 type PersonId = UUID
 

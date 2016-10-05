@@ -45,6 +45,11 @@ dependencies:
 - uuid-aeson
 - vector
 - vector-instances
+- servant        ==0.9.*
+- servant-lucid
+- servant-server ==0.9.*
+- wai
+- warp
 
 library:
   source-dirs: src
@@ -63,8 +68,3 @@ executables:
     source-dirs: server/
     dependencies:
       - jasenrekisteri
-      - servant        ==0.9.*
-      - servant-lucid
-      - servant-server ==0.9.*
-      - wai
-      - warp

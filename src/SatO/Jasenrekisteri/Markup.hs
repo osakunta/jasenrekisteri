@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Jasenrekisteri.HtmlUtils (
+module SatO.Jasenrekisteri.Markup (
     template',
     page404,
     -- * Headers
@@ -29,10 +29,10 @@ import qualified Data.Aeson as A
 -}
 import qualified Data.Text as T
 
-import Jasenrekisteri.API
-import Jasenrekisteri.Person
-import Jasenrekisteri.Tag
-import Jasenrekisteri.World
+import SatO.Jasenrekisteri.API
+import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Tag
+import SatO.Jasenrekisteri.World
 
 template :: Text -> Html () -> Html () -> HtmlPage sym
 template title nav inner = page_ title $ do

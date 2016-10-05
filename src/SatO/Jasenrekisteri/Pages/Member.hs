@@ -1,17 +1,17 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
-module Jasenrekisteri.Pages.Member (memberPage) where
+module SatO.Jasenrekisteri.Pages.Member (memberPage) where
 
 import Futurice.Prelude
 import Prelude ()
 
 import Futurice.IdMap (HasKey (..))
 
-import Jasenrekisteri.HtmlUtils
-import Jasenrekisteri.Person
-import Jasenrekisteri.Tag
-import Jasenrekisteri.World
+import SatO.Jasenrekisteri.Markup
+import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Tag
+import SatO.Jasenrekisteri.World
 
 memberPage :: World -> PersonId -> HtmlPage "member"
 memberPage world personId = case world ^? worldMembers . ix personId of

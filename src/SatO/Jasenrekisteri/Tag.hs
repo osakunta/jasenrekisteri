@@ -9,7 +9,7 @@
 {-# LANGUAGE TemplateHaskell       #-}
 {-# LANGUAGE TypeFamilies          #-}
 {-# OPTIONS_GHC -Wno-partial-type-signatures #-}
-module Jasenrekisteri.Tag (
+module SatO.Jasenrekisteri.Tag (
     -- * Tag name
     TagName (..),
     _TagName,

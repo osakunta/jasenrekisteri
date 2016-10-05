@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeOperators   #-}
-module Jasenrekisteri.World (
+module SatO.Jasenrekisteri.World (
     -- * Creation
     World(..),
     mkWorld,
@@ -25,8 +25,8 @@ import qualified Data.Set       as Set
 import qualified Futurice.Graph as G
 import qualified Futurice.IdMap as IdMap
 
-import Jasenrekisteri.Person
-import Jasenrekisteri.Tag
+import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Tag
 
 -- | 'World' contains all the data we display.
 --
