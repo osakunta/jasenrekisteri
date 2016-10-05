@@ -33,6 +33,7 @@ type JasenrekisteriAPI =
     :<|> MemberEndpoint
     :<|> "tags" :> HTMLPageEndpoint "tags"
     :<|> TagEndpoint
+    :<|> "search" :> HTMLPageEndpoint "search"
     :<|> "logout" :> HTMLPageEndpoint "logout"
     :<|> Raw
 

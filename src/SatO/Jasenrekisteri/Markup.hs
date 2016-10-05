@@ -108,16 +108,22 @@ tagnameList_ world = row_ . large_ 12 . traverse_ (tagNameLink_ world)
 -- Members
 -------------------------------------------------------------------------------
 
-memberList_ :: Monad m => [Person] -> HtmlT m ()
-memberList_ ps = do
+memberList_
+    :: Monad m
+    => [Tag]       -- ^ tag to show in the list
+    -> [Person]
+    -> HtmlT m ()
+memberList_ ts ps = do
     row_ $ do
         largemed_ 6 $ toHtml $  "Yhteensä: " <> (show $ length ps')
         largemed_ 6 $ label_ $ do
-            "Haku: "
+            "Suodata: "
             input_ [ type_ "text", id_ "member-filter" ]
     row_ . large_ 12 $ table_ [ id_ "member-list", class_ "hover" ] $ do
         thead_ $ tr_ $ do
             th_ $ "Nimi"
+            when (isn't _Empty ts) $
+                th_ "Tagit"
             th_ $ "2016-2017"
         tbody_ $ for_ ps' $ \person -> do
             let needle = T.toLower
@@ -128,6 +134,8 @@ memberList_ ps = do
                     span_ [class_ "etu"] $ toHtml $ person ^. personFirstNames
                     " "
                     span_ [class_ "suku"] $ toHtml $ person ^. personLastName
+                when (isn't _Empty ts) $ td_ $
+                    tagList_ (ts ^.. folded . filtered (\t -> person ^. personTags . contains (t ^. key)))
                 td_ $ do
                     label_ $ do
                         checkbox_ (person ^. personTags . contains "2016-2017") []

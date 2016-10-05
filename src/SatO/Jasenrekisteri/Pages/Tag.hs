@@ -27,11 +27,15 @@ tagPage world tn =
 tagPage' :: World -> Tag -> HtmlPage "tag"
 tagPage' world tag = template' ("Tagi: " <> tn ^. _TagName) $ do
     subheader_ "Alatagit"
-    tagList_ (world ^.. subtagsFold . filtered (\subtag -> subtag ^. tagName /= tn))
+    tagList_ tags
     subheader_ "Jäsenet"
-    memberList_ (world ^.. membersFold)
+    memberList_ tags (world ^.. membersFold)
   where
     tn = tag ^. tagName
+
+    -- | TODO: use tag closure
+    tags :: [Tag]
+    tags = world ^.. subtagsFold . filtered (\subtag -> subtag ^. tagName /= tn)
 
     subtagNames = setOf (subtagsFold . key) world
 

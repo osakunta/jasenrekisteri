@@ -75,6 +75,7 @@ library
       SatO.Jasenrekisteri.Markup
       SatO.Jasenrekisteri.Pages.Member
       SatO.Jasenrekisteri.Pages.Members
+      SatO.Jasenrekisteri.Pages.Search
       SatO.Jasenrekisteri.Pages.Tag
       SatO.Jasenrekisteri.Pages.Tags
       SatO.Jasenrekisteri.Person

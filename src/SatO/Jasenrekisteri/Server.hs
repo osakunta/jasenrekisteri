@@ -16,6 +16,7 @@ import SatO.Jasenrekisteri.API
 import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Pages.Member
 import SatO.Jasenrekisteri.Pages.Members
+import SatO.Jasenrekisteri.Pages.Search
 import SatO.Jasenrekisteri.Pages.Tags
 import SatO.Jasenrekisteri.Pages.Tag
 import SatO.Jasenrekisteri.Person
@@ -27,6 +28,7 @@ server world = pure (membersPage world)
     :<|> (\i -> pure $ memberPage world i)
     :<|> pure (tagsPage world)
     :<|> (\i -> pure $ tagPage world i)
+    :<|> pure (searchPage world)
     :<|> pure (page_ "logout" (pure ()))
     :<|> serveDirectory "static"
 

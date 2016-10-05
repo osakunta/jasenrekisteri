@@ -11,4 +11,5 @@ import SatO.Jasenrekisteri.World
 
 membersPage :: World -> HtmlPage "members"
 membersPage world = template' "Jäsenet" $ do
-    memberList_ (world ^.. worldMembers . folded)
+    memberList_ [] (world ^.. worldMembers . folded)
+-- TODO: use top tags?
