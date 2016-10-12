@@ -28,7 +28,7 @@ server world = pure (membersPage world)
     :<|> (\i -> pure $ memberPage world i)
     :<|> pure (tagsPage world)
     :<|> (\i -> pure $ tagPage world i)
-    :<|> pure (searchPage world)
+    :<|> pure . searchPage world
     :<|> pure (page_ "logout" (pure ()))
     :<|> serveDirectory "static"
 

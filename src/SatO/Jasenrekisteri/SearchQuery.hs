@@ -3,7 +3,14 @@ module SatO.Jasenrekisteri.SearchQuery where
 
 import Futurice.Prelude
 import Prelude ()
+
+import Data.ByteString     (ByteString)
 import Text.Trifecta
+import Text.Trifecta.Delta (Delta (Directed))
+import Web.HttpApiData     (FromHttpApiData (..))
+
+import qualified Data.Text.Encoding           as TE
+import qualified Text.PrettyPrint.ANSI.Leijen as PP
 
 import SatO.Jasenrekisteri.Tag
 
@@ -50,4 +57,26 @@ orPrec  = 1
 defPrec = 0
 
 searchQueryParser :: Parser SearchQuery
-searchQueryParser = pure (QLiteral "foo")
+searchQueryParser = queryP
+  where
+    queryP    = orP
+
+    orP       = foldl QOr <$> andP <*> many (stringP "OR" *> andP)
+    andP      = foldl QAnd <$> notP <*> many (stringP "AND" *> notP)
+    notP      = maybe id (\_ -> QNot) <$> optional (stringP "NOT") <*> litP
+
+    litP      = litP' <|> parensP queryP
+    litP'     = QLiteral . fromString <$> some (alphaNum <|> oneOf "-") <* spaces <?> "Tagin nimi"
+
+    stringP s = string s <* spacesP
+    spacesP   = space *> spaces -- at least one space
+    parensP   = between (char '(' *> spaces) (char ')' *> spaces)
+
+parseSearchQuery :: ByteString -> Either String SearchQuery
+parseSearchQuery bs =
+    case parseByteString (spaces *> searchQueryParser <* eof) (Directed "<input>" 0 0 0 0) bs of
+        Success q -> Right q
+        Failure e -> Left $ PP.displayS (PP.renderCompact  $ _errDoc e) ""
+
+instance FromHttpApiData SearchQuery where
+    parseUrlPiece = first (view packed) . parseSearchQuery . TE.encodeUtf8

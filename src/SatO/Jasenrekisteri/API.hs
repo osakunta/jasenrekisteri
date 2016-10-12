@@ -16,6 +16,7 @@ import Servant
 import Servant.HTML.Lucid
 
 import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.SearchQuery
 import SatO.Jasenrekisteri.Tag
 
 -------------------------------------------------------------------------------
@@ -33,7 +34,7 @@ type JasenrekisteriAPI =
     :<|> MemberEndpoint
     :<|> "tags" :> HTMLPageEndpoint "tags"
     :<|> TagEndpoint
-    :<|> "search" :> HTMLPageEndpoint "search"
+    :<|> "search" :> QueryParam "query" SearchQuery :> HTMLPageEndpoint "search"
     :<|> "logout" :> HTMLPageEndpoint "logout"
     :<|> Raw
 

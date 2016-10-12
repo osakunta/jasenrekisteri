@@ -33,6 +33,7 @@ library
     , aeson ==1.0.*
     , aeson-compat
     , aeson-extra
+    , ansi-wl-pprint
     , array
     , base-compat
     , bytestring
@@ -96,6 +97,7 @@ executable excel
     , aeson ==1.0.*
     , aeson-compat
     , aeson-extra
+    , ansi-wl-pprint
     , array
     , base-compat
     , bytestring
@@ -142,6 +144,7 @@ executable jasenrekisteri-server
     , aeson ==1.0.*
     , aeson-compat
     , aeson-extra
+    , ansi-wl-pprint
     , array
     , base-compat
     , bytestring

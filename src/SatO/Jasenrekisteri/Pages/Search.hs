@@ -17,17 +17,18 @@ import SatO.Jasenrekisteri.SearchQuery
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-searchPage :: World -> HtmlPage "search"
-searchPage world = template' title $ do
+searchPage :: World -> Maybe SearchQuery -> HtmlPage "search"
+searchPage world mquery = template' title $ do
     row_ $ large_ 12 $ div_ [ class_ "callout secondary" ] $ do
         for_ exampleQueries $ \q -> do
             button_ [ class_ "button" ] $ toHtml $ prettySearchQuery q
             " "
         hr_ []
-        label_ $ do
-            "Haku"
-            input_ [ type_ "text", value_ $ prettySearchQuery query ]
-        input_ [ type_ "submit" , value_ "Hae", class_ "button primary" ]
+        form_ [ method_ "GET"] $ do
+            label_ $ do
+                "Haku"
+                input_ [ name_ "query", type_ "text", value_ $ prettySearchQuery query ]
+            input_ [ type_ "submit" , value_ "Hae", class_ "button primary" ]
     memberList_ queryTags' $ world ^..
         worldMembers . folded
         . filtered (\member -> personIds ^. contains (member ^. personUuid))
@@ -35,7 +36,7 @@ searchPage world = template' title $ do
     title = "Haku: " <> prettySearchQuery query
 
     -- TODO:
-    query = defaultSearchQuery
+    query = fromMaybe defaultSearchQuery mquery
 
     -- TODO: extract positive tags
     queryTags' = (\tn -> world ^. worldTags . att tn) <$> (queryTags query ^.. folded)
