@@ -40,6 +40,7 @@ dependencies:
 - swagger2
 - text
 - transformers
+- trifecta
 - unordered-containers
 - uuid
 - uuid-aeson

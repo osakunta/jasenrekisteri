@@ -55,6 +55,7 @@ library
     , swagger2
     , text
     , transformers
+    , trifecta
     , unordered-containers
     , uuid
     , uuid-aeson
@@ -79,6 +80,7 @@ library
       SatO.Jasenrekisteri.Pages.Tag
       SatO.Jasenrekisteri.Pages.Tags
       SatO.Jasenrekisteri.Person
+      SatO.Jasenrekisteri.SearchQuery
       SatO.Jasenrekisteri.Server
       SatO.Jasenrekisteri.Tag
       SatO.Jasenrekisteri.World
@@ -116,6 +118,7 @@ executable excel
     , swagger2
     , text
     , transformers
+    , trifecta
     , unordered-containers
     , uuid
     , uuid-aeson
@@ -161,6 +164,7 @@ executable jasenrekisteri-server
     , swagger2
     , text
     , transformers
+    , trifecta
     , unordered-containers
     , uuid
     , uuid-aeson
