@@ -13,6 +13,7 @@ import qualified Data.ByteString.Lazy     as LBS
 import qualified Network.Wai.Handler.Warp as Warp
 
 import SatO.Jasenrekisteri.API
+import SatO.Jasenrekisteri.Command
 import SatO.Jasenrekisteri.Ctx
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
@@ -25,6 +26,11 @@ import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
+addTagEndpoint :: Ctx -> PersonId -> TagName -> Handler Text
+addTagEndpoint ctx mid tn = liftIO $ do
+    ctxApplyCmd (CmdAddTag mid tn) ctx
+    pure "OK"
+
 server :: Ctx -> Server JasenrekisteriAPI
 server ctx = queryEndpoint ctx membersPage
     :<|> queryEndpoint ctx memberPage
@@ -32,6 +38,7 @@ server ctx = queryEndpoint ctx membersPage
     :<|> queryEndpoint ctx tagPage
     :<|> queryEndpoint ctx searchPage
     :<|> pure (page_ "logout" (pure ()))
+    :<|> addTagEndpoint ctx
     :<|> serveDirectory "static"
 
 app :: Ctx -> Application

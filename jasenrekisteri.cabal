@@ -76,6 +76,7 @@ library
       SatO.Clay
       SatO.Foundation
       SatO.Jasenrekisteri.API
+      SatO.Jasenrekisteri.Command
       SatO.Jasenrekisteri.Ctx
       SatO.Jasenrekisteri.Endpoints
       SatO.Jasenrekisteri.Markup

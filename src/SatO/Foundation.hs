@@ -113,6 +113,7 @@ page_ t b = HtmlPage $ doctypehtml_ $ do
         embeddedFoundationStyle_
         embeddedLodash_
         embeddedMenrva_
+        -- TODO: add fetch
         embeddedJasenrekisteri_
         satoCss_
     body_ b

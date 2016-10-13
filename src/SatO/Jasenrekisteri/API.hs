@@ -32,7 +32,11 @@ type JasenrekisteriAPI =
     :<|> TagEndpoint
     :<|> "search" :> QueryParam "query" SearchQuery :> HTMLPageEndpoint "search"
     :<|> "logout" :> HTMLPageEndpoint "logout"
+    :<|> "commands" :> CommandsAPI
     :<|> Raw
+
+type CommandsAPI =
+    "add-tag" :> Capture "member-id" PersonId :> Capture "tag-name" TagName :> Post '[JSON] Text
 
 jasenrekisteriAPI :: Proxy JasenrekisteriAPI
 jasenrekisteriAPI = Proxy

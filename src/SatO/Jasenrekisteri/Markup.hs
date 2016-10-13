@@ -24,10 +24,9 @@ import Futurice.Prelude
 import Prelude ()
 import SatO.Foundation
 
-{-
 import qualified Data.Aeson as A
--}
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as TE
 
 import SatO.Jasenrekisteri.API
 import SatO.Jasenrekisteri.Person
@@ -126,19 +125,28 @@ memberList_ ts ps = do
                 th_ "Tagit"
             th_ $ "2016-2017"
         tbody_ $ for_ ps' $ \person -> do
+            let memberId = person ^. key
             let needle = T.toLower
                   $ person ^. personFirstNames
                   <> " " <> person ^. personLastName
             tr_ [ data_ "member-haystack" needle ] $ do
-                td_ $ a_ [ memberHref $ person ^. key ] $ do
+                td_ $ a_ [ memberHref memberId ] $ do
                     span_ [class_ "etu"] $ toHtml $ person ^. personFirstNames
                     " "
                     span_ [class_ "suku"] $ toHtml $ person ^. personLastName
                 when (isn't _Empty ts) $ td_ $
                     tagList_ (ts ^.. folded . filtered (\t -> person ^. personTags . contains (t ^. key)))
-                td_ $ do
-                    label_ $ do
-                        checkbox_ (person ^. personTags . contains "2016-2017") []
-                        "2016-2017"
+                td_ $ tagCheckbox person "2016-2017"
   where
     ps' = sortBy (comparing _personFirstNames <> comparing _personLastName) ps
+
+tagCheckbox :: Monad m => Person -> TagName -> HtmlT m ()
+tagCheckbox person tn = label_ $ do
+   checkbox_
+        (person ^. personTags . contains tn)
+        [ data_ "tag" d ]
+   (toHtml $ tn ^. _TagName)
+ where
+   memberId = person ^. key
+   json = A.object [ "tagName" A..= tn, "memberId" A..= memberId ]
+   d = TE.decodeUtf8 $ A.encode json ^. strict
