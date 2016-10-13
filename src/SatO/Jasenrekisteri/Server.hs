@@ -22,13 +22,14 @@ import SatO.Jasenrekisteri.Pages.Tag
 import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
+import SatO.Jasenrekisteri.Endpoints
 
 server :: World -> Server JasenrekisteriAPI
-server world = pure (membersPage world)
-    :<|> (\i -> pure $ memberPage world i)
-    :<|> pure (tagsPage world)
-    :<|> (\i -> pure $ tagPage world i)
-    :<|> pure . searchPage world
+server world = queryEndpoint world membersPage
+    :<|> queryEndpoint world memberPage
+    :<|> queryEndpoint world tagsPage
+    :<|> queryEndpoint world tagPage
+    :<|> queryEndpoint world searchPage
     :<|> pure (page_ "logout" (pure ()))
     :<|> serveDirectory "static"
 

@@ -9,6 +9,9 @@ import Data.Set.Lens    (setOf)
 import Futurice.IdMap   (key)
 import Futurice.Prelude
 import Prelude ()
+import Control.Monad.Reader (ask)
+
+import SatO.Jasenrekisteri.Endpoints
 
 import qualified Data.Set       as Set
 import qualified Futurice.Graph as G
@@ -18,10 +21,11 @@ import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-tagPage :: World -> TagName -> HtmlPage "tag"
-tagPage world tn =
+tagPage :: TagName -> QueryM (HtmlPage "tag")
+tagPage tn = do
+    world <- ask
     let tag = world ^. worldTags . att tn
-    in tagPage' world tag
+    pure $ tagPage' world tag
 
 -- TODO: use closure fields
 tagPage' :: World -> Tag -> HtmlPage "tag"

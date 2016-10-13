@@ -6,15 +6,20 @@ import Control.Lens
 import Futurice.Prelude
 import Prelude ()
 
+import Control.Monad.Reader (ask)
 import Data.Monoid    (Sum (..))
 import Futurice.IdMap (key)
 
+import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-tagsPage :: World -> HtmlPage "tags"
-tagsPage world = template' "Tagit" $ do
+tagsPage :: QueryM (HtmlPage "tags")
+tagsPage = ask <&> \world -> template' "Tagit" $ do
+    let withCount :: Tag -> (Tag, Sum Int)
+        withCount tag = (tag, world ^. worldTagPersonCount . ix (tag ^. key))
+
     let tagsWithCounts = world ^.. worldTags . ifoldedTagHierarchy . to withCount
     subheader_ "Enemmän kuin yksi"
     row_ $ large_ 12 $ for_ tagsWithCounts $ \(tag, Sum count) ->
@@ -28,6 +33,3 @@ tagsPage world = template' "Tagit" $ do
     subheader_ "Tyhjät"
     row_ $ large_ 12 $ for_ tagsWithCounts $ \(tag, Sum count) ->
         when (count == 0) $ tagLink_ tag
-  where
-    withCount :: Tag -> (Tag, Sum Int)
-    withCount tag = (tag, world ^. worldTagPersonCount . ix (tag ^. key))

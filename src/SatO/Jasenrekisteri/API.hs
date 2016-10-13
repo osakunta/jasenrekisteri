@@ -19,10 +19,6 @@ import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.SearchQuery
 import SatO.Jasenrekisteri.Tag
 
--------------------------------------------------------------------------------
--- Temporary, use HtmlPage
--------------------------------------------------------------------------------
-
 type HTMLPageEndpoint sym = Get '[HTML] (HtmlPage sym)
 
 -------------------------------------------------------------------------------

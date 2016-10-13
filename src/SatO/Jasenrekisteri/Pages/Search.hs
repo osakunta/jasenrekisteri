@@ -6,19 +6,26 @@ module SatO.Jasenrekisteri.Pages.Search (searchPage) where
 import Control.Lens
 import Control.Lens.Att
 import Futurice.Prelude
+import Control.Monad.Reader (ask)
 import Prelude ()
 
 import qualified Data.Set       as Set
 import qualified Futurice.IdMap as IdMap
 
+import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.SearchQuery
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-searchPage :: World -> Maybe SearchQuery -> HtmlPage "search"
-searchPage world mquery = template' title $ do
+searchPage :: Maybe SearchQuery -> QueryM (HtmlPage "search")
+searchPage mquery = do
+    world <- ask
+    pure $ searchPage' world mquery
+
+searchPage' :: World -> Maybe SearchQuery -> HtmlPage "search"
+searchPage' world mquery = template' title $ do
     row_ $ large_ 12 $ div_ [ class_ "callout secondary" ] $ do
         for_ exampleQueries $ \q -> do
             button_ [ class_ "button" ] $ toHtml $ prettySearchQuery q

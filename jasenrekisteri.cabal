@@ -48,6 +48,7 @@ library
     , lens
     , lucid
     , mmorph
+    , mtl
     , regex-applicative
     , regex-applicative-text
     , semigroups
@@ -74,6 +75,7 @@ library
       SatO.Clay
       SatO.Foundation
       SatO.Jasenrekisteri.API
+      SatO.Jasenrekisteri.Endpoints
       SatO.Jasenrekisteri.Markup
       SatO.Jasenrekisteri.Pages.Member
       SatO.Jasenrekisteri.Pages.Members
@@ -112,6 +114,7 @@ executable excel
     , lens
     , lucid
     , mmorph
+    , mtl
     , regex-applicative
     , regex-applicative-text
     , semigroups
@@ -159,6 +162,7 @@ executable jasenrekisteri-server
     , lens
     , lucid
     , mmorph
+    , mtl
     , regex-applicative
     , regex-applicative-text
     , semigroups

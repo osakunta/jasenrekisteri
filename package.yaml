@@ -33,6 +33,7 @@ dependencies:
 - lens
 - lucid
 - mmorph
+- mtl
 - regex-applicative
 - regex-applicative-text
 - semigroups
