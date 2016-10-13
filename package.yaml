@@ -38,6 +38,7 @@ dependencies:
 - regex-applicative-text
 - semigroups
 - servant-lucid
+- stm
 - strict-base-types
 - swagger2
 - text

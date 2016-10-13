@@ -11,11 +11,10 @@ import Futurice.Prelude
 import Prelude ()
 import Control.Monad.Reader (ask)
 
-import SatO.Jasenrekisteri.Endpoints
-
 import qualified Data.Set       as Set
 import qualified Futurice.Graph as G
 
+import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.Tag

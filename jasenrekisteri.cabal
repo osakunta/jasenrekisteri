@@ -53,6 +53,7 @@ library
     , regex-applicative-text
     , semigroups
     , servant-lucid
+    , stm
     , strict-base-types
     , swagger2
     , text
@@ -75,6 +76,7 @@ library
       SatO.Clay
       SatO.Foundation
       SatO.Jasenrekisteri.API
+      SatO.Jasenrekisteri.Ctx
       SatO.Jasenrekisteri.Endpoints
       SatO.Jasenrekisteri.Markup
       SatO.Jasenrekisteri.Pages.Member
@@ -119,6 +121,7 @@ executable excel
     , regex-applicative-text
     , semigroups
     , servant-lucid
+    , stm
     , strict-base-types
     , swagger2
     , text
@@ -167,6 +170,7 @@ executable jasenrekisteri-server
     , regex-applicative-text
     , semigroups
     , servant-lucid
+    , stm
     , strict-base-types
     , swagger2
     , text
