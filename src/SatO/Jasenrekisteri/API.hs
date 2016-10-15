@@ -15,6 +15,7 @@ import SatO.Foundation    (HtmlPage)
 import Servant
 import Servant.HTML.Lucid
 
+import SatO.Jasenrekisteri.Command
 import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.SearchQuery
 import SatO.Jasenrekisteri.Tag
@@ -32,11 +33,8 @@ type JasenrekisteriAPI =
     :<|> TagEndpoint
     :<|> "search" :> QueryParam "query" SearchQuery :> HTMLPageEndpoint "search"
     :<|> "logout" :> HTMLPageEndpoint "logout"
-    :<|> "commands" :> CommandsAPI
+    :<|> "command" :> ReqBody '[JSON] Command :> Post '[JSON] Text
     :<|> Raw
-
-type CommandsAPI =
-    "add-tag" :> Capture "member-id" PersonId :> Capture "tag-name" TagName :> Post '[JSON] Text
 
 jasenrekisteriAPI :: Proxy JasenrekisteriAPI
 jasenrekisteriAPI = Proxy

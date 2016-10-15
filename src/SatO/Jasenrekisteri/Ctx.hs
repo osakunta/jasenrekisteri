@@ -18,4 +18,6 @@ newCtx w = Ctx <$> newTVarIO w
 
 -- TODO: log
 ctxApplyCmd :: Command -> Ctx -> IO ()
-ctxApplyCmd cmd ctx = atomically $ modifyTVar' (ctxWorld ctx) (applyCommand cmd)
+ctxApplyCmd cmd ctx = do
+    print cmd
+    atomically $ modifyTVar' (ctxWorld ctx) (applyCommand cmd)

@@ -26,9 +26,9 @@ import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-addTagEndpoint :: Ctx -> PersonId -> TagName -> Handler Text
-addTagEndpoint ctx mid tn = liftIO $ do
-    ctxApplyCmd (CmdAddTag mid tn) ctx
+commandEndpoint :: Ctx -> Command -> Handler Text
+commandEndpoint ctx cmd = liftIO $ do
+    ctxApplyCmd cmd ctx
     pure "OK"
 
 server :: Ctx -> Server JasenrekisteriAPI
@@ -38,7 +38,7 @@ server ctx = queryEndpoint ctx membersPage
     :<|> queryEndpoint ctx tagPage
     :<|> queryEndpoint ctx searchPage
     :<|> pure (page_ "logout" (pure ()))
-    :<|> addTagEndpoint ctx
+    :<|> commandEndpoint ctx
     :<|> serveDirectory "static"
 
 app :: Ctx -> Application

@@ -73,21 +73,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Commands
 
-  function commandAddTag(memberId, tagName) {
+  function command(cmd) {
+    var url = "/command";
+
     var headers = new Headers();
     headers.append("Accept", "application/json");
+    headers.append("Content-Type", "application/json");
+
     var opts = {
       method: "POST",
       headers: headers,
+      body: JSON.stringify(cmd),
     };
-    var url = "/commands/add-tag/" + memberId + "/" + tagName;
-    fetch(url, opts)
+
+    return fetch(url, opts)
       .then(function (res) {
         console.debug("response", url, res.ok);
       });
   }
 
+  function commandAddTag(memberId, tagName) {
+    return command({
+      type: "add-tag",
+      memberId: memberId,
+      tagName: tagName,
+    });
+  }
+
   function commandRemoveTag(memberId, tagName) {
-    console.info("commandRemoveTag: not implemented");
+    return command({
+      type: "remove-tag",
+      memberId: memberId,
+      tagName: tagName,
+    });
   }
 });
