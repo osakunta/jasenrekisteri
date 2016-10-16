@@ -86,6 +86,9 @@ instance ToHttpApiData TagName where
 instance FromHttpApiData TagName where
     parseUrlPiece = pure . TagName
 
+instance Arbitrary TagName where
+    arbitrary = TagName <$> arbitrary
+
 ------------------------------------------------------------------------------
 -- TagNames
 ------------------------------------------------------------------------------

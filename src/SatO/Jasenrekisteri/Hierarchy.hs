@@ -64,7 +64,7 @@ virkailijat = m'
 
         hallitus :: [Tag]
         hallitus = flip map hallitusVirat $ \v ->
-            Tag (_TagName # (v <> tyear)) hallitusColour mempty
+            Tag (_TagName # (v <> tyear)) 0 mempty
 
 hallitusVirat :: [Text]
 hallitusVirat = 

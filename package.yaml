@@ -37,7 +37,10 @@ dependencies:
 - regex-applicative
 - regex-applicative-text
 - semigroups
+- servant        ==0.9.*
 - servant-lucid
+- servant-lucid
+- servant-server ==0.9.*
 - stm
 - strict-base-types
 - swagger2
@@ -49,14 +52,20 @@ dependencies:
 - uuid-aeson
 - vector
 - vector-instances
-- servant        ==0.9.*
-- servant-lucid
-- servant-server ==0.9.*
 - wai
 - warp
 
 library:
-  source-dirs: src
+  source-dirs: src/
+
+tests:
+  unit-tests:
+    main: Tests.hs
+    source-dirs: tests/
+    dependencies:
+      - tasty
+      - tasty-quickcheck
+      - jasenrekisteri
 
 executables:
   excel:

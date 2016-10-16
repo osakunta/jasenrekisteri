@@ -1,8 +1,12 @@
+{-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE TypeFamilies      #-}
 module SatO.Jasenrekisteri.Command where
 
-import Control.Lens
+import Control.Lens      hiding ((.=))
 import Data.Aeson
+import Futurice.Generics
 import Futurice.Prelude
 import Prelude ()
 
@@ -23,8 +27,25 @@ instance FromJSON Command where
           "remove-tag" -> CmdRemoveTag <$> obj .: "memberId" <*> obj .: "tagName"
           _            -> fail $ "Unknown command: " <> cmd ^. from packed
 
+instance ToJSON Command where
+    toJSON (CmdAddTag mid tn) = object
+        [ "type"     .= ("add-tag" :: Text)
+        , "memberId" .= mid
+        , "tagName"  .= tn
+        ]
+    toJSON (CmdRemoveTag mid tn) = object
+        [ "type"     .= ("remove-tag" :: Text)
+        , "memberId" .= mid
+        , "tagName"  .= tn
+        ]
+
+instance Arbitrary Command where
+    arbitrary = sopArbitrary
+
 applyCommand :: Command -> World -> World
 applyCommand (CmdAddTag pid tn) w =
     w & worldMembers . ix pid . personTags . contains tn .~ True
 applyCommand (CmdRemoveTag pid tn) w =
     w & worldMembers . ix pid . personTags . contains tn .~ False
+
+deriveGeneric ''Command

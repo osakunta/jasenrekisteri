@@ -26,7 +26,7 @@ source-repository head
 
 library
   hs-source-dirs:
-      src
+      src/
   ghc-options: -Wall
   build-depends:
       base >=4.9 && <4.10
@@ -49,10 +49,14 @@ library
     , lucid
     , mmorph
     , mtl
+    , QuickCheck
     , regex-applicative
     , regex-applicative-text
     , semigroups
+    , servant        ==0.9.*
     , servant-lucid
+    , servant-lucid
+    , servant-server ==0.9.*
     , stm
     , strict-base-types
     , swagger2
@@ -64,9 +68,6 @@ library
     , uuid-aeson
     , vector
     , vector-instances
-    , servant        ==0.9.*
-    , servant-lucid
-    , servant-server ==0.9.*
     , wai
     , warp
   exposed-modules:
@@ -119,10 +120,14 @@ executable excel
     , lucid
     , mmorph
     , mtl
+    , QuickCheck
     , regex-applicative
     , regex-applicative-text
     , semigroups
+    , servant        ==0.9.*
     , servant-lucid
+    , servant-lucid
+    , servant-server ==0.9.*
     , stm
     , strict-base-types
     , swagger2
@@ -134,9 +139,6 @@ executable excel
     , uuid-aeson
     , vector
     , vector-instances
-    , servant        ==0.9.*
-    , servant-lucid
-    , servant-server ==0.9.*
     , wai
     , warp
     , jasenrekisteri
@@ -168,10 +170,14 @@ executable jasenrekisteri-server
     , lucid
     , mmorph
     , mtl
+    , QuickCheck
     , regex-applicative
     , regex-applicative-text
     , semigroups
+    , servant        ==0.9.*
     , servant-lucid
+    , servant-lucid
+    , servant-server ==0.9.*
     , stm
     , strict-base-types
     , swagger2
@@ -183,10 +189,60 @@ executable jasenrekisteri-server
     , uuid-aeson
     , vector
     , vector-instances
-    , servant        ==0.9.*
-    , servant-lucid
-    , servant-server ==0.9.*
     , wai
     , warp
+    , jasenrekisteri
+  default-language: Haskell2010
+
+test-suite unit-tests
+  type: exitcode-stdio-1.0
+  main-is: Tests.hs
+  hs-source-dirs:
+      tests/
+  ghc-options: -Wall
+  build-depends:
+      base >=4.9 && <4.10
+    , aeson ==1.0.*
+    , aeson-compat
+    , aeson-extra
+    , ansi-wl-pprint
+    , array
+    , base-compat
+    , bytestring
+    , cassava
+    , clay
+    , containers
+    , exceptions
+    , file-embed
+    , futurice-prelude
+    , hashable
+    , http-api-data
+    , lens
+    , lucid
+    , mmorph
+    , mtl
+    , QuickCheck
+    , regex-applicative
+    , regex-applicative-text
+    , semigroups
+    , servant        ==0.9.*
+    , servant-lucid
+    , servant-lucid
+    , servant-server ==0.9.*
+    , stm
+    , strict-base-types
+    , swagger2
+    , text
+    , transformers
+    , trifecta
+    , unordered-containers
+    , uuid
+    , uuid-aeson
+    , vector
+    , vector-instances
+    , wai
+    , warp
+    , tasty
+    , tasty-quickcheck
     , jasenrekisteri
   default-language: Haskell2010
