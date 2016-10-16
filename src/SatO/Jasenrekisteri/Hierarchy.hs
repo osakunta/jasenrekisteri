@@ -15,7 +15,7 @@ import qualified Futurice.IdMap as IdMap
 tags :: [Tag]
 tags =
     merkit
-    <> [taloTag]
+    <> [taloTag, senioriTag]
     <> fuksiTags
     <> toList virkailijat
     <> jasenTags
@@ -101,6 +101,13 @@ jasenTags = jasenTag <$> [ 1996..2017 ]
         b = textShow (year + 1)
 
 -------------------------------------------------------------------------------
+-- Seniori
+-------------------------------------------------------------------------------
+
+senioriTag :: Tag
+senioriTag = Tag "seniori" senioriColour mempty
+
+-------------------------------------------------------------------------------
 -- Talo
 -------------------------------------------------------------------------------
 
@@ -120,6 +127,9 @@ merkit =
 -------------------------------------------------------------------------------
 -- Colours
 -------------------------------------------------------------------------------
+
+senioriColour :: TagColour
+senioriColour = 1
 
 hallitusColour :: TagColour
 hallitusColour = 7
