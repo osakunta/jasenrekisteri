@@ -16,6 +16,7 @@ import SatO.Jasenrekisteri.API
 import SatO.Jasenrekisteri.Command
 import SatO.Jasenrekisteri.Ctx
 import SatO.Jasenrekisteri.Endpoints
+import SatO.Jasenrekisteri.Hierarchy     (tags)
 import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Pages.Member
 import SatO.Jasenrekisteri.Pages.Members
@@ -23,7 +24,6 @@ import SatO.Jasenrekisteri.Pages.Search
 import SatO.Jasenrekisteri.Pages.Tag
 import SatO.Jasenrekisteri.Pages.Tags
 import SatO.Jasenrekisteri.Person
-import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
 commandEndpoint :: Ctx -> Command -> Handler Text
@@ -48,12 +48,10 @@ defaultMain :: IO ()
 defaultMain = do
     args <- getArgs
     case args of
-        [filepathData, filepathTags] -> do
+        [filepathData, _filepathTags] -> do
             contentsData <- LBS.readFile filepathData
             persons <- decode contentsData :: IO [Person]
             -- mapM_ print $ V.filter (not . (== mempty) . _personTags) persons
-            contentsTags <- LBS.readFile filepathTags
-            tags <- decode contentsTags :: IO [Tag]
             let world = mkWorld persons tags
             ctx <- newCtx world
             Warp.run 8000 $ app ctx
