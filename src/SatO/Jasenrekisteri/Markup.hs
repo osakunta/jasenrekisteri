@@ -88,7 +88,7 @@ tagNameLink_ world tagname = tagLink_ (world ^. worldTags . att tagname)
 tagLink' :: Monad m => Tag -> Text -> HtmlT m ()
 tagLink' tag t = do
     -- TODO: do colours
-    a_ [tagHref name] $ span_ [ class_ $ "label " <> lblColour ] $ toHtml t
+    a_ [tagHref name, class_ $ "jrek-tag label " <> lblColour ] $ toHtml t
     " "
   where
     name = tag ^. key
@@ -101,8 +101,13 @@ tagLink_ tag = tagLink' tag (tag ^. key . _TagName)
 tagList_ :: Monad m => [Tag] -> HtmlT m ()
 tagList_ = row_ . large_ 12 . traverse_ tagLink_
 
+-- | TODO: add "where to add type"
 tagnameList_ :: Monad m => World -> [TagName] -> HtmlT m ()
-tagnameList_ world = row_ . large_ 12 . traverse_ (tagNameLink_ world)
+tagnameList_ world ts = div_ [ class_ "jrek-tag-block" ] $ do
+    row_ $ large_ 12 $ traverse_ (tagNameLink_ world) ts
+    hr_ []
+    row_ $ large_ 12 $ button_ [ class_ "button" ] "Muokkaa"
+
 
 -------------------------------------------------------------------------------
 -- Members
