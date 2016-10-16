@@ -15,11 +15,11 @@ module SatO.Jasenrekisteri.World (
     personHasTag,
     ) where
 
+import Prelude ()
+import Futurice.Prelude
 import Control.Lens
 import Data.Set.Lens    (setOf)
 import Futurice.IdMap   (IdMap)
-import Futurice.Prelude
-import Prelude ()
 
 import qualified Data.Set       as Set
 import qualified Futurice.Graph as G

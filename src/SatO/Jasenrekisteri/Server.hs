@@ -1,15 +1,18 @@
+{-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE OverloadedStrings #-}
 module SatO.Jasenrekisteri.Server (defaultMain) where
 
-import Futurice.Prelude
 import Prelude ()
-
+import Futurice.Prelude
+import Control.Concurrent.STM     (atomically, readTVar, writeTVar)
+import Control.Monad.CryptoRandom (crandom)
 import Data.Aeson.Compat
-import Data.Reflection    (Given (..), give)
+import Data.Pool                  (withResource)
+import Data.Reflection            (Given (..), give)
 import Network.Wai
 import Servant
-import System.Environment (getArgs)
+import System.Environment         (getArgs)
 
 import qualified Data.ByteString.Lazy     as LBS
 import qualified Network.Wai.Handler.Warp as Warp
@@ -20,6 +23,7 @@ import SatO.Jasenrekisteri.Ctx
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Hierarchy     (tags)
 import SatO.Jasenrekisteri.Markup
+import SatO.Jasenrekisteri.Pages.Logout
 import SatO.Jasenrekisteri.Pages.Member
 import SatO.Jasenrekisteri.Pages.Members
 import SatO.Jasenrekisteri.Pages.Search
@@ -34,11 +38,30 @@ commandEndpoint ctx cmd = liftIO $ do
     ctxApplyCmd cmd ctx
     pure "OK"
 
-loginEndpoint :: Given (SessionStore ()) => Ctx -> LoginData -> Handler Bool
-loginEndpoint _ctx (LoginData u p) | u == "user" && p == "pass" =
-    let _s = given :: SessionStore ()
-    in pure True
-loginEndpoint _ _ = pure False
+loginEndpoint
+    :: Given (SessionStore ())
+    => Ctx -> LoginData -> Handler (Maybe UUID)
+loginEndpoint ctx (LoginData u p) | u == "user" && p == "pass" = do
+    msid <- liftIO $ withResource (ctxPRNGs ctx) $ \tg -> atomically $ do
+        g <- readTVar tg
+        case crandom g of
+            Left _err       -> pure Nothing
+            Right (sid, g') -> writeTVar tg g' >> pure (Just sid)
+    case msid of
+        Nothing  -> pure Nothing
+        Just sid -> do
+            _ <- liftIO $ addSession ss sid ()
+            pure $ Just sid
+  where
+    ss = given :: SessionStore ()
+loginEndpoint _ _ = pure Nothing
+
+logoutEndpoint
+    :: Given (SessionStore ())
+    => Ctx -> (UUID, ()) -> Handler (HtmlPage "logout")
+logoutEndpoint _ctx (sid, _) = do
+    liftIO $ removeSession (given :: SessionStore ()) sid
+    pure logoutPage
 
 server :: Given (SessionStore ()) => Ctx -> Server JasenrekisteriAPI
 server ctx = queryEndpoint ctx membersPage
@@ -47,7 +70,7 @@ server ctx = queryEndpoint ctx membersPage
     :<|> queryEndpoint ctx tagPage
     :<|> queryEndpoint ctx searchPage
     :<|> loginEndpoint ctx
-    :<|> pure (page_ "logout" (pure ()))
+    :<|> logoutEndpoint ctx
     :<|> commandEndpoint ctx
     :<|> serveDirectory "static"
 

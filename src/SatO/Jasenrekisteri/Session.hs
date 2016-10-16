@@ -8,6 +8,7 @@
 module SatO.Jasenrekisteri.Session (
     SessionStore,
     addSession,
+    removeSession,
     makeSessionStore,
     -- * Login
     LoginData (..),
@@ -15,11 +16,10 @@ module SatO.Jasenrekisteri.Session (
     Session,
     ) where
 
--- import Control.Lens
-import Futurice.Prelude
 import Prelude ()
-
--- import Control.Concurrent.STM
+import Futurice.Prelude
+import Control.Concurrent.STM
+       (TVar, atomically, modifyTVar', newTVarIO, readTVarIO)
 import Data.Aeson.Compat
 import Data.ByteString                            (ByteString)
 import Data.Reflection                            (Given (..))
@@ -33,20 +33,28 @@ import Servant.Server.Internal.ServantErr         (err403)
 import Web.Cookie                                 (parseCookies)
 
 import qualified Data.ByteString.Lazy as LBS
+import qualified Data.UUID            as UUID
 
-data SessionStore a = SessionStore
+data SessionStore a = SessionStore (TVar (Map UUID a))
 
 cookieName :: ByteString
 cookieName = "JREK_SESSION_ID"
 
 makeSessionStore :: IO (SessionStore a)
-makeSessionStore = return SessionStore
+makeSessionStore = SessionStore <$> newTVarIO mempty
 
-validateSession :: SessionStore a -> ByteString -> IO (Maybe a)
-validateSession _ss _bs = return Nothing -- (Just undefined)
+validateSession :: SessionStore a -> UUID -> IO (Maybe a)
+validateSession (SessionStore ss) sid = do
+    m <- readTVarIO ss
+    return $ m ^. at sid
 
-addSession :: SessionStore a -> a -> IO ByteString
-addSession _ss _x = undefined
+addSession :: SessionStore a -> UUID -> a -> IO ()
+addSession (SessionStore ss) sid x = atomically $ modifyTVar' ss $ \m ->
+    m & at sid ?~ x
+
+removeSession :: SessionStore a -> UUID -> IO ()
+removeSession  (SessionStore ss) sid = atomically $ modifyTVar' ss $ \m ->
+    m & at sid .~ Nothing
 
 -------------------------------------------------------------------------------
 -- Servant bits
@@ -58,7 +66,7 @@ data Session a
 instance (Given (SessionStore a), HasServer api ctx)
     => HasServer (Session a :> api) ctx
   where
-    type ServerT (Session a :> api) m = a -> ServerT api m
+    type ServerT (Session a :> api) m = (UUID, a) -> ServerT api m
 
     route Proxy context subserver =
         route (Proxy :: Proxy api) context (addAuthCheck subserver sessionCheck)
@@ -67,12 +75,13 @@ instance (Given (SessionStore a), HasServer api ctx)
         sessionCheck = withRequest $ \req ->
             let mSessionId = do
                   h <- lookup "Cookie" (requestHeaders req)
-                  lookup cookieName (parseCookies h)
+                  bs <- lookup cookieName (parseCookies h)
+                  UUID.fromASCIIBytes bs
             in case mSessionId of
                 Nothing  -> ffail
                 Just sid -> do
                     x <- liftIO $ validateSession given sid
-                    maybe ffail pure x
+                    maybe ffail (pure . (,) sid) x
 
 instance HasLink api => HasLink (Session a :> api) where
     type MkLink (Session a :> api) = MkLink api
@@ -106,5 +115,5 @@ page403 = renderBS $ toHtml $ page_ "Jäsenrekisteri" $ do
         row_ $ large_ 12 $ label_ $ do
             "Tunnus"
             input_ [ id_ "login-pass" , type_ "password" ]
-        row_ $ large_ 12 $ button_ [ id_ "login-button", class_ "button "] $ 
+        row_ $ large_ 12 $ button_ [ id_ "login-button", class_ "button "] $
             "Kirjaudu"

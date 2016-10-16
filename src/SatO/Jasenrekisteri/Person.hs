@@ -28,11 +28,11 @@ module SatO.Jasenrekisteri.Person (
     personPhone,
     ) where
 
+import Prelude ()
+import Futurice.Prelude
 import Control.Lens
 import Futurice.Generics
 import Futurice.IdMap                (HasKey (..))
-import Futurice.Prelude
-import Prelude ()
 import Text.Regex.Applicative.Common (decimal)
 import Text.Regex.Applicative.Text   (RE', match, sym)
 

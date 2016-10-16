@@ -1,13 +1,13 @@
-{-# LANGUAGE OverloadedStrings,TypeFamilies     #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeFamilies      #-}
 -- | The tag colours and hierarchy
-module SatO.Jasenrekisteri.Hierarchy {- (tags) -} where
+module SatO.Jasenrekisteri.Hierarchy (tags) where
 
-import Control.Lens
-import Futurice.Prelude
 import Prelude ()
+import Futurice.Prelude
+import Control.Lens
+import Data.Set.Lens           (setOf)
 import SatO.Jasenrekisteri.Tag
-
-import Data.Set.Lens
 
 import           Futurice.IdMap (IdMap)
 import qualified Futurice.IdMap as IdMap
@@ -19,7 +19,7 @@ tags =
     <> fuksiTags
     <> toList virkailijat
     <> jasenTags
-    
+
 -------------------------------------------------------------------------------
 -- Virkailijat
 -------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ virkailijat = m'
         , virka <- hallitusVirat
         ]
 
-    insertChildren (year, virka) vm = 
+    insertChildren (year, virka) vm =
         vm & ix parent . tagChildren . contains child .~ True
       where
         parent = TagName virka
@@ -67,7 +67,7 @@ virkailijat = m'
             Tag (_TagName # (v <> tyear)) 0 mempty
 
 hallitusVirat :: [Text]
-hallitusVirat = 
+hallitusVirat =
     [ "hpj"
     , "pääsihteeri"
     , "isäntä"

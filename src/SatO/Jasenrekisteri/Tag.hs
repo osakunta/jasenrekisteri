@@ -28,15 +28,14 @@ module SatO.Jasenrekisteri.Tag (
     ifoldedTagHierarchy,
     ) where
 
+import Prelude ()
+import Futurice.Prelude
 import Control.Lens
 import Control.Lens.Att
 import Futurice.Generics
 import Futurice.IdMap    (HasKey (..))
-import Futurice.Prelude
-import Prelude ()
-
-import Lucid           (ToHtml (..))
-import Web.HttpApiData (FromHttpApiData (..), ToHttpApiData (..))
+import Lucid             (ToHtml (..))
+import Web.HttpApiData   (FromHttpApiData (..), ToHttpApiData (..))
 
 import           Data.Set.Lens  (setOf)
 import           Futurice.Graph (Graph)

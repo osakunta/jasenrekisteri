@@ -4,11 +4,11 @@
 {-# LANGUAGE TypeFamilies      #-}
 module SatO.Jasenrekisteri.Command where
 
+import Prelude ()
+import Futurice.Prelude
 import Control.Lens      hiding ((.=))
 import Data.Aeson
 import Futurice.Generics
-import Futurice.Prelude
-import Prelude ()
 
 import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.Tag

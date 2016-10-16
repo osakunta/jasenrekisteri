@@ -5,6 +5,11 @@ steps:
       long_list_align: new_line
       empty_list_align: right_after
       list_padding: module_name
+      pinned_modules:
+        - Prelude
+        - Futurice.Prelude
+        - Control.Lens
+        - Control.Lens.Att
   - language_pragmas:
       style: vertical
       remove_redundant: true

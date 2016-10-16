@@ -26,6 +26,8 @@ dependencies:
 - clay
 - containers
 - cookie
+- crypto-api
+- DRBG
 - exceptions
 - file-embed
 - futurice-prelude
@@ -38,7 +40,9 @@ dependencies:
 - reflection
 - regex-applicative
 - regex-applicative-text
+- resource-pool
 - semigroups
+- monadcryptorandom
 - servant        ==0.9.*
 - servant-lucid
 - servant-lucid

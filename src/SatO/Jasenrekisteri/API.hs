@@ -7,9 +7,8 @@
 {-# LANGUAGE TypeOperators         #-}
 module SatO.Jasenrekisteri.API where
 
-import Futurice.Prelude
 import Prelude ()
-
+import Futurice.Prelude
 import Lucid
 import SatO.Foundation    (HtmlPage)
 import Servant
@@ -33,8 +32,8 @@ type JasenrekisteriAPI =
     :<|> Session () :> "tags" :> HTMLPageEndpoint "tags"
     :<|> TagEndpoint
     :<|> Session () :> "search" :> QueryParam "query" SearchQuery :> HTMLPageEndpoint "search"
-    :<|> "login" :> ReqBody '[JSON] LoginData :> Post '[JSON] Bool
-    :<|> "logout" :> HTMLPageEndpoint "logout"
+    :<|> "login" :> ReqBody '[JSON] LoginData :> Post '[JSON] (Maybe UUID)
+    :<|> Session () :> "logout" :> HTMLPageEndpoint "logout"
     :<|> "command" :> ReqBody '[JSON] Command :> Post '[JSON] Text
     :<|> Raw
 

@@ -41,6 +41,8 @@ library
     , clay
     , containers
     , cookie
+    , crypto-api
+    , DRBG
     , exceptions
     , file-embed
     , futurice-prelude
@@ -53,7 +55,9 @@ library
     , reflection
     , regex-applicative
     , regex-applicative-text
+    , resource-pool
     , semigroups
+    , monadcryptorandom
     , servant        ==0.9.*
     , servant-lucid
     , servant-lucid
@@ -83,6 +87,7 @@ library
       SatO.Jasenrekisteri.Endpoints
       SatO.Jasenrekisteri.Hierarchy
       SatO.Jasenrekisteri.Markup
+      SatO.Jasenrekisteri.Pages.Logout
       SatO.Jasenrekisteri.Pages.Member
       SatO.Jasenrekisteri.Pages.Members
       SatO.Jasenrekisteri.Pages.Search
@@ -114,6 +119,8 @@ executable excel
     , clay
     , containers
     , cookie
+    , crypto-api
+    , DRBG
     , exceptions
     , file-embed
     , futurice-prelude
@@ -126,7 +133,9 @@ executable excel
     , reflection
     , regex-applicative
     , regex-applicative-text
+    , resource-pool
     , semigroups
+    , monadcryptorandom
     , servant        ==0.9.*
     , servant-lucid
     , servant-lucid
@@ -165,6 +174,8 @@ executable jasenrekisteri-server
     , clay
     , containers
     , cookie
+    , crypto-api
+    , DRBG
     , exceptions
     , file-embed
     , futurice-prelude
@@ -177,7 +188,9 @@ executable jasenrekisteri-server
     , reflection
     , regex-applicative
     , regex-applicative-text
+    , resource-pool
     , semigroups
+    , monadcryptorandom
     , servant        ==0.9.*
     , servant-lucid
     , servant-lucid
@@ -217,6 +230,8 @@ test-suite unit-tests
     , clay
     , containers
     , cookie
+    , crypto-api
+    , DRBG
     , exceptions
     , file-embed
     , futurice-prelude
@@ -229,7 +244,9 @@ test-suite unit-tests
     , reflection
     , regex-applicative
     , regex-applicative-text
+    , resource-pool
     , semigroups
+    , monadcryptorandom
     , servant        ==0.9.*
     , servant-lucid
     , servant-lucid

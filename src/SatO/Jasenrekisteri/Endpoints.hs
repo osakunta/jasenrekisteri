@@ -4,15 +4,19 @@
 {-# LANGUAGE TypeOperators          #-}
 {-# LANGUAGE TypeSynonymInstances   #-}
 {-# LANGUAGE UndecidableInstances   #-}
-module SatO.Jasenrekisteri.Endpoints where
+module SatO.Jasenrekisteri.Endpoints (
+    QueryM,
+    queryEndpoint,
+    ask,
+    ) where
 
-import Control.Monad.Reader (Reader, runReader)
-import Futurice.Prelude
 import Prelude ()
+import Futurice.Prelude
+import Control.Monad.Reader (Reader, ask, runReader)
 import Servant              (Handler)
 
-import SatO.Jasenrekisteri.Ctx    (Ctx, ctxReadWorld)
-import SatO.Jasenrekisteri.World  (World)
+import SatO.Jasenrekisteri.Ctx   (Ctx, ctxReadWorld)
+import SatO.Jasenrekisteri.World (World)
 
 type QueryM = Reader World
 

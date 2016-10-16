@@ -1,9 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module SatO.Jasenrekisteri.SearchQuery where
 
-import Futurice.Prelude
 import Prelude ()
-
+import Futurice.Prelude
 import Data.ByteString     (ByteString)
 import Text.Trifecta
 import Text.Trifecta.Delta (Delta (Directed))

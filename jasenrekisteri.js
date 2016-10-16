@@ -88,19 +88,20 @@ document.addEventListener("DOMContentLoaded", function () {
     var p$ = menrva.source(loginPass.value);
     var ok$ = menrva.source(true);
 
-    loginUser.addEventListener("keyup", function () {
-      menrva.transaction()
-        .set(u$, loginUser.value)
-        .set(ok$, true)
-        .commit();
-    });
+    function bindChange(source, el) {
+      function cb() {
+        menrva.transaction()
+          .set(source, el.value)
+          .set(ok$, true)
+          .commit();
+      }
 
-    loginPass.addEventListener("keyup", function () {
-      menrva.transaction()
-        .set(p$, loginPass.value)
-        .set(ok$, true)
-        .commit();
-    });
+      el.addEventListener("keyup", cb);
+      el.addEventListener("change", cb);
+    }
+
+    bindChange(u$, loginUser);
+    bindChange(p$, loginPass);
 
     menrva.combine(u$, p$, function (u, p) {
       return u !== "" && p !== "";
@@ -120,6 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
       login(u, p).then(function (res) {
         console.info("/login returned", res);
         if (res) {
+          document.cookie = "JREK_SESSION_ID=" + res;
           location.reload();
         } else {
           menrva.transaction().set(ok$, false).commit();

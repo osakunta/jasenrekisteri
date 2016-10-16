@@ -17,16 +17,16 @@ module SatO.Jasenrekisteri.Markup (
     module SatO.Foundation,
     ) where
 
+import Prelude ()
+import Futurice.Prelude
 import Control.Lens
 import Control.Lens.Att
 import Data.Ord         (comparing)
 import Futurice.IdMap   (key)
-import Futurice.Prelude
-import Prelude ()
 import SatO.Foundation
 
-import qualified Data.Aeson as A
-import qualified Data.Text as T
+import qualified Data.Aeson         as A
+import qualified Data.Text          as T
 import qualified Data.Text.Encoding as TE
 
 import SatO.Jasenrekisteri.API
