@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 module SatO.Jasenrekisteri.Markup (
+    template,
     template',
     page404,
     -- * Headers

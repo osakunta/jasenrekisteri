@@ -68,8 +68,95 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function loginForm() {
+    var loginForm = document.querySelector("#login-form");
+    if (!loginForm) return;
+
+    var loginUser = loginForm.querySelector("#login-user");
+    var loginPass = loginForm.querySelector("#login-pass");
+    var loginButton = loginForm.querySelector("#login-button");
+
+    if (!loginUser || !loginPass || !loginButton) {
+      console.error("Broken login form");
+      return;
+    }
+
+    console.info("Found login form");
+
+    // Enable button when non empty texts
+    var u$ = menrva.source(loginUser.value);
+    var p$ = menrva.source(loginPass.value);
+    var ok$ = menrva.source(true);
+
+    loginUser.addEventListener("keyup", function () {
+      menrva.transaction()
+        .set(u$, loginUser.value)
+        .set(ok$, true)
+        .commit();
+    });
+
+    loginPass.addEventListener("keyup", function () {
+      menrva.transaction()
+        .set(p$, loginPass.value)
+        .set(ok$, true)
+        .commit();
+    });
+
+    menrva.combine(u$, p$, function (u, p) {
+      return u !== "" && p !== "";
+    }).onValue(function (b) {
+      loginButton.disabled = !b;
+    });
+
+    ok$.onValue(function (ok) {
+      loginForm.className = ok ? "callout primary" : "callout warning";
+    });
+
+    // click
+    loginButton.addEventListener("click", function () {
+      var u = loginUser.value;
+      var p = loginPass.value;
+
+      login(u, p).then(function (res) {
+        console.info("/login returned", res);
+        if (res) {
+          location.reload();
+        } else {
+          menrva.transaction().set(ok$, false).commit();
+        }
+      });
+    });
+  }
+
   memberFilter();
   tagToggler();
+  loginForm();
+
+  // jsonFetch
+
+  // login
+  function login(u, p) {
+    var url = "/login";
+
+    var headers = new Headers();
+    headers.append("Accept", "application/json");
+    headers.append("Content-Type", "application/json");
+
+    var opts = {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({
+        user: u,
+        pass: p,
+      }),
+    };
+
+    return fetch(url, opts)
+      .then(function (res) {
+        console.debug("response", url, res.ok);
+        return res.json();
+      });
+  }
 
   // Commands
 
@@ -89,6 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return fetch(url, opts)
       .then(function (res) {
         console.debug("response", url, res.ok);
+        return res.json();
       });
   }
 

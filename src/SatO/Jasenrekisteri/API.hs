@@ -18,6 +18,7 @@ import Servant.HTML.Lucid
 import SatO.Jasenrekisteri.Command
 import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.SearchQuery
+import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 
 type HTMLPageEndpoint sym = Get '[HTML] (HtmlPage sym)
@@ -27,11 +28,12 @@ type HTMLPageEndpoint sym = Get '[HTML] (HtmlPage sym)
 -------------------------------------------------------------------------------
 
 type JasenrekisteriAPI =
-    HTMLPageEndpoint "members"
+    Session () :> HTMLPageEndpoint "members"
     :<|> MemberEndpoint
-    :<|> "tags" :> HTMLPageEndpoint "tags"
+    :<|> Session () :> "tags" :> HTMLPageEndpoint "tags"
     :<|> TagEndpoint
-    :<|> "search" :> QueryParam "query" SearchQuery :> HTMLPageEndpoint "search"
+    :<|> Session () :> "search" :> QueryParam "query" SearchQuery :> HTMLPageEndpoint "search"
+    :<|> "login" :> ReqBody '[JSON] LoginData :> Post '[JSON] Bool
     :<|> "logout" :> HTMLPageEndpoint "logout"
     :<|> "command" :> ReqBody '[JSON] Command :> Post '[JSON] Text
     :<|> Raw
@@ -43,7 +45,7 @@ jasenrekisteriAPI = Proxy
 -- Endpoints
 -------------------------------------------------------------------------------
 
-type MemberEndpoint = "member" :> Capture "id" PersonId :> HTMLPageEndpoint "member"
+type MemberEndpoint = Session () :> "member" :> Capture "id" PersonId :> HTMLPageEndpoint "member"
 
 memberEndpoint :: Proxy MemberEndpoint
 memberEndpoint = Proxy
@@ -52,7 +54,7 @@ memberHref :: PersonId -> Attribute
 memberHref personId =
     href_ $ uriToText $ safeLink jasenrekisteriAPI memberEndpoint personId
 
-type TagEndpoint = "tag" :> Capture "tag" TagName :> HTMLPageEndpoint "tag"
+type TagEndpoint = Session () :> "tag" :> Capture "tag" TagName :> HTMLPageEndpoint "tag"
 
 tagEndpoint :: Proxy TagEndpoint
 tagEndpoint = Proxy

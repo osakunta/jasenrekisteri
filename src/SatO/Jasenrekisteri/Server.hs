@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE OverloadedStrings #-}
 module SatO.Jasenrekisteri.Server (defaultMain) where
 
@@ -5,6 +6,7 @@ import Futurice.Prelude
 import Prelude ()
 
 import Data.Aeson.Compat
+import Data.Reflection    (Given (..), give)
 import Network.Wai
 import Servant
 import System.Environment (getArgs)
@@ -24,6 +26,7 @@ import SatO.Jasenrekisteri.Pages.Search
 import SatO.Jasenrekisteri.Pages.Tag
 import SatO.Jasenrekisteri.Pages.Tags
 import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.World
 
 commandEndpoint :: Ctx -> Command -> Handler Text
@@ -31,17 +34,24 @@ commandEndpoint ctx cmd = liftIO $ do
     ctxApplyCmd cmd ctx
     pure "OK"
 
-server :: Ctx -> Server JasenrekisteriAPI
+loginEndpoint :: Given (SessionStore ()) => Ctx -> LoginData -> Handler Bool
+loginEndpoint _ctx (LoginData u p) | u == "user" && p == "pass" =
+    let _s = given :: SessionStore ()
+    in pure True
+loginEndpoint _ _ = pure False
+
+server :: Given (SessionStore ()) => Ctx -> Server JasenrekisteriAPI
 server ctx = queryEndpoint ctx membersPage
     :<|> queryEndpoint ctx memberPage
     :<|> queryEndpoint ctx tagsPage
     :<|> queryEndpoint ctx tagPage
     :<|> queryEndpoint ctx searchPage
+    :<|> loginEndpoint ctx
     :<|> pure (page_ "logout" (pure ()))
     :<|> commandEndpoint ctx
     :<|> serveDirectory "static"
 
-app :: Ctx -> Application
+app :: Given (SessionStore ()) => Ctx -> Application
 app = serve jasenrekisteriAPI . server
 
 defaultMain :: IO ()
@@ -54,5 +64,6 @@ defaultMain = do
             -- mapM_ print $ V.filter (not . (== mempty) . _personTags) persons
             let world = mkWorld persons tags
             ctx <- newCtx world
-            Warp.run 8000 $ app ctx
+            ss <- makeSessionStore :: IO (SessionStore ())
+            Warp.run 8000 $ give ss (app ctx)
         _ -> putStrLn "Usage: ./jasenrekisteri-server data.json tags.json"

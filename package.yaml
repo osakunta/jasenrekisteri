@@ -25,6 +25,7 @@ dependencies:
 - cassava
 - clay
 - containers
+- cookie
 - exceptions
 - file-embed
 - futurice-prelude
@@ -34,6 +35,7 @@ dependencies:
 - lucid
 - mmorph
 - mtl
+- reflection
 - regex-applicative
 - regex-applicative-text
 - semigroups
