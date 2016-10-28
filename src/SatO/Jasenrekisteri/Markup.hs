@@ -31,6 +31,7 @@ import qualified Data.Text.Encoding as TE
 
 import SatO.Jasenrekisteri.API
 import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
@@ -46,12 +47,12 @@ template title nav inner = page_ title $ do
                 " Muutokset eivät tallennu pysyvästi"
         section_ inner
 
-template' :: Text -> Html () -> HtmlPage sym
-template' title = template title navigation
+template' :: LoginUser -> Text -> Html () -> HtmlPage sym
+template' lu title = template title $ navigation lu
 
 -- http://foundation.zurb.com/sites/docs/top-bar.html
-navigation :: Monad m => HtmlT m ()
-navigation = do
+navigation :: Monad m => LoginUser -> HtmlT m ()
+navigation lu = do
     div_ [ class_ "top-bar" ] $ do
         div_ [ class_ "top-bar-left" ] $ ul_ [ class_ "dropdown menu" ] $ do
             li_ [ class_ "menu-text"] $ do
@@ -65,11 +66,10 @@ navigation = do
             li_ $ a_ [tagHref "talo"] "Talo"
             li_ $ a_ [href_ "/search" ] "Haku"
         div_ [ class_ "top-bar-right" ] $ ul_ [ class_ "dropdown menu" ] $ do
-            li_ [ class_ "menu-text" ] $ "Hello Urho!"
-            li_ $ a_ [href_ "/logout" ] "Kirjaudu ulos"
+            li_ [ class_ "menu-text" ] $ toHtml $ "Terve " <> getLoginUser lu
 
-page404 :: HtmlPage sym
-page404 = template' "ei löydy" $ pure ()
+page404 :: LoginUser -> HtmlPage sym
+page404 lu = template' lu "ei löydy" $ pure ()
 
 -------------------------------------------------------------------------------
 -- Subheader

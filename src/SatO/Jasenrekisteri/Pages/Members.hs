@@ -11,9 +11,10 @@ import Control.Monad.Reader (ask)
 
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
+import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.World
 
-membersPage :: QueryM (HtmlPage "members")
-membersPage = ask <&> \world -> template' "Jäsenet" $ do
+membersPage :: LoginUser -> QueryM (HtmlPage "members")
+membersPage lu = ask <&> \world -> template' lu "Jäsenet" $ do
     memberList_ [] (world ^.. worldMembers . folded)
 -- TODO: use top tags?

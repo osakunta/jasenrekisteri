@@ -3,13 +3,13 @@
 {-# LANGUAGE RecordWildCards   #-}
 module SatO.Jasenrekisteri.Pages.Tag (tagPage) where
 
+import Prelude ()
+import Futurice.Prelude
 import Control.Lens
 import Control.Lens.Att
-import Data.Set.Lens    (setOf)
-import Futurice.IdMap   (key)
-import Futurice.Prelude
-import Prelude ()
 import Control.Monad.Reader (ask)
+import Data.Set.Lens        (setOf)
+import Futurice.IdMap       (key)
 
 import qualified Data.Set       as Set
 import qualified Futurice.Graph as G
@@ -17,18 +17,19 @@ import qualified Futurice.Graph as G
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-tagPage :: TagName -> QueryM (HtmlPage "tag")
-tagPage tn = do
+tagPage :: LoginUser -> TagName -> QueryM (HtmlPage "tag")
+tagPage lu tn = do
     world <- ask
     let tag = world ^. worldTags . att tn
-    pure $ tagPage' world tag
+    pure $ tagPage' lu world tag
 
 -- TODO: use closure fields
-tagPage' :: World -> Tag -> HtmlPage "tag"
-tagPage' world tag = template' ("Tagi: " <> tn ^. _TagName) $ do
+tagPage' :: LoginUser -> World -> Tag -> HtmlPage "tag"
+tagPage' lu world tag = template' lu ("Tagi: " <> tn ^. _TagName) $ do
     subheader_ "Alatagit"
     tagList_ tags
     subheader_ "Jäsenet"

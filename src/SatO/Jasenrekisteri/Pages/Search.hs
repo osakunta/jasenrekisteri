@@ -16,16 +16,17 @@ import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.SearchQuery
+import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-searchPage :: Maybe SearchQuery -> QueryM (HtmlPage "search")
-searchPage mquery = do
+searchPage :: LoginUser -> Maybe SearchQuery -> QueryM (HtmlPage "search")
+searchPage lu mquery = do
     world <- ask
-    pure $ searchPage' world mquery
+    pure $ searchPage' lu world mquery
 
-searchPage' :: World -> Maybe SearchQuery -> HtmlPage "search"
-searchPage' world mquery = template' title $ do
+searchPage' :: LoginUser -> World -> Maybe SearchQuery -> HtmlPage "search"
+searchPage' lu world mquery = template' lu title $ do
     row_ $ large_ 12 $ div_ [ class_ "callout secondary" ] $ do
         for_ exampleQueries $ \q -> do
             button_ [ class_ "button" ] $ toHtml $ prettySearchQuery q

@@ -12,11 +12,12 @@ import Futurice.IdMap (key)
 
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
+import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-tagsPage :: QueryM (HtmlPage "tags")
-tagsPage = ask <&> \world -> template' "Tagit" $ do
+tagsPage :: LoginUser -> QueryM (HtmlPage "tags")
+tagsPage lu = ask <&> \world -> template' lu "Tagit" $ do
     let withCount :: Tag -> (Tag, Sum Int)
         withCount tag = (tag, world ^. worldTagPersonCount . ix (tag ^. key))
 
