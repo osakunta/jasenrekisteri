@@ -8,11 +8,15 @@ import Prelude ()
 import Futurice.Prelude
 import Control.Lens      hiding ((.=))
 import Data.Aeson
+import Data.Monoid       (mconcat)
 import Futurice.Generics
 
 import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
+
+import qualified Database.PostgreSQL.Simple.FromField as P
+import qualified Database.PostgreSQL.Simple.ToField   as P
 
 data Command
     = CmdAddTag PersonId TagName
@@ -39,6 +43,17 @@ instance ToJSON Command where
         , "tagName"  .= tn
         ]
 
+    toEncoding (CmdAddTag mid tn) = pairs $ mconcat
+        [ "type"     .= ("add-tag" :: Text)
+        , "memberId" .= mid
+        , "tagName"  .= tn
+        ]
+    toEncoding (CmdRemoveTag mid tn) = pairs $ mconcat
+        [ "type"     .= ("remove-tag" :: Text)
+        , "memberId" .= mid
+        , "tagName"  .= tn
+        ]
+
 instance Arbitrary Command where
     arbitrary = sopArbitrary
 
@@ -49,3 +64,13 @@ applyCommand (CmdRemoveTag pid tn) w =
     w & worldMembers . ix pid . personTags . contains tn .~ False
 
 deriveGeneric ''Command
+
+instance P.ToField Command where
+    toField = P.toField . encode
+
+instance P.FromField Command where
+    fromField f mdata = do
+        bs <- P.fromField f mdata
+        case eitherDecode bs of
+            Right x  -> return x
+            Left err -> P.returnError P.ConversionFailed f err

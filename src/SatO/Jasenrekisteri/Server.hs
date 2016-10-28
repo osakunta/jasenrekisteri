@@ -6,11 +6,13 @@ module SatO.Jasenrekisteri.Server (defaultMain) where
 
 import Prelude ()
 import Futurice.Prelude
+import Control.Concurrent.STM (atomically, writeTVar)
 import Data.Aeson.Compat
-import Data.Pool                  (withResource)
+import Data.List              (foldl')
+import Data.Pool              (withResource)
 import Network.Wai
 import Servant
-import System.Environment         (getArgs)
+import System.Environment     (getArgs)
 
 import qualified Data.ByteString.Lazy     as LBS
 import qualified Network.Wai.Handler.Warp as Warp
@@ -35,8 +37,8 @@ import qualified Data.Text.Encoding.Error   as TE
 import qualified Database.PostgreSQL.Simple as P
 
 commandEndpoint :: Ctx -> LoginUser -> Command -> Handler Text
-commandEndpoint ctx _ cmd = liftIO $ do
-    ctxApplyCmd cmd ctx
+commandEndpoint ctx lu cmd = liftIO $ do
+    ctxApplyCmd lu cmd ctx
     pure "OK"
 
 authCheck :: Ctx -> BasicAuthCheck LoginUser
@@ -46,7 +48,7 @@ authCheck ctx = BasicAuthCheck check
         withResource (ctxPostgres ctx) $ \conn -> do
             let username = TE.decodeUtf8With TE.lenientDecode username'
                 password = TE.decodeUtf8With TE.lenientDecode password'
-            r <- P.query conn "SELECT 1 FROM credentials where username = ? and password = ?;" (username, password)  :: IO [P.Only Int]
+            r <- P.query conn "SELECT 1 FROM jasen2.credentials where username = ? and password = ?;" (username, password)  :: IO [P.Only Int]
             pure $ case r of
                 [] -> Unauthorized
                 _  -> Authorized $ LoginUser username
@@ -79,5 +81,10 @@ defaultMain = do
             let world = mkWorld persons tags
             cfg <- readConfig
             ctx <- newCtx (cfgConnectInfo cfg) world
-            Warp.run 8000 $ app ctx
+            -- Query stored commands, and apply to the initial world
+            cmds <- withResource (ctxPostgres ctx) $ \conn ->
+                P.fromOnly <$$> P.query_ conn "SELECT edata FROM jasen2.events ORDER BY eid;"
+            let world' = foldl' (flip applyCommand) world cmds
+            atomically $ writeTVar (ctxWorld ctx) world'
+            Warp.run (cfgPort cfg) $ app ctx
         _ -> putStrLn "Usage: ./jasenrekisteri-server data.json"

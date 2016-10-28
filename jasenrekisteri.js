@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // jsonFetch
 
-  // login
+  // login, TODO: remove
   function login(u, p) {
     var url = "/login";
 
@@ -172,6 +172,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var opts = {
       method: "POST",
       headers: headers,
+      credentials: "same-origin",
       body: JSON.stringify(cmd),
     };
 
