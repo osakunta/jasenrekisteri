@@ -36,13 +36,15 @@ dependencies:
 - lens
 - lucid
 - mmorph
+- monadcryptorandom
 - mtl
+- postgresql-simple
+- postgresql-simple-url
 - reflection
 - regex-applicative
 - regex-applicative-text
 - resource-pool
 - semigroups
-- monadcryptorandom
 - servant        ==0.9.*
 - servant-lucid
 - servant-lucid

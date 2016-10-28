@@ -131,7 +131,7 @@ worldTags = lens _worldTags $ \world tags ->
 -- @
 -- worldPersonTags :: Getter World (Map Personid [Tag])
 -- @
-worldPersonTags :: (Profunctor p, Contravariant f) => Optic' p f World (Map PersonId TagNames)
+worldPersonTags :: (Profunctor p, Functor f, Contravariant f) => Optic' p f World (Map PersonId TagNames)
 worldPersonTags = to _worldPersonTags
 
 -- |
@@ -139,7 +139,7 @@ worldPersonTags = to _worldPersonTags
 -- @
 -- worldTagPersonCount :: Getter World (Map TagName (Sum Int))
 -- @
-worldTagPersons :: (Profunctor p, Contravariant f) => Optic' p f World (Map TagName :$ Set PersonId)
+worldTagPersons :: (Profunctor p, Functor f, Contravariant f) => Optic' p f World (Map TagName :$ Set PersonId)
 worldTagPersons = to _worldTagPersons
 
 -- |
@@ -147,7 +147,7 @@ worldTagPersons = to _worldTagPersons
 -- @
 -- worldTagPersonCount :: Getter World (Map TagName (Sum Int))
 -- @
-worldTagPersonCount :: (Profunctor p, Contravariant f) => Optic' p f World (Map TagName :$ Sum Int)
+worldTagPersonCount :: (Profunctor p, Functor f, Contravariant f) => Optic' p f World (Map TagName :$ Sum Int)
 worldTagPersonCount = to _worldTagPersonCount
 
 -------------------------------------------------------------------------------

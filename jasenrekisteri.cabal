@@ -51,13 +51,15 @@ library
     , lens
     , lucid
     , mmorph
+    , monadcryptorandom
     , mtl
+    , postgresql-simple
+    , postgresql-simple-url
     , reflection
     , regex-applicative
     , regex-applicative-text
     , resource-pool
     , semigroups
-    , monadcryptorandom
     , servant        ==0.9.*
     , servant-lucid
     , servant-lucid
@@ -83,6 +85,7 @@ library
       SatO.Foundation
       SatO.Jasenrekisteri.API
       SatO.Jasenrekisteri.Command
+      SatO.Jasenrekisteri.Config
       SatO.Jasenrekisteri.Ctx
       SatO.Jasenrekisteri.Endpoints
       SatO.Jasenrekisteri.Hierarchy
@@ -129,13 +132,15 @@ executable excel
     , lens
     , lucid
     , mmorph
+    , monadcryptorandom
     , mtl
+    , postgresql-simple
+    , postgresql-simple-url
     , reflection
     , regex-applicative
     , regex-applicative-text
     , resource-pool
     , semigroups
-    , monadcryptorandom
     , servant        ==0.9.*
     , servant-lucid
     , servant-lucid
@@ -184,13 +189,15 @@ executable jasenrekisteri-server
     , lens
     , lucid
     , mmorph
+    , monadcryptorandom
     , mtl
+    , postgresql-simple
+    , postgresql-simple-url
     , reflection
     , regex-applicative
     , regex-applicative-text
     , resource-pool
     , semigroups
-    , monadcryptorandom
     , servant        ==0.9.*
     , servant-lucid
     , servant-lucid
@@ -240,13 +247,15 @@ test-suite unit-tests
     , lens
     , lucid
     , mmorph
+    , monadcryptorandom
     , mtl
+    , postgresql-simple
+    , postgresql-simple-url
     , reflection
     , regex-applicative
     , regex-applicative-text
     , resource-pool
     , semigroups
-    , monadcryptorandom
     , servant        ==0.9.*
     , servant-lucid
     , servant-lucid

@@ -1,21 +1,20 @@
-resolver: nightly-2016-10-01
+flags: {}
+extra-package-dbs: []
 packages:
 - '.'
 - location:
     git: https://github.com/futurice/haskell-futurice-prelude.git
-    commit: b988df149f92c2ac9510bf00da8480191e326749
+    commit: ed98cfc5da20d45d0e1649e77753bb78bd54eb62
   extra-dep: true
 - location:
     git: https://github.com/phadej/github.git
     commit: d47f3165d62feab85e85cc271d519cf87d1d3b78
   extra-dep: true
 - location:
-    git: https://github.com/phadej/uuid-aeson.git
-    commit: 2f26dabbc8ff257d3bf49a0fafa23fc20a4f7bed
+    git: https://github.com/necrobious/uuid-aeson.git
+    commit: f5fd573c7cb098515d0093acb2879520e190cc08
   extra-dep: true
 extra-deps:
 - ansi-pretty-0.1.2.0
-- hsc2hs-0.68
-- swagger2-2.1.3
-flags: {}
-extra-package-dbs: []
+- lens-4.15.1
+resolver: nightly-2016-10-26

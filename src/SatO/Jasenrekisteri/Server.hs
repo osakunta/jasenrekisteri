@@ -19,6 +19,7 @@ import qualified Network.Wai.Handler.Warp as Warp
 
 import SatO.Jasenrekisteri.API
 import SatO.Jasenrekisteri.Command
+import SatO.Jasenrekisteri.Config
 import SatO.Jasenrekisteri.Ctx
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Hierarchy     (tags)
@@ -86,6 +87,7 @@ defaultMain = do
             persons <- decode contentsData :: IO [Person]
             -- mapM_ print $ V.filter (not . (== mempty) . _personTags) persons
             let world = mkWorld persons tags
+            _cfg <- readConfig
             ctx <- newCtx world
             ss <- makeSessionStore :: IO (SessionStore ())
             Warp.run 8000 $ give ss (app ctx)

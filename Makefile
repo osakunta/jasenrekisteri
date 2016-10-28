@@ -3,10 +3,7 @@
 all : tags.json build
 
 run : 
-	stack exec jasenrekisteri-server data.json tags.json
+	POSTGRES_URL=postgres://$(USER)@localhost:5432/$(USER) stack exec jasenrekisteri-server data.json tags.json
 
 build : tags.json
 	stack build --pedantic
-
-tags.json : tags.yaml
-	yaml2json tags.yaml > tags.json
