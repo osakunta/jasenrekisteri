@@ -26,15 +26,15 @@ type HTMLPageEndpoint sym = Get '[HTML] (HtmlPage sym)
 -- API
 -------------------------------------------------------------------------------
 
+type JasenrekisteriAuth = BasicAuth "jasenrekisteri" LoginUser
+
 type JasenrekisteriAPI =
-    Session () :> HTMLPageEndpoint "members"
+    JasenrekisteriAuth :> HTMLPageEndpoint "members"
     :<|> MemberEndpoint
-    :<|> Session () :> "tags" :> HTMLPageEndpoint "tags"
+    :<|> JasenrekisteriAuth :> "tags" :> HTMLPageEndpoint "tags"
     :<|> TagEndpoint
-    :<|> Session () :> "search" :> QueryParam "query" SearchQuery :> HTMLPageEndpoint "search"
-    :<|> "login" :> ReqBody '[JSON] LoginData :> Post '[JSON] (Maybe UUID)
-    :<|> Session () :> "logout" :> HTMLPageEndpoint "logout"
-    :<|> "command" :> ReqBody '[JSON] Command :> Post '[JSON] Text
+    :<|> JasenrekisteriAuth :> "search" :> QueryParam "query" SearchQuery :> HTMLPageEndpoint "search"
+    :<|> JasenrekisteriAuth :> "command" :> ReqBody '[JSON] Command :> Post '[JSON] Text
     :<|> Raw
 
 jasenrekisteriAPI :: Proxy JasenrekisteriAPI
@@ -44,7 +44,7 @@ jasenrekisteriAPI = Proxy
 -- Endpoints
 -------------------------------------------------------------------------------
 
-type MemberEndpoint = Session () :> "member" :> Capture "id" PersonId :> HTMLPageEndpoint "member"
+type MemberEndpoint = JasenrekisteriAuth :> "member" :> Capture "id" PersonId :> HTMLPageEndpoint "member"
 
 memberEndpoint :: Proxy MemberEndpoint
 memberEndpoint = Proxy
@@ -53,7 +53,7 @@ memberHref :: PersonId -> Attribute
 memberHref personId =
     href_ $ uriToText $ safeLink jasenrekisteriAPI memberEndpoint personId
 
-type TagEndpoint = Session () :> "tag" :> Capture "tag" TagName :> HTMLPageEndpoint "tag"
+type TagEndpoint = JasenrekisteriAuth :> "tag" :> Capture "tag" TagName :> HTMLPageEndpoint "tag"
 
 tagEndpoint :: Proxy TagEndpoint
 tagEndpoint = Proxy

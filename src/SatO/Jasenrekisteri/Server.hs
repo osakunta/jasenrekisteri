@@ -1,15 +1,13 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeOperators     #-}
 module SatO.Jasenrekisteri.Server (defaultMain) where
 
 import Prelude ()
 import Futurice.Prelude
-import Control.Concurrent.STM     (atomically, readTVar, writeTVar)
-import Control.Monad.CryptoRandom (crandom)
 import Data.Aeson.Compat
 import Data.Pool                  (withResource)
-import Data.Reflection            (Given (..), give)
 import Network.Wai
 import Servant
 import System.Environment         (getArgs)
@@ -23,8 +21,6 @@ import SatO.Jasenrekisteri.Config
 import SatO.Jasenrekisteri.Ctx
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Hierarchy     (tags)
-import SatO.Jasenrekisteri.Markup
-import SatO.Jasenrekisteri.Pages.Logout
 import SatO.Jasenrekisteri.Pages.Member
 import SatO.Jasenrekisteri.Pages.Members
 import SatO.Jasenrekisteri.Pages.Search
@@ -34,59 +30,43 @@ import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.World
 
+import qualified Data.Text.Encoding         as TE
+import qualified Data.Text.Encoding.Error   as TE
 import qualified Database.PostgreSQL.Simple as P
 
-commandEndpoint :: Ctx -> Command -> Handler Text
-commandEndpoint ctx cmd = liftIO $ do
+commandEndpoint :: Ctx -> LoginUser -> Command -> Handler Text
+commandEndpoint ctx _ cmd = liftIO $ do
     ctxApplyCmd cmd ctx
     pure "OK"
 
-loginEndpoint
-    :: Given (SessionStore ())
-    => Ctx -> LoginData -> Handler (Maybe UUID)
-loginEndpoint ctx (LoginData u p) =
-    liftIO $ withResource (ctxPostgres ctx) $ \conn -> do
-        r <- P.query conn "SELECT 1 FROM credentials where username = ? and password = ?;" (u, p)  :: IO [P.Only Int]
-        case r of
-            -- Invalid login
-            [] -> pure Nothing
-            -- Ok
-            _  -> initialiseSession
+authCheck :: Ctx -> BasicAuthCheck LoginUser
+authCheck ctx = BasicAuthCheck check
   where
-    ss = given :: SessionStore ()
+    check (BasicAuthData username' password') =
+        withResource (ctxPostgres ctx) $ \conn -> do
+            let username = TE.decodeUtf8With TE.lenientDecode username'
+                password = TE.decodeUtf8With TE.lenientDecode password'
+            r <- P.query conn "SELECT 1 FROM credentials where username = ? and password = ?;" (username, password)  :: IO [P.Only Int]
+            pure $ case r of
+                [] -> Unauthorized
+                _  -> Authorized $ LoginUser username
 
-    initialiseSession = do
-        msid <- liftIO $ withResource (ctxPRNGs ctx) $ \tg -> atomically $ do
-            g <- readTVar tg
-            case crandom g of
-                Left _err       -> pure Nothing
-                Right (sid, g') -> writeTVar tg g' >> pure (Just sid)
-        case msid of
-            Nothing  -> pure Nothing
-            Just sid -> do
-                _ <- addSession ss sid ()
-                pure $ Just sid
+basicAuthServerContext :: Ctx -> Context (BasicAuthCheck LoginUser ': '[])
+basicAuthServerContext ctx = authCheck ctx :. EmptyContext
 
-logoutEndpoint
-    :: Given (SessionStore ())
-    => Ctx -> (UUID, ()) -> Handler (HtmlPage "logout")
-logoutEndpoint _ctx (sid, _) = do
-    liftIO $ removeSession (given :: SessionStore ()) sid
-    pure logoutPage
-
-server :: Given (SessionStore ()) => Ctx -> Server JasenrekisteriAPI
+server :: Ctx -> Server JasenrekisteriAPI
 server ctx = queryEndpoint ctx membersPage
     :<|> queryEndpoint ctx memberPage
     :<|> queryEndpoint ctx tagsPage
     :<|> queryEndpoint ctx tagPage
     :<|> queryEndpoint ctx searchPage
-    :<|> loginEndpoint ctx
-    :<|> logoutEndpoint ctx
     :<|> commandEndpoint ctx
     :<|> serveDirectory "static"
 
-app :: Given (SessionStore ()) => Ctx -> Application
-app = serve jasenrekisteriAPI . server
+app :: Ctx -> Application
+app ctx = serveWithContext jasenrekisteriAPI
+    (basicAuthServerContext ctx)
+    (server ctx)
 
 defaultMain :: IO ()
 defaultMain = do
@@ -99,6 +79,5 @@ defaultMain = do
             let world = mkWorld persons tags
             cfg <- readConfig
             ctx <- newCtx (cfgConnectInfo cfg) world
-            ss <- makeSessionStore :: IO (SessionStore ())
-            Warp.run 8000 $ give ss (app ctx)
+            Warp.run 8000 $ app ctx
         _ -> putStrLn "Usage: ./jasenrekisteri-server data.json"
