@@ -34,6 +34,8 @@ import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.World
 
+import qualified Database.PostgreSQL.Simple as P
+
 commandEndpoint :: Ctx -> Command -> Handler Text
 commandEndpoint ctx cmd = liftIO $ do
     ctxApplyCmd cmd ctx
@@ -42,20 +44,28 @@ commandEndpoint ctx cmd = liftIO $ do
 loginEndpoint
     :: Given (SessionStore ())
     => Ctx -> LoginData -> Handler (Maybe UUID)
-loginEndpoint ctx (LoginData u p) | u == "user" && p == "pass" = do
-    msid <- liftIO $ withResource (ctxPRNGs ctx) $ \tg -> atomically $ do
-        g <- readTVar tg
-        case crandom g of
-            Left _err       -> pure Nothing
-            Right (sid, g') -> writeTVar tg g' >> pure (Just sid)
-    case msid of
-        Nothing  -> pure Nothing
-        Just sid -> do
-            _ <- liftIO $ addSession ss sid ()
-            pure $ Just sid
+loginEndpoint ctx (LoginData u p) =
+    liftIO $ withResource (ctxPostgres ctx) $ \conn -> do
+        r <- P.query conn "SELECT 1 FROM credentials where username = ? and password = ?;" (u, p)  :: IO [P.Only Int]
+        case r of
+            -- Invalid login
+            [] -> pure Nothing
+            -- Ok
+            _  -> initialiseSession
   where
     ss = given :: SessionStore ()
-loginEndpoint _ _ = pure Nothing
+
+    initialiseSession = do
+        msid <- liftIO $ withResource (ctxPRNGs ctx) $ \tg -> atomically $ do
+            g <- readTVar tg
+            case crandom g of
+                Left _err       -> pure Nothing
+                Right (sid, g') -> writeTVar tg g' >> pure (Just sid)
+        case msid of
+            Nothing  -> pure Nothing
+            Just sid -> do
+                _ <- addSession ss sid ()
+                pure $ Just sid
 
 logoutEndpoint
     :: Given (SessionStore ())
