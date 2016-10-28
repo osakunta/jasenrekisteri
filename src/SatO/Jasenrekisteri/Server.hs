@@ -82,13 +82,13 @@ defaultMain :: IO ()
 defaultMain = do
     args <- getArgs
     case args of
-        [filepathData, _filepathTags] -> do
+        [filepathData] -> do
             contentsData <- LBS.readFile filepathData
             persons <- decode contentsData :: IO [Person]
             -- mapM_ print $ V.filter (not . (== mempty) . _personTags) persons
             let world = mkWorld persons tags
-            _cfg <- readConfig
-            ctx <- newCtx world
+            cfg <- readConfig
+            ctx <- newCtx (cfgConnectInfo cfg) world
             ss <- makeSessionStore :: IO (SessionStore ())
             Warp.run 8000 $ give ss (app ctx)
-        _ -> putStrLn "Usage: ./jasenrekisteri-server data.json tags.json"
+        _ -> putStrLn "Usage: ./jasenrekisteri-server data.json"

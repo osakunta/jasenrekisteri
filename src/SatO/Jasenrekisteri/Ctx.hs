@@ -6,20 +6,24 @@ import Crypto.Random          (newGenIO)
 import Crypto.Random.DRBG     (HmacDRBG)
 import Data.Pool              (Pool, createPool)
 
+import qualified Database.PostgreSQL.Simple as Postgres
+
 import SatO.Jasenrekisteri.Command
 import SatO.Jasenrekisteri.World
 
 data Ctx = Ctx
-    { ctxWorld :: TVar World
-    , ctxPRNGs :: Pool (TVar HmacDRBG)
+    { ctxWorld    :: TVar World
+    , ctxPostgres :: Pool Postgres.Connection
+    , ctxPRNGs    :: Pool (TVar HmacDRBG)
     }
 
 ctxReadWorld :: Ctx -> IO World
 ctxReadWorld = readTVarIO . ctxWorld
 
-newCtx :: World -> IO Ctx
-newCtx w = Ctx
+newCtx :: Postgres.ConnectInfo -> World -> IO Ctx
+newCtx ci w = Ctx
     <$> newTVarIO w
+    <*> createPool (Postgres.connect ci) Postgres.close 1 60 5
     <*> createPool (newGenIO >>= newTVarIO) (\_ -> return()) 1 3600 5
 
 -- TODO: log

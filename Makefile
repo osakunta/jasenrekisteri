@@ -1,9 +1,9 @@
 .PHONY : all build run
 
-all : tags.json build
+all : build
 
 run : 
-	POSTGRES_URL=postgres://$(USER)@localhost:5432/$(USER) stack exec jasenrekisteri-server data.json tags.json
+	POSTGRES_URL=postgres://$(USER)@localhost:5432/$(USER) stack exec jasenrekisteri-server data.json
 
-build : tags.json
+build :
 	stack build --pedantic
