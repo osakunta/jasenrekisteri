@@ -70,7 +70,9 @@ deriveGeneric ''Person
 instance Csv.FromRecord Person
 instance Csv.ToRecord Person
 
-instance ToJSON Person where toJSON = sopToJSON
+instance ToJSON Person where
+    toJSON = sopToJSON
+    toEncoding = sopToEncoding
 instance FromJSON Person where
     parseJSON = fmap (addTaloTag . addFuksiTag). sopParseJSON
 
