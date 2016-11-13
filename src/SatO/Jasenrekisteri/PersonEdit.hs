@@ -51,6 +51,8 @@ instance ToJSON PersonEdit where
     toEncoding = sopToEncoding
 instance FromJSON PersonEdit where
     parseJSON = sopParseJSON
+instance Arbitrary PersonEdit where
+    arbitrary = sopArbitrary
 
 instance Semigroup PersonEdit where
     a <> b = to' $ sappend (from' a) (from' b)
@@ -77,7 +79,7 @@ instance M (Maybe a) where
     sa _       y = y
 
 toEndo :: PersonEdit -> Person -> Person
-toEndo = undefined fieldEndos
+toEndo = appEndo . mconcat . SOP.hcollapse . fieldEndos
 
 fieldEndos :: '[xs] ~ SOP.Code PersonEdit => PersonEdit -> NP (K (Endo Person)) xs
 fieldEndos pe =
