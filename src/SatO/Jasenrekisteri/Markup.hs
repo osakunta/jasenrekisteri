@@ -103,10 +103,10 @@ tagList_ = row_ . large_ 12 . traverse_ tagLink_
 
 -- | TODO: add "where to add type"
 tagnameList_ :: Monad m => World -> [TagName] -> HtmlT m ()
-tagnameList_ world ts = div_ [ class_ "jrek-tag-block" ] $ do
+tagnameList_ world ts = div_ [ class_ "callout jrek-tag-block" ] $ do
     row_ $ large_ 12 $ traverse_ (tagNameLink_ world) ts
     hr_ []
-    row_ $ large_ 12 $ button_ [ class_ "button" ] "Muokkaa"
+    row_ $ large_ 12 $ button_ [ class_ "button" ] "Muokkaa tageja"
 
 
 -------------------------------------------------------------------------------

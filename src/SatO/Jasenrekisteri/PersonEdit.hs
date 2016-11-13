@@ -10,6 +10,8 @@
 module SatO.Jasenrekisteri.PersonEdit (
     PersonEdit (..),
     toEndo,
+    -- * internal
+    UnSingleton,
     ) where
 
 import Prelude ()
