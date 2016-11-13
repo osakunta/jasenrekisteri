@@ -68,6 +68,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function tagModifier() {
+    var wrappers = document.querySelectorAll('div.row[data-jrek-person-tag]');
+
+    console.info("tagModifier", wrappers);
+  }
+
   function loginForm() {
     var loginForm = document.querySelector("#login-form");
     if (!loginForm) return;
@@ -132,6 +138,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   memberFilter();
   tagToggler();
+  tagModifier();
   loginForm();
 
   // jsonFetch

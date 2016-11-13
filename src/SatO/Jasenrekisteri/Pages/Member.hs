@@ -6,10 +6,11 @@ module SatO.Jasenrekisteri.Pages.Member (memberPage) where
 
 import Prelude ()
 import Futurice.Prelude
-import Control.Lens (Getting, (<&>))
+import Control.Lens         (Getting, (<&>))
 import Control.Monad.Reader (ask)
 import Futurice.IdMap       (HasKey (..))
 
+import qualified Data.UUID    as UUID
 import qualified Generics.SOP as SOP
 
 import SatO.Jasenrekisteri.Endpoints
@@ -25,6 +26,8 @@ memberPage lu personId = ask <&> \world -> case world ^? worldMembers . ix perso
     -- TODO: not found page
     Nothing -> page404 lu
     Just p@Person {..} ->  template' lu (_personFirstNames <> " " <> _personLastName) $ do
+        let pid = p ^. key
+
         row_ $ large_ 12 $ dl_ $ do
             dt_ "Sähköposti"
             dd_ $ a_ [href_ $ "mailto:" <> _personEmail] $ toHtml _personEmail
@@ -37,8 +40,14 @@ memberPage lu personId = ask <&> \world -> case world ^? worldMembers . ix perso
                 toHtml $ _personZipcode <> " " <> _personCity
 
         subheader_ "Tagit"
-        row_ $ large_ 12 $ do
-            tagnameList_ world (world ^.. worldPersonTags . ix (p ^. key) . _TagNames . folded)
+        row_ $ large_ 12 $ div_ [ class_ "callout" ] $ do
+            tagnameList_ world (world ^.. worldPersonTags . ix pid . _TagNames . folded)
+            hr_ []
+            row_ [ data_ "jrek-person-tag" $ UUID.toText pid ] $ do
+                large_ 6 $ input_ [ type_ "text", placeholder_ "tagi" ]
+                large_ 6 $ div_ [ class_ "button-group" ] $ do
+                    button_ [ class_ "button" ] "Lisää"
+                    button_ [ class_ "button alert" ] "Poista"
 
         subheader_ "Muokkaa"
         row_ $ large_ 12 $ div_ [ class_ "callout" ] $ form_ $ do
@@ -48,6 +57,13 @@ memberPage lu personId = ask <&> \world -> case world ^? worldMembers . ix perso
             div_ [ class_ "button-group" ] $ do
                 button_ [ class_ "button" ] "Tallenna"
                 button_ [ class_ "button warning" ] "Poista muutokset"
+
+-------------------------------------------------------------------------------
+-- Markup
+-------------------------------------------------------------------------------
+
+tagnameList_ :: World -> [TagName] -> Html ()
+tagnameList_ world ts = traverse_ (tagNameLink_ world) ts
 
 -------------------------------------------------------------------------------
 -- Editbox

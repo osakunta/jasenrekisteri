@@ -10,7 +10,6 @@ module SatO.Jasenrekisteri.Markup (
     tagLink',
     tagNameLink_,
     tagList_,
-    tagnameList_,
     -- * Members
     memberList_,
     -- * Re-export
@@ -100,14 +99,6 @@ tagLink_ tag = tagLink' tag (tag ^. key . _TagName)
 
 tagList_ :: Monad m => [Tag] -> HtmlT m ()
 tagList_ = row_ . large_ 12 . traverse_ tagLink_
-
--- | TODO: add "where to add type"
-tagnameList_ :: Monad m => World -> [TagName] -> HtmlT m ()
-tagnameList_ world ts = div_ [ class_ "callout jrek-tag-block" ] $ do
-    row_ $ large_ 12 $ traverse_ (tagNameLink_ world) ts
-    hr_ []
-    row_ $ large_ 12 $ button_ [ class_ "button" ] "Muokkaa tageja"
-
 
 -------------------------------------------------------------------------------
 -- Members
