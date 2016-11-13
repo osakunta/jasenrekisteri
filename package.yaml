@@ -31,6 +31,7 @@ dependencies:
 - exceptions
 - file-embed
 - futurice-prelude
+- generics-sop
 - hashable
 - http-api-data
 - lens

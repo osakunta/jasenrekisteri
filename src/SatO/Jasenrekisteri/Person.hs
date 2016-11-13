@@ -30,7 +30,7 @@ module SatO.Jasenrekisteri.Person (
 
 import Prelude ()
 import Futurice.Prelude
-import Control.Lens
+import Control.Lens                  (contains)
 import Futurice.Generics
 import Futurice.IdMap                (HasKey (..))
 import Text.Regex.Applicative.Common (decimal)
@@ -71,7 +71,7 @@ instance Csv.FromRecord Person
 instance Csv.ToRecord Person
 
 instance ToJSON Person where
-    toJSON = sopToJSON
+    toJSON     = sopToJSON
     toEncoding = sopToEncoding
 instance FromJSON Person where
     parseJSON = fmap (addTaloTag . addFuksiTag). sopParseJSON

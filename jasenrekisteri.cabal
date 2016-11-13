@@ -46,6 +46,7 @@ library
     , exceptions
     , file-embed
     , futurice-prelude
+    , generics-sop
     , hashable
     , http-api-data
     , lens
@@ -97,6 +98,7 @@ library
       SatO.Jasenrekisteri.Pages.Tag
       SatO.Jasenrekisteri.Pages.Tags
       SatO.Jasenrekisteri.Person
+      SatO.Jasenrekisteri.PersonEdit
       SatO.Jasenrekisteri.SearchQuery
       SatO.Jasenrekisteri.Server
       SatO.Jasenrekisteri.Session
@@ -127,6 +129,7 @@ executable excel
     , exceptions
     , file-embed
     , futurice-prelude
+    , generics-sop
     , hashable
     , http-api-data
     , lens
@@ -184,6 +187,7 @@ executable jasenrekisteri-server
     , exceptions
     , file-embed
     , futurice-prelude
+    , generics-sop
     , hashable
     , http-api-data
     , lens
@@ -242,6 +246,7 @@ test-suite unit-tests
     , exceptions
     , file-embed
     , futurice-prelude
+    , generics-sop
     , hashable
     , http-api-data
     , lens
