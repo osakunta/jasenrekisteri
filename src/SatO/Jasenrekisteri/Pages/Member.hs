@@ -65,7 +65,7 @@ personEditboxes =
     K (Editbox "birthday" "Syntymäpäivä" personBirthday) :*
     K (Editbox "birthplace" "Syntymäpaikka" personBirthplace) :*
     K (Editbox "lastName" "Sukunimi" personLastName) :*
-    K (Editbox "firstNames" "Etunimiet" personFirstNames) :*
+    K (Editbox "firstNames" "Etunimet" personFirstNames) :*
     K (Editbox "matrikkeli" "Matrikkeli" personMatrikkeli) :*
     K (Editbox "affilitationDate" "Liittymispäivä" personAffiliationDate) :*
     K (Editbox "university" "Yliopisto" personUniversity) :*
