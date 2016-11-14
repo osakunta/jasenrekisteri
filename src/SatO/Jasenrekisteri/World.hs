@@ -11,8 +11,6 @@ module SatO.Jasenrekisteri.World (
     worldPersonTags,
     worldTagPersons,
     worldTagPersonCount,
-    -- * Misc
-    personHasTag,
     ) where
 
 import Prelude ()
@@ -120,11 +118,11 @@ overlaps tns tns' = not $ null $ Set.intersection
 
 worldMembers :: Lens' World (IdMap Person)
 worldMembers = lens _worldMembers $ \world members ->
-    mkWorld' members (world ^. worldTags)
+    mkWorld (members ^.. folded) (world ^.. worldTags . ifoldedTagHierarchy)
 
 worldTags :: Lens' World TagHierarchy
 worldTags = lens _worldTags $ \world tags ->
-    mkWorld' (world ^. worldMembers) tags
+    mkWorld (world ^.. worldMembers . folded) (tags ^.. ifoldedTagHierarchy)
 
 -- |
 --
@@ -149,11 +147,3 @@ worldTagPersons = to _worldTagPersons
 -- @
 worldTagPersonCount :: (Profunctor p, Functor f, Contravariant f) => Optic' p f World (Map TagName :$ Sum Int)
 worldTagPersonCount = to _worldTagPersonCount
-
--------------------------------------------------------------------------------
--- Qiery
--------------------------------------------------------------------------------
-
--- TODO:
-personHasTag :: World -> Person -> TagName -> Bool
-personHasTag _world _person _tag = False
