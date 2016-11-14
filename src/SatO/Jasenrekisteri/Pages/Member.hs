@@ -46,8 +46,8 @@ memberPage lu personId = ask <&> \world -> case world ^? worldMembers . ix perso
             row_ [ data_ "jrek-person-tag" $ UUID.toText pid ] $ do
                 large_ 6 $ input_ [ type_ "text", placeholder_ "tagi" ]
                 large_ 6 $ div_ [ class_ "button-group" ] $ do
-                    button_ [ class_ "button" ] "Lisää"
-                    button_ [ class_ "button alert" ] "Poista"
+                    button_ [ data_ "jrek-action" "add", class_ "button" ] "Lisää"
+                    button_ [ data_ "jrek-action" "remove", class_ "button alert" ] "Poista"
 
         subheader_ "Muokkaa"
         row_ $ large_ 12 $ div_ [ class_ "callout" ] $ form_ $ do

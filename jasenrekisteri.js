@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function tagToggler() {
-    var checkboxes = document.querySelectorAll('input[type=checkbox]');
+    var checkboxes = $$('input[type=checkbox]');
 
     checkboxes.forEach(function (checkbox) {
       if (!checkbox.dataset.tag) return;
@@ -69,69 +69,37 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function tagModifier() {
-    var wrappers = document.querySelectorAll('div.row[data-jrek-person-tag]');
+    $$("div.row[data-jrek-person-tag]").forEach(function (wrapper) {
+      var input = $("input[type=text]", wrapper);
+      var addButton = $("button[data-jrek-action=add]", wrapper);
+      var removeButton = $("button[data-jrek-action=remove]", wrapper);
 
-    console.info("tagModifier", wrappers);
-  }
+      var memberId = wrapper.dataset.jrekPersonTag;
 
-  function loginForm() {
-    var loginForm = document.querySelector("#login-form");
-    if (!loginForm) return;
-
-    var loginUser = loginForm.querySelector("#login-user");
-    var loginPass = loginForm.querySelector("#login-pass");
-    var loginButton = loginForm.querySelector("#login-button");
-
-    if (!loginUser || !loginPass || !loginButton) {
-      console.error("Broken login form");
-      return;
-    }
-
-    console.info("Found login form");
-
-    // Enable button when non empty texts
-    var u$ = menrva.source(loginUser.value);
-    var p$ = menrva.source(loginPass.value);
-    var ok$ = menrva.source(true);
-
-    function bindChange(source, el) {
-      function cb() {
+      var input$ = menrva.source("");
+      var cb = function () {
         menrva.transaction()
-          .set(source, el.value)
-          .set(ok$, true)
+          .set(input$, input.value.trim())
           .commit();
-      }
+      };
+      input.addEventListener("keyup", cb);
+      input.addEventListener("change", cb);
 
-      el.addEventListener("keyup", cb);
-      el.addEventListener("change", cb);
-    }
+      input$.onValue(function (value) {
+        addButton.disabled = value === "";
+        removeButton.disabled = value === "";
+      });
 
-    bindChange(u$, loginUser);
-    bindChange(p$, loginPass);
+      addButton.addEventListener("click", function () {
+        commandAddTag(memberId, input.value.trim());
+        input.value = "";
+        cb();
+      });
 
-    menrva.combine(u$, p$, function (u, p) {
-      return u !== "" && p !== "";
-    }).onValue(function (b) {
-      loginButton.disabled = !b;
-    });
-
-    ok$.onValue(function (ok) {
-      loginForm.className = ok ? "callout primary" : "callout warning";
-    });
-
-    // click
-    loginButton.addEventListener("click", function () {
-      var u = loginUser.value;
-      var p = loginPass.value;
-
-      login(u, p).then(function (res) {
-        console.info("/login returned", res);
-        if (res) {
-          document.cookie = "JREK_SESSION_ID=" + res;
-          location.reload();
-        } else {
-          menrva.transaction().set(ok$, false).commit();
-        }
+      removeButton.addEventListener("click", function () {
+        commandRemoveTag(memberId, input.value.trim());
+        input.value = "";
+        cb();
       });
     });
   }
@@ -139,32 +107,18 @@ document.addEventListener("DOMContentLoaded", function () {
   memberFilter();
   tagToggler();
   tagModifier();
-  loginForm();
 
-  // jsonFetch
+  // Utilities
 
-  // login, TODO: remove
-  function login(u, p) {
-    var url = "/login";
+  function $(selector, el) {
+    el = el || document;
+    return el.querySelector(selector, el);
+  }
 
-    var headers = new Headers();
-    headers.append("Accept", "application/json");
-    headers.append("Content-Type", "application/json");
-
-    var opts = {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify({
-        user: u,
-        pass: p,
-      }),
-    };
-
-    return fetch(url, opts)
-      .then(function (res) {
-        console.debug("response", url, res.ok);
-        return res.json();
-      });
+  function $$(selector, el) {
+    el = el || document;
+    var res = el.querySelectorAll(selector, el);
+    return Array.prototype.slice.call(res);
   }
 
   // Commands
@@ -191,6 +145,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function commandAddTag(memberId, tagName) {
+    assert(_.isString(memberId), "memberId should be string");
+    assert(_.isString(tagName), "memberId should be string");
+
+    console.info("command add-tag", memberId, tagName);
     return command({
       type: "add-tag",
       memberId: memberId,
@@ -199,10 +157,21 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function commandRemoveTag(memberId, tagName) {
+    assert(_.isString(memberId), "memberId should be string");
+    assert(_.isString(tagName), "memberId should be string");
+
+    console.info("command remove-tag", memberId, tagName);
     return command({
       type: "remove-tag",
       memberId: memberId,
       tagName: tagName,
     });
+  }
+
+  function assert(cond, msg) {
+    if (!cond) {
+      console.error(msg);
+      throw new Error(msg);
+    }
   }
 });
