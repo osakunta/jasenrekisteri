@@ -50,13 +50,12 @@ memberPage lu personId = ask <&> \world -> case world ^? worldMembers . ix perso
                     button_ [ data_ "jrek-action" "remove", class_ "button alert" ] "Poista"
 
         subheader_ "Muokkaa"
-        row_ $ large_ 12 $ div_ [ class_ "callout" ] $ form_ $ do
+        row_ $ large_ 12 $ div_ [ class_ "callout" ] $ div_ [ data_ "jrek-member-edit" $ UUID.toText pid] $ do
             for_ (SOP.hcollapse personEditboxes) $ editbox p
 
             hr_ []
             div_ [ class_ "button-group" ] $ do
-                button_ [ class_ "button" ] "Tallenna"
-                button_ [ class_ "button warning" ] "Poista muutokset"
+                button_ [ data_ "jrek-action" "submit", class_ "button" ] "Tallenna"
 
 -------------------------------------------------------------------------------
 -- Markup
@@ -74,7 +73,12 @@ data Editbox = Editbox Text Text (Getting Text Person Text)
 editbox :: Person -> Editbox -> Html ()
 editbox p (Editbox i l getter) = label_ $ do
     toHtml l
-    input_ [ type_ "text", data_ "jrek-orig-value" i, value_ $ p ^. getter ]
+    input_
+        [ type_ "text"
+        , data_ "jrek-field-name" i
+        , data_ "jrek-field-value" $ p ^. getter
+        , value_ $ p ^. getter
+        ]
 
 personEditboxes :: NP (K Editbox) (UnSingleton (SOP.Code PersonEdit))
 personEditboxes =
@@ -83,7 +87,7 @@ personEditboxes =
     K (Editbox "lastName" "Sukunimi" personLastName) :*
     K (Editbox "firstNames" "Etunimet" personFirstNames) :*
     K (Editbox "matrikkeli" "Matrikkeli" personMatrikkeli) :*
-    K (Editbox "affilitationDate" "Liittymispäivä" personAffiliationDate) :*
+    K (Editbox "affiliationDate" "Liittymispäivä" personAffiliationDate) :*
     K (Editbox "university" "Yliopisto" personUniversity) :*
     K (Editbox "tDK" "Tiedekunta" personTDK) :*
     K (Editbox "address" "Postiosoite" personAddress) :*

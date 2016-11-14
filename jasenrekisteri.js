@@ -75,6 +75,7 @@ document.addEventListener("DOMContentLoaded", function () {
       var removeButton = $("button[data-jrek-action=remove]", wrapper);
 
       var memberId = wrapper.dataset.jrekPersonTag;
+      console.info("Initialising member tag edit for", memberId);
 
       var input$ = menrva.source("");
       var cb = function () {
@@ -119,10 +120,59 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function personEdit() {
+    var formEl = $("div[data-jrek-member-edit]");
+    if (!formEl) return;
+    var submitButton = $("button[data-jrek-action=submit]", formEl);
+    if (!submitButton) return;
+
+    var memberId = formEl.dataset.jrekMemberEdit;
+    console.info("Initialising member edit form for", memberId);
+
+    var fields = $$("input[data-jrek-field-name]");
+
+    // button toggler
+    var cb = function () {
+      var hasChanges = fields.some(function (f) {
+        return f.dataset.jrekFieldValue !== f.value;
+      });
+
+      submitButton.disabled = !hasChanges;
+    }
+
+    cb();
+    fields.forEach(function (f) {
+      f.addEventListener("change", cb);
+      f.addEventListener("keyup", cb);
+    });
+
+    submitButton.addEventListener("click", function () {
+      var edit = {};
+      var hasChanges = false;
+      fields.forEach(function (f) {
+        var n = f.dataset.jrekFieldName;
+        var o = f.dataset.jrekFieldValue;
+        var v = f.value;
+
+        if (o !== v) {
+          edit[n] = v;
+          hasChanges = true;
+        } else {
+          edit[n] = null;
+        }
+      });
+
+      if (hasChanges) {
+        commandMemberEdit(memberId, edit);
+      }
+    });
+  }
+
   memberFilter();
   tagToggler();
   tagModifier();
   searchButtons();
+  personEdit();
 
   // Utilities
 
@@ -135,6 +185,13 @@ document.addEventListener("DOMContentLoaded", function () {
     el = el || document;
     var res = el.querySelectorAll(selector, el);
     return Array.prototype.slice.call(res);
+  }
+
+  function assert(cond, msg) {
+    if (!cond) {
+      console.error(msg);
+      throw new Error(msg);
+    }
   }
 
   // Commands
@@ -184,10 +241,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  function assert(cond, msg) {
-    if (!cond) {
-      console.error(msg);
-      throw new Error(msg);
-    }
+  function commandMemberEdit(memberId, edit) {
+    assert(_.isString(memberId), "memberId should be string");
+    assert(_.isPlainObject(edit), "edit should be a plain object");
+
+    console.info("command member-edit", memberId, edit);
+    return command({
+      type: "member-edit",
+      memberId: memberId,
+      edit: edit,
+    });
   }
 });
