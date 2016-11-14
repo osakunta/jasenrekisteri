@@ -104,9 +104,25 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function searchButtons() {
+    var searchEl = $("div.jrek-search");
+    if (!searchEl) return;
+    var inputEl = $("input[name=query]", searchEl);
+    if (!inputEl) return;
+
+    $$("button[data-jrek-search-string]").forEach(function (button) {
+      var q = button.dataset.jrekSearchString;
+
+      button.addEventListener("click", function () {
+        inputEl.value = q;
+      });
+    });
+  }
+
   memberFilter();
   tagToggler();
   tagModifier();
+  searchButtons();
 
   // Utilities
 

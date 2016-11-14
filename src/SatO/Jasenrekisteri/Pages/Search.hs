@@ -27,10 +27,10 @@ searchPage lu mquery = do
 
 searchPage' :: LoginUser -> World -> Maybe SearchQuery -> HtmlPage "search"
 searchPage' lu world mquery = template' lu title $ do
-    row_ $ large_ 12 $ div_ [ class_ "callout secondary" ] $ do
-        for_ exampleQueries $ \q -> do
-            button_ [ class_ "button" ] $ toHtml $ prettySearchQuery q
-            " "
+    row_ $ large_ 12 $ div_ [ class_ "jrek-search callout secondary" ] $ do
+        div_ [ class_ "button-group" ] $ for_ exampleQueries $ \q -> do
+            let pq = prettySearchQuery q
+            button_ [ data_ "jrek-search-string" pq,  class_ "button" ] $ toHtml pq
         hr_ []
         form_ [ method_ "GET"] $ do
             label_ $ do
