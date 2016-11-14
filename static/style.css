@@ -204,3 +204,18 @@ a.tag8:hover { color: #ffc3ff; background-color: #7215a4 }
 
 a.tag9 { border-color: #930061; color: #930061; background-color: #ffbdff; }
 a.tag9:hover { color: #ffbdff; background-color: #930061 }
+
+/* Overlay */
+/* http://stackoverflow.com/questions/2852276/make-div-overlay-entire-page-not-just-viewport */
+div.jrek-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
+
+div.jrek-overlay-message {
+
+}
