@@ -9,7 +9,9 @@ module SatO.Jasenrekisteri.Person (
     Person(..),
     -- * Person identifier
     PersonId,
-    -- ** Lenses
+    -- * Modifications
+    addMagicTags,
+    -- * Lenses
     personUuid,
     personBirthday,
     personBirthplace,
@@ -80,14 +82,16 @@ instance HasKey Person where
     type Key Person = UUID
     key = personUuid
 
--- | TODO: use regexp
-addTaloTag :: Person -> Person
-addTaloTag p
-    | "lapinrinne 1" `T.isInfixOf` T.toLower (p ^. personAddress)
-        = p & personTags . contains "talo" .~ True
-    | otherwise
-        = p
+addMagicTags :: Person -> Person
+addMagicTags = addTaloTag . addFuksiTag
 
+-- TODO: use regexp
+addTaloTag :: Person -> Person
+addTaloTag p = p & personTags . contains "talo" .~ isTalo
+  where
+    isTalo = "lapinrinne 1" `T.isInfixOf` T.toLower (p ^. personAddress)
+
+-- | TODO: drop fuksi tags
 addFuksiTag :: Person -> Person
 addFuksiTag p = case match affYear (p ^. personAffiliationDate) of
     Nothing   -> p

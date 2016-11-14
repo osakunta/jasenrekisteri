@@ -76,7 +76,7 @@ applyCommand (CmdAddTag pid tn) w =
 applyCommand (CmdRemoveTag pid tn) w =
     w & worldMembers . ix pid . personTags . contains tn .~ False
 applyCommand (CmdEditPerson pid pe) w =
-    w & worldMembers . ix pid %~ toEndo pe
+    w & worldMembers . ix pid %~ addMagicTags . toEndo pe
 
 deriveGeneric ''Command
 
