@@ -33,6 +33,18 @@ css = do
             ":hover" & do
                 backgroundColor col2
                 color col1
+    -- http://stackoverflow.com/questions/2852276/make-div-overlay-entire-page-not-just-viewport
+    ".jrek-overlay" & do
+      position fixed
+      top Clay.nil
+      left Clay.nil
+      width $ pct 100
+      height $ pct 100
+      backgroundColor $ rgba 0 0 0 0.5
+
+    ".jrek-message" & do
+      marginTop $ em 5
+
   where
     satoFontFamily = fontFamily ["Lucida Grande", "Helvetica", "Arial"] [sansSerif]
     tagColors =

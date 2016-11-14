@@ -6,6 +6,18 @@
 document.addEventListener("DOMContentLoaded", function () {
   console.info("Initialising jasenrekisteri");
 
+  var eventNames = [ "click", "change" ];
+  var eachWithKey = _.each.convert({ 'cap': false });
+
+  memberFilter();
+  tagToggler();
+  tagModifier();
+  searchButtons();
+  personEdit();
+  var overlay = addOverlay();
+
+  // "components"
+
   function memberFilter () {
     // needle
     var filterNeedleSource = menrva.source("");
@@ -168,11 +180,23 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  memberFilter();
-  tagToggler();
-  tagModifier();
-  searchButtons();
-  personEdit();
+  function addOverlay() {
+    var overlay = document.createElement("DIV");
+    overlay.className = "jrek-overlay";
+    overlay.style.display = "none";
+    document.body.appendChild(overlay);
+
+    var message = dom("div", { className: "jrek-message callout primary" }, [ "placeholder-message" ]);
+
+    overlay.appendChild(dom("div", { className: "row" }, [
+      dom("div", { className: "large-12 columns" },  [ message ]),
+    ]));
+
+    return {
+      overlay: overlay,
+      message: message,
+    };
+  }
 
   // Utilities
 
@@ -192,6 +216,40 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error(msg);
       throw new Error(msg);
     }
+  }
+
+  function dom(elName, args, children) {
+    if (_.isArray(args)) {
+      children = args;
+      args = {};
+    }
+
+    children = children || [];
+    args = args || {};
+
+    var el = document.createElement(elName);
+
+    eachWithKey(function (value, key) {
+      if (eventNames.indexOf(key) === -1) {
+        el[key] = value;
+      } else {
+        el.addEventListener(key, value);
+      }
+    }, args);
+
+    children.forEach(function (child) {
+      if (_.isString(child)) {
+        el.appendChild(domText(child));
+      } else {
+        el.appendChild(child);
+      }
+    });
+
+    return el;
+  }
+
+  function domText(t) {
+    return document.createTextNode(t);
   }
 
   // Commands
@@ -214,6 +272,13 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(function (res) {
         console.debug("response", url, res.ok);
         return res.json();
+      })
+      .catch(function (exc) {
+        overlay.message.classList.add("alert");
+        overlay.message.classList.remove("primary");
+        overlay.message.innerHTML = "Tapahtui virhe!<br />" + exc
+        overlay.overlay.style.display = "";
+        throw exc;
       });
   }
 
@@ -250,6 +315,18 @@ document.addEventListener("DOMContentLoaded", function () {
       type: "member-edit",
       memberId: memberId,
       edit: edit,
+    })
+    .then(function () {
+      overlay.message.innerText = "";
+      overlay.message.appendChild(dom("div", [
+        dom("button", {
+          className: "button",
+          click: function () {
+            location.reload();
+          }
+        }, [ "Päivitä sivu" ]),
+      ]));
+      overlay.overlay.style.display = "";
     });
   }
 });
