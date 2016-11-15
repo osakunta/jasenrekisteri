@@ -319,12 +319,13 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(function () {
       overlay.message.innerText = "";
       overlay.message.appendChild(dom("div", [
+        dom("p", [ "Sivua pitää päivittä, jotta muutokset tulevat näkyviin." ]),
         dom("button", {
           className: "button",
           click: function () {
             location.reload();
           }
-        }, [ "Päivitä sivu" ]),
+        }, [ "Päivitä" ]),
       ]));
       overlay.overlay.style.display = "";
     });
