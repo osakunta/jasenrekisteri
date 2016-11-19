@@ -25,6 +25,12 @@ data Command
     | CmdEditPerson PersonId PersonEdit
   deriving (Eq, Show)
 
+commandMemberId :: Getter Command PersonId
+commandMemberId = to $ \cmd -> case cmd of
+    CmdAddTag memberId _     -> memberId
+    CmdRemoveTag memberId _  -> memberId
+    CmdEditPerson memberId _ -> memberId
+
 instance FromJSON Command where
     parseJSON = withObject "Command" $ \obj -> do
         cmd <- obj .: "type"

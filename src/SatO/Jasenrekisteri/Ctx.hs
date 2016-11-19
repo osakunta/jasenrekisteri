@@ -45,4 +45,8 @@ ctxApplyCmd lu cmd ctx = do
 
 ctxFetchCmds :: Ctx -> PersonId -> IO [(LoginUser, UTCTime, Command)]
 ctxFetchCmds ctx memberId = withResource (ctxPostgres ctx) $ \conn -> do
-    P.query conn "SELECT username, updated, edata FROM jasen2.events WHERE edata :: json ->> 'memberId' = ?" (P.Only memberId)
+    P.query conn "SELECT username, updated, edata FROM jasen2.events WHERE edata :: json ->> 'memberId' = ? ORDER by eid DESC" (P.Only memberId)
+
+ctxFetchAllCmds :: Ctx -> IO [(LoginUser, UTCTime, Command)]
+ctxFetchAllCmds ctx = withResource (ctxPostgres ctx) $ \conn -> do
+    P.query_ conn "SELECT username, updated, edata FROM jasen2.events ORDER by eid DESC"

@@ -13,6 +13,7 @@ import Futurice.IdMap       (HasKey (..))
 import qualified Data.UUID    as UUID
 import qualified Generics.SOP as SOP
 
+import SatO.Jasenrekisteri.API
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Person
@@ -50,6 +51,8 @@ memberPage lu personId = ask <&> \world -> case world ^? worldMembers . ix perso
                     button_ [ data_ "jrek-action" "remove", class_ "button alert" ] "Poista"
 
         subheader_ "Muokkaa"
+        row_ $ large_ 12 $ a_ [ memberlogHref pid ] "Muutosloki"
+        hr_ []
         row_ $ large_ 12 $ div_ [ class_ "callout" ] $ div_ [ data_ "jrek-member-edit" $ UUID.toText pid] $ do
             for_ (SOP.hcollapse personEditboxes) $ editbox p
 

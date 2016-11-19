@@ -31,11 +31,12 @@ type JasenrekisteriAuth = BasicAuth "jasenrekisteri" LoginUser
 type JasenrekisteriAPI =
     JasenrekisteriAuth :> HTMLPageEndpoint "members"
     :<|> MemberEndpoint
+    :<|> ChangelogEndpoint
     :<|> JasenrekisteriAuth :> "tags" :> HTMLPageEndpoint "tags"
     :<|> TagEndpoint
     :<|> JasenrekisteriAuth :> "search" :> QueryParam "query" SearchQuery :> HTMLPageEndpoint "search"
     :<|> JasenrekisteriAuth :> "command" :> ReqBody '[JSON] Command :> Post '[JSON] Text
-    :<|> ChangelogEndpoint
+    :<|> MemberlogEndpoint
     :<|> Raw
 
 jasenrekisteriAPI :: Proxy JasenrekisteriAPI
@@ -63,14 +64,23 @@ tagHref :: TagName -> Attribute
 tagHref tn =
     href_ $ uriToText $ safeLink jasenrekisteriAPI tagEndpoint tn
 
-type ChangelogEndpoint = JasenrekisteriAuth :> "log" :> Capture "id" PersonId :> HTMLPageEndpoint "changelog"
+type ChangelogEndpoint = JasenrekisteriAuth :> "changelog" :> HTMLPageEndpoint "changelog"
 
 changelogEndpoint :: Proxy ChangelogEndpoint
 changelogEndpoint = Proxy
 
-changelogHref :: PersonId -> Attribute
-changelogHref memberId =
-    href_ $ uriToText $ safeLink jasenrekisteriAPI changelogEndpoint memberId
+changelogHref :: Attribute
+changelogHref =
+    href_ $ uriToText $ safeLink jasenrekisteriAPI changelogEndpoint
+
+type MemberlogEndpoint = JasenrekisteriAuth :> "member-log" :> Capture "id" PersonId :> HTMLPageEndpoint "memberlog"
+
+memberlogEndpoint :: Proxy MemberlogEndpoint
+memberlogEndpoint = Proxy
+
+memberlogHref :: PersonId -> Attribute
+memberlogHref memberId =
+    href_ $ uriToText $ safeLink jasenrekisteriAPI memberlogEndpoint memberId
 
 -------------------------------------------------------------------------------
 -- Utilities
