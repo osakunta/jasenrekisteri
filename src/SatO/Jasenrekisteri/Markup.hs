@@ -63,6 +63,7 @@ navigation lu = do
             li_ $ a_ [tagHref "2015-2016"] "2015-2016"
             li_ $ a_ [tagHref "2016-2017"] "2016-2017"
             li_ $ a_ [tagHref "talo"] "Talo"
+            li_ $ a_ [changelogHref Nothing ] "Muutosloki"
             li_ $ a_ [href_ "/search" ] "Haku"
         div_ [ class_ "top-bar-right" ] $ ul_ [ class_ "dropdown menu" ] $ do
             li_ [ class_ "menu-text" ] $ toHtml $ "Terve " <> getLoginUser lu
