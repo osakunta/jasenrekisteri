@@ -69,6 +69,7 @@ library
     , strict-base-types
     , swagger2
     , text
+    , time
     , transformers
     , trifecta
     , unordered-containers
@@ -153,6 +154,7 @@ executable excel
     , strict-base-types
     , swagger2
     , text
+    , time
     , transformers
     , trifecta
     , unordered-containers
@@ -211,6 +213,7 @@ executable jasenrekisteri-server
     , strict-base-types
     , swagger2
     , text
+    , time
     , transformers
     , trifecta
     , unordered-containers
@@ -270,6 +273,7 @@ test-suite unit-tests
     , strict-base-types
     , swagger2
     , text
+    , time
     , transformers
     , trifecta
     , unordered-containers

@@ -54,6 +54,7 @@ dependencies:
 - strict-base-types
 - swagger2
 - text
+- time
 - transformers
 - trifecta
 - unordered-containers
