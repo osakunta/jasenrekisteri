@@ -14,3 +14,5 @@ create table jasen2.events (
   updated timestamp with time zone not null default current_timestamp,
   edata text not null
 );
+
+create index events_mid_idx ON jasen2.events ((edata :: json ->> 'memberId'));

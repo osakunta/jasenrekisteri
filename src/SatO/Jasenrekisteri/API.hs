@@ -35,6 +35,7 @@ type JasenrekisteriAPI =
     :<|> TagEndpoint
     :<|> JasenrekisteriAuth :> "search" :> QueryParam "query" SearchQuery :> HTMLPageEndpoint "search"
     :<|> JasenrekisteriAuth :> "command" :> ReqBody '[JSON] Command :> Post '[JSON] Text
+    :<|> JasenrekisteriAuth :> "log" :> Capture "id" PersonId :> Get '[JSON] [Text]
     :<|> Raw
 
 jasenrekisteriAPI :: Proxy JasenrekisteriAPI

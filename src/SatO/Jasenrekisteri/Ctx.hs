@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module SatO.Jasenrekisteri.Ctx where
 
+import Prelude ()
+import Futurice.Prelude
 import Control.Concurrent.STM
        (TVar, atomically, modifyTVar', newTVarIO, readTVarIO)
 import Crypto.Random          (newGenIO)
@@ -11,6 +13,7 @@ import qualified Database.PostgreSQL.Simple as P
 
 import SatO.Jasenrekisteri.Command
 import SatO.Jasenrekisteri.Session
+import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.World
 
 data Ctx = Ctx
@@ -37,3 +40,7 @@ ctxApplyCmd lu cmd ctx = do
         _ <- P.execute conn "INSERT INTO jasen2.events (username, edata) VALUES (?, ?)" (lu, cmd)
         -- | TODO: log what happened?
         pure ()
+
+ctxFetchCmds :: Ctx -> PersonId -> IO [(LoginUser, UTCTime, Command)]
+ctxFetchCmds ctx memberId = withResource (ctxPostgres ctx) $ \conn -> do
+    P.query conn "SELECT username, updated, edata FROM jasen2.events WHERE edata :: json ->> 'memberId' = ?" (P.Only memberId)

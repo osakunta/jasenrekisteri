@@ -41,6 +41,11 @@ commandEndpoint ctx lu cmd = liftIO $ do
     ctxApplyCmd lu cmd ctx
     pure "OK"
 
+logEndpoint :: Ctx -> LoginUser -> PersonId -> Handler [Text]
+logEndpoint ctx _ memberId = liftIO $ do
+    cmds <- ctxFetchCmds ctx memberId
+    pure $ textShow <$> cmds
+
 authCheck :: Ctx -> BasicAuthCheck LoginUser
 authCheck ctx = BasicAuthCheck check
   where
@@ -63,6 +68,7 @@ server ctx = queryEndpoint ctx membersPage
     :<|> queryEndpoint ctx tagPage
     :<|> queryEndpoint ctx searchPage
     :<|> commandEndpoint ctx
+    :<|> logEndpoint ctx
     :<|> serveDirectory "static"
 
 app :: Ctx -> Application
