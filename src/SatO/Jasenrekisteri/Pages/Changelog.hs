@@ -7,6 +7,7 @@ module SatO.Jasenrekisteri.Pages.Changelog (changelogPage, memberlogPage) where
 import Prelude ()
 import Futurice.Prelude
 import Data.Maybe       (fromMaybe, mapMaybe)
+import Data.Time        (defaultTimeLocale, formatTime)
 
 import qualified Data.Text as T
 import qualified Data.UUID as UUID
@@ -30,7 +31,7 @@ changelogPage lu cmds world = template' lu "Muutosloki" $ do
         tbody_ $ for_ cmds $ \(editor, stamp, cmd) -> tr_ $ do
             let memberId = cmd ^. commandMemberId
             td_ $ toHtml editor
-            td_ $ toHtml $ show $ utcToHelsinkiTime stamp
+            td_ $ toHtml $ formatTime defaultTimeLocale "%F %H:%m" $ utcToHelsinkiTime stamp
             td_ $ a_ [ memberlogHref memberId ] $ toHtml $ fromMaybe "<tuntematon>" $
                 world ^? worldMembers . ix memberId . personFullName
             td_ $ case cmd of
@@ -65,7 +66,7 @@ memberlogPage lu memberId origWorld world cmds =
                 th_ "Muutos"
             tbody_ $ for_ (members origMember cmds) $ \(currMember, editor, stamp, cmd) -> tr_ $ do
                 td_ $ toHtml editor
-                td_ $ toHtml $ show $ utcToHelsinkiTime stamp
+                td_ $ toHtml $ formatTime defaultTimeLocale "%F %H:%m" $ utcToHelsinkiTime stamp
                 td_ $ case cmd of
                     CmdAddTag _ tn -> do
                         span_ [ class_ "jrek-added" ] "Lisätty"
