@@ -20,7 +20,6 @@ import Prelude ()
 import Futurice.Prelude
 import Control.Lens
 import Control.Lens.Att
-import Data.Ord         (comparing)
 import Futurice.IdMap   (key)
 import SatO.Foundation
 
@@ -105,6 +104,7 @@ tagList_ = row_ . large_ 12 . traverse_ tagLink_
 -- Members
 -------------------------------------------------------------------------------
 
+-- | TODO: sort by tags or no
 memberList_
     :: Monad m
     => [Tag]       -- ^ tag to show in the list
@@ -132,7 +132,12 @@ memberList_ ts ps = do
                     tagList_ (ts ^.. folded . filtered (\t -> person ^. personTags . contains (t ^. key)))
                 td_ $ tagCheckbox person "2016-2017"
   where
-    ps' = sortBy (comparing _personFirstNames <> comparing _personLastName) ps
+    metric member =
+        ( firstIndexOf (member ^.. personTags . _TagNames . folded) sortedTs
+        , member ^. personFullName
+        )
+    sortedTs = sort (ts ^.. folded . tagName)
+    ps' = sortOn metric ps
 
 tagCheckbox :: Monad m => Person -> TagName -> HtmlT m ()
 tagCheckbox person tn = label_ $ do
@@ -144,3 +149,18 @@ tagCheckbox person tn = label_ $ do
    memberId = person ^. key
    json = A.object [ "tagName" A..= tn, "memberId" A..= memberId ]
    d = TE.decodeUtf8 $ A.encode json ^. strict
+
+-------------------------------------------------------------------------------
+-- Futurice prelude
+-------------------------------------------------------------------------------
+
+firstIndexOf :: Eq a => [a] -> [a] -> Option Int
+firstIndexOf es = go 0
+  where
+    go _ []           = None
+    go n (x : xs)
+        | x `elem` es = Some n
+        | otherwise   = go (n + 1) xs
+
+data Option a = Some a | None
+  deriving (Eq, Ord)
