@@ -47,7 +47,8 @@ changelogHandler :: Ctx -> LoginUser -> PersonId -> Handler (HtmlPage "changelog
 changelogHandler ctx lu memberId = liftIO $ do
     cmds <- ctxFetchCmds ctx memberId
     world <- ctxReadWorld ctx
-    pure $ changelogPage lu memberId undefined world cmds
+    let origWorld = ctxOrigWorld ctx
+    pure $ changelogPage lu memberId origWorld world cmds
 
 authCheck :: Ctx -> BasicAuthCheck LoginUser
 authCheck ctx = BasicAuthCheck check

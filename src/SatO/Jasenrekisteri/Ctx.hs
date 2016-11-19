@@ -17,9 +17,10 @@ import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.World
 
 data Ctx = Ctx
-    { ctxWorld    :: TVar World
-    , ctxPostgres :: Pool P.Connection
-    , ctxPRNGs    :: Pool (TVar HmacDRBG)
+    { ctxWorld     :: TVar World
+    , ctxOrigWorld :: World
+    , ctxPostgres  :: Pool P.Connection
+    , ctxPRNGs     :: Pool (TVar HmacDRBG)
     }
 
 ctxReadWorld :: Ctx -> IO World
@@ -28,6 +29,7 @@ ctxReadWorld = readTVarIO . ctxWorld
 newCtx :: P.ConnectInfo -> World -> IO Ctx
 newCtx ci w = Ctx
     <$> newTVarIO w
+    <*> pure w
     <*> createPool (P.connect ci) P.close 1 60 5
     <*> createPool (newGenIO >>= newTVarIO) (\_ -> return()) 1 3600 5
 
