@@ -7,10 +7,13 @@
 module SatO.Jasenrekisteri.Person (
     -- * Person
     Person(..),
+    emptyPerson,
     -- * Person identifier
     PersonId,
     -- * Modifications
     addMagicTags,
+    -- * Getters
+    personFullName,
     -- * Lenses
     personUuid,
     personBirthday,
@@ -32,7 +35,7 @@ module SatO.Jasenrekisteri.Person (
 
 import Prelude ()
 import Futurice.Prelude
-import Control.Lens                  (contains)
+import Control.Lens                  (Getter, to, contains)
 import Futurice.Generics
 import Futurice.IdMap                (HasKey (..))
 import Text.Regex.Applicative.Common (decimal)
@@ -66,8 +69,15 @@ data Person = Person
     }
     deriving (Eq, Ord, Show, Read, Generic)
 
+emptyPerson :: PersonId -> Person
+emptyPerson memberId = Person memberId 
+    "" "" "" "" "" "" "" "" mempty "" "" "" "" "" ""
+
 makeLenses ''Person
 deriveGeneric ''Person
+
+personFullName :: Getter Person Text 
+personFullName = to $ \person -> person ^. personFirstNames <> " " <> person ^. personLastName
 
 instance Csv.FromRecord Person
 instance Csv.ToRecord Person

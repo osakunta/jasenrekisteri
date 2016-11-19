@@ -1,22 +1,27 @@
-{-# LANGUAGE ConstraintKinds  #-}
-{-# LANGUAGE DataKinds        #-}
-{-# LANGUAGE DeriveGeneric    #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE KindSignatures   #-}
-{-# LANGUAGE PolyKinds        #-}
-{-# LANGUAGE TemplateHaskell  #-}
-{-# LANGUAGE TypeFamilies     #-}
-{-# LANGUAGE TypeOperators    #-}
+{-# LANGUAGE ConstraintKinds   #-}
+{-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE GADTs             #-}
+{-# LANGUAGE KindSignatures    #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PolyKinds         #-}
+{-# LANGUAGE RankNTypes        #-}
+{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE TypeFamilies      #-}
+{-# LANGUAGE TypeOperators     #-}
 module SatO.Jasenrekisteri.PersonEdit (
     PersonEdit (..),
     toEndo,
+    personEdits,
+    personEdits',
+    PE (..),
     -- * internal
     UnSingleton,
     ) where
 
 import Prelude ()
 import Futurice.Prelude
-import Control.Lens (ASetter', Getting)
 import Control.Applicative (liftA2)
 import Data.Monoid         (Endo (..))
 import Data.Type.Equality
@@ -83,26 +88,35 @@ instance M (Maybe a) where
 toEndo :: PersonEdit -> Person -> Person
 toEndo = appEndo . mconcat . SOP.hcollapse . fieldEndos
 
-fieldEndos :: '[xs] ~ SOP.Code PersonEdit => PersonEdit -> NP (K (Endo Person)) xs
-fieldEndos pe =
-    mk personBirthday peBirthday :*
-    mk personBirthplace peBirthplace :*
-    mk personLastName peLastName :*
-    mk personFirstNames peFirstNames :*
-    mk personMatrikkeli peMatrikkeli :*
-    mk personAffiliationDate peAffiliationDate :*
-    mk personUniversity peUniversity :*
-    mk personTDK peTDK :*
-    mk personAddress peAddress :*
-    mk personZipcode peZipcode :*
-    mk personCity peCity :*
-    mk personCountry peCountry :*
-    mk personEmail peEmail :*
-    mk personPhone pePhone :*
+data PE where
+    MkPE :: Text -> Text -> Lens' Person Text -> Lens' PersonEdit (Maybe Text) -> PE
+
+personEdits :: NP (K PE) (UnSingleton (SOP.Code PersonEdit))
+personEdits =
+    K (MkPE "birthday" "Syntymäpäivä" personBirthday peBirthday) :*
+    K (MkPE "birthplace" "Syntymäpaikka" personBirthplace peBirthplace) :*
+    K (MkPE "lastName" "Sukunimi" personLastName peLastName) :*
+    K (MkPE "firstNames" "Etunimet" personFirstNames peFirstNames) :*
+    K (MkPE "matrikkeli" "Matrikkeli" personMatrikkeli peMatrikkeli) :*
+    K (MkPE "affiliationDate" "Liittymispäivä" personAffiliationDate peAffiliationDate) :*
+    K (MkPE "university" "Yliopisto" personUniversity peUniversity) :*
+    K (MkPE "tDK" "Tiedekunta" personTDK peTDK) :*
+    K (MkPE "address" "Postiosoite" personAddress peAddress) :*
+    K (MkPE "zipcode" "Postinumero" personZipcode peZipcode) :*
+    K (MkPE "city" "Kaupinki" personCity peCity) :*
+    K (MkPE "country" "Maa" personCountry peCountry) :*
+    K (MkPE "email" "Sähköposti" personEmail peEmail) :*
+    K (MkPE "phone" "Puhelinnumero" personPhone pePhone) :*
     Nil
+
+personEdits' :: [PE]
+personEdits' = SOP.hcollapse personEdits
+
+fieldEndos :: PersonEdit -> NP (K (Endo Person)) (UnSingleton (SOP.Code PersonEdit))
+fieldEndos pe = SOP.hmap (K . mk . unK) personEdits
   where
-    mk :: ASetter' Person a -> Getting (Maybe a) PersonEdit (Maybe a) -> K (Endo Person) (Maybe a)
-    mk p e = K $ maybe mempty mk' (pe ^. e)
+    mk :: PE -> Endo Person
+    mk (MkPE _ _ p e) = maybe mempty mk' (pe ^. e)
       where
         mk' x = Endo $ p .~ x
 

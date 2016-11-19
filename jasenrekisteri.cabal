@@ -91,6 +91,7 @@ library
       SatO.Jasenrekisteri.Endpoints
       SatO.Jasenrekisteri.Hierarchy
       SatO.Jasenrekisteri.Markup
+      SatO.Jasenrekisteri.Pages.Changelog
       SatO.Jasenrekisteri.Pages.Logout
       SatO.Jasenrekisteri.Pages.Member
       SatO.Jasenrekisteri.Pages.Members
