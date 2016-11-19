@@ -32,8 +32,8 @@ changelogPage lu cmds world = template' lu "Muutosloki" $ do
             let memberId = cmd ^. commandMemberId
             td_ $ toHtml editor
             td_ $ toHtml $ formatTime defaultTimeLocale "%F %H:%m" $ utcToHelsinkiTime stamp
-            td_ $ a_ [ memberlogHref memberId ] $ toHtml $ fromMaybe "<tuntematon>" $
-                world ^? worldMembers . ix memberId . personFullName
+            td_ $ a_ [ memberlogHref memberId ] $ fromMaybe "<tuntematon>" $
+                world ^? worldMembers . ix memberId . personFullNameHtml
             td_ $ case cmd of
                     CmdAddTag _ tn -> do
                         span_ [ class_ "jrek-added" ] "Lisätty"
@@ -61,7 +61,7 @@ memberlogPage
     -> [(LoginUser, UTCTime, Command)]  -- ^ Changes
     -> HtmlPage "memberlog"
 memberlogPage lu memberId origWorld world cmds =
-    template' lu ("Muutosloki - " <> name <> " - " <> UUID.toText memberId) $ do
+    template' lu ("Muutosloki - " <> name <> " - " <> toHtml (UUID.toText memberId)) $ do
         row_ $ large_ 12 $ a_ [ memberHref memberId ] $ "Jäsenen sivu"
         hr_ []
         row_ $ large_ 12 $ table_ $ do
@@ -94,7 +94,9 @@ memberlogPage lu memberId origWorld world cmds =
   where
     member = fromMaybe (emptyPerson memberId) $ world ^? worldMembers . ix memberId
     origMember = fromMaybe (emptyPerson memberId) $ origWorld ^? worldMembers . ix memberId
-    name = ifEmpty "<tuntematon>" $ member ^. personFullName
+
+    name :: Html ()
+    name = member ^. personFullNameHtml
 
 ifEmpty :: Text -> Text -> Text
 ifEmpty def t

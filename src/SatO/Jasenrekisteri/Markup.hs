@@ -34,19 +34,19 @@ import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-template :: Text -> Html () -> Html () -> HtmlPage sym
+template :: Html () -> Html () -> Html () -> HtmlPage sym
 template title nav inner = page_ title $ do
     body_ $ do
         header_ $ do
             nav
-            row_ $ large_ 12 $ h1_ $ toHtml title
+            row_ $ large_ 12 $ h1_ title
             -- TODO: remove me
             row_ $ large_ 12 $ div_ [ class_ "callout alert"] $ do
                 b_ "HUOM!"
                 " Muutokset eivät tallennu pysyvästi"
         section_ inner
 
-template' :: LoginUser -> Text -> Html () -> HtmlPage sym
+template' :: LoginUser -> Html () -> Html () -> HtmlPage sym
 template' lu title = template title $ navigation lu
 
 -- http://foundation.zurb.com/sites/docs/top-bar.html
@@ -127,10 +127,7 @@ memberList_ ts ps = do
             let needle = T.toLower
                   $ person ^. personFullName
             tr_ [ data_ "member-haystack" needle ] $ do
-                td_ $ a_ [ memberHref memberId ] $ do
-                    span_ [class_ "etu"] $ toHtml $ person ^. personFirstNames
-                    " "
-                    span_ [class_ "suku"] $ toHtml $ person ^. personLastName
+                td_ $ a_ [ memberHref memberId ] $ person ^. personFullNameHtml
                 when (isn't _Empty ts) $ td_ $
                     tagList_ (ts ^.. folded . filtered (\t -> person ^. personTags . contains (t ^. key)))
                 td_ $ tagCheckbox person "2016-2017"

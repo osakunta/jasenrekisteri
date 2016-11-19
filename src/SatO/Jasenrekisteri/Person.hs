@@ -14,6 +14,7 @@ module SatO.Jasenrekisteri.Person (
     addMagicTags,
     -- * Getters
     personFullName,
+    personFullNameHtml,
     -- * Lenses
     personUuid,
     personBirthday,
@@ -35,15 +36,17 @@ module SatO.Jasenrekisteri.Person (
 
 import Prelude ()
 import Futurice.Prelude
-import Control.Lens                  (Getter, to, contains)
+import Control.Lens                  (Getter, contains, to)
 import Futurice.Generics
 import Futurice.IdMap                (HasKey (..))
 import Text.Regex.Applicative.Common (decimal)
 import Text.Regex.Applicative.Text   (RE', match, sym)
 
-import qualified Data.Csv  as Csv
-import qualified Data.Text as T
+import qualified Data.Attoparsec.Text as Atto
+import qualified Data.Csv             as Csv
+import qualified Data.Text            as T
 
+import SatO.Foundation
 import SatO.Jasenrekisteri.Tag
 
 type PersonId = UUID
@@ -70,14 +73,28 @@ data Person = Person
     deriving (Eq, Ord, Show, Read, Generic)
 
 emptyPerson :: PersonId -> Person
-emptyPerson memberId = Person memberId 
+emptyPerson memberId = Person memberId
     "" "" "" "" "" "" "" "" mempty "" "" "" "" "" ""
 
 makeLenses ''Person
 deriveGeneric ''Person
 
-personFullName :: Getter Person Text 
-personFullName = to $ \person -> person ^. personFirstNames <> " " <> person ^. personLastName
+-- | Strips underlines
+personFullName :: Getter Person Text
+personFullName = to $ \person -> T.replace "_" "" $
+    person ^. personFirstNames <> " " <> person ^. personLastName
+
+personFullNameHtml :: Monad m => Getter Person (HtmlT m ())
+personFullNameHtml = to $ \person -> formatName $
+    person ^. personFirstNames <> " " <> person ^. personLastName
+
+formatName :: Monad m => Text -> HtmlT m ()
+formatName = either (const $ i_ "<???>") id . Atto.parseOnly p
+  where
+    p = sequenceA_ <$> many (noUnderscore <|> underscored)
+    noUnderscore = toHtml <$> some (Atto.satisfy (/= '_'))
+    underscored  = span_ [ class_ "underline" ] . toHtml <$> underscored'
+    underscored' = Atto.char '_' *> many (Atto.satisfy (/= '_')) <* (() <$ Atto.char '_' <|> Atto.endOfInput)
 
 instance Csv.FromRecord Person
 instance Csv.ToRecord Person

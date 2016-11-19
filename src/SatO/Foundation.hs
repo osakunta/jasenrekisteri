@@ -103,10 +103,10 @@ instance ToHtml (HtmlPage a) where
 -- PageParams
 -------------------------------------------------------------------------------
 
-page_ :: Text -> Html () -> HtmlPage k
+page_ :: Html () -> Html () -> HtmlPage k
 page_ t b = HtmlPage $ doctypehtml_ $ do
     head_ $ do
-        title_ $ toHtml t
+        title_  t -- todo: strip tags
         meta_ [charset_ "utf-8"]
         meta_ [name_ "viewport", content_ "width=device-width, initial-scale=1.0"]
         meta_ [httpEquiv_ "x-ua-compatible", content_"ie=edge"]

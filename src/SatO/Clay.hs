@@ -51,6 +51,9 @@ css = do
     ".jrek-removed" & do
       color "#cc0000"
 
+    ".underline" & do
+      textDecoration underline
+
   where
     satoFontFamily = fontFamily ["Lucida Grande", "Helvetica", "Arial"] [sansSerif]
     tagColors =

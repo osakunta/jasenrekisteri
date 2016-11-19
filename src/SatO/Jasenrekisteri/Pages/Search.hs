@@ -41,7 +41,7 @@ searchPage' lu world mquery = template' lu title $ do
         worldMembers . folded
         . filtered (\member -> personIds ^. contains (member ^. personUuid))
   where
-    title = "Haku: " <> prettySearchQuery query
+    title = "Haku: " <> toHtml (prettySearchQuery query)
 
     -- TODO:
     query = fromMaybe defaultSearchQuery mquery

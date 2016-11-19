@@ -29,7 +29,7 @@ tagPage lu tn = do
 
 -- TODO: use closure fields
 tagPage' :: LoginUser -> World -> Tag -> HtmlPage "tag"
-tagPage' lu world tag = template' lu ("Tagi: " <> tn ^. _TagName) $ do
+tagPage' lu world tag = template' lu ("Tagi: " <> toHtml (tn ^. _TagName)) $ do
     subheader_ "Alatagit"
     tagList_ tags
     subheader_ "Jäsenet"

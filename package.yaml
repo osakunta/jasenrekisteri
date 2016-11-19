@@ -20,6 +20,7 @@ dependencies:
 - aeson-extra
 - ansi-wl-pprint
 - array
+- attoparsec
 - base-compat
 - bytestring
 - cassava

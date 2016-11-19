@@ -35,6 +35,7 @@ library
     , aeson-extra
     , ansi-wl-pprint
     , array
+    , attoparsec
     , base-compat
     , bytestring
     , cassava
@@ -120,6 +121,7 @@ executable excel
     , aeson-extra
     , ansi-wl-pprint
     , array
+    , attoparsec
     , base-compat
     , bytestring
     , cassava
@@ -179,6 +181,7 @@ executable jasenrekisteri-server
     , aeson-extra
     , ansi-wl-pprint
     , array
+    , attoparsec
     , base-compat
     , bytestring
     , cassava
@@ -239,6 +242,7 @@ test-suite unit-tests
     , aeson-extra
     , ansi-wl-pprint
     , array
+    , attoparsec
     , base-compat
     , bytestring
     , cassava

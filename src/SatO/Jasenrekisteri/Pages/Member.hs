@@ -26,7 +26,7 @@ memberPage :: LoginUser -> PersonId -> QueryM (HtmlPage "member")
 memberPage lu personId = ask <&> \world -> case world ^? worldMembers . ix personId of
     -- TODO: not found page
     Nothing -> page404 lu
-    Just p@Person {..} ->  template' lu (_personFirstNames <> " " <> _personLastName) $ do
+    Just p@Person {..} ->  template' lu (p ^. personFullNameHtml) $ do
         let pid = p ^. key
 
         row_ $ large_ 12 $ dl_ $ do
