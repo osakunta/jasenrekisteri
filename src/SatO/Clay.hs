@@ -45,6 +45,12 @@ css = do
     ".jrek-message" & do
       marginTop $ em 5
 
+    ".jrek-added" & do
+      color "#00cc00"
+
+    ".jrek-removed" & do
+      color "#cc0000"
+
   where
     satoFontFamily = fontFamily ["Lucida Grande", "Helvetica", "Arial"] [sansSerif]
     tagColors =

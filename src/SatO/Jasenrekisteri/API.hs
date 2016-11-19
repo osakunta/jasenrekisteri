@@ -35,7 +35,7 @@ type JasenrekisteriAPI =
     :<|> TagEndpoint
     :<|> JasenrekisteriAuth :> "search" :> QueryParam "query" SearchQuery :> HTMLPageEndpoint "search"
     :<|> JasenrekisteriAuth :> "command" :> ReqBody '[JSON] Command :> Post '[JSON] Text
-    :<|> JasenrekisteriAuth :> "log" :> Capture "id" PersonId :> Get '[JSON] [Text]
+    :<|> ChangelogEndpoint
     :<|> Raw
 
 jasenrekisteriAPI :: Proxy JasenrekisteriAPI
@@ -62,6 +62,15 @@ tagEndpoint = Proxy
 tagHref :: TagName -> Attribute
 tagHref tn =
     href_ $ uriToText $ safeLink jasenrekisteriAPI tagEndpoint tn
+
+type ChangelogEndpoint = JasenrekisteriAuth :> "log" :> Capture "id" PersonId :> HTMLPageEndpoint "changelog"
+
+changelogEndpoint :: Proxy ChangelogEndpoint
+changelogEndpoint = Proxy
+
+changelogHref :: PersonId -> Attribute
+changelogHref memberId =
+    href_ $ uriToText $ safeLink jasenrekisteriAPI changelogEndpoint memberId
 
 -------------------------------------------------------------------------------
 -- Utilities

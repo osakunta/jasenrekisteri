@@ -124,8 +124,7 @@ memberList_ ts ps = do
         tbody_ $ for_ ps' $ \person -> do
             let memberId = person ^. key
             let needle = T.toLower
-                  $ person ^. personFirstNames
-                  <> " " <> person ^. personLastName
+                  $ person ^. personFullName
             tr_ [ data_ "member-haystack" needle ] $ do
                 td_ $ a_ [ memberHref memberId ] $ do
                     span_ [class_ "etu"] $ toHtml $ person ^. personFirstNames

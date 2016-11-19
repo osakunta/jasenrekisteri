@@ -23,10 +23,12 @@ import SatO.Jasenrekisteri.Config
 import SatO.Jasenrekisteri.Ctx
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Hierarchy     (tags)
+import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Pages.Member
 import SatO.Jasenrekisteri.Pages.Members
 import SatO.Jasenrekisteri.Pages.Search
 import SatO.Jasenrekisteri.Pages.Tag
+import SatO.Jasenrekisteri.Pages.Changelog
 import SatO.Jasenrekisteri.Pages.Tags
 import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.Session
@@ -41,10 +43,11 @@ commandEndpoint ctx lu cmd = liftIO $ do
     ctxApplyCmd lu cmd ctx
     pure "OK"
 
-logEndpoint :: Ctx -> LoginUser -> PersonId -> Handler [Text]
-logEndpoint ctx _ memberId = liftIO $ do
+changelogHandler :: Ctx -> LoginUser -> PersonId -> Handler (HtmlPage "changelog")
+changelogHandler ctx lu memberId = liftIO $ do
     cmds <- ctxFetchCmds ctx memberId
-    pure $ textShow <$> cmds
+    world <- ctxReadWorld ctx
+    pure $ changelogPage lu memberId undefined world cmds
 
 authCheck :: Ctx -> BasicAuthCheck LoginUser
 authCheck ctx = BasicAuthCheck check
@@ -68,7 +71,7 @@ server ctx = queryEndpoint ctx membersPage
     :<|> queryEndpoint ctx tagPage
     :<|> queryEndpoint ctx searchPage
     :<|> commandEndpoint ctx
-    :<|> logEndpoint ctx
+    :<|> changelogHandler ctx
     :<|> serveDirectory "static"
 
 app :: Ctx -> Application
