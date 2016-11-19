@@ -17,6 +17,7 @@ import SatO.Jasenrekisteri.PersonEdit
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
+import qualified Data.UUID                            as UUID
 import qualified Database.PostgreSQL.Simple.FromField as P
 import qualified Database.PostgreSQL.Simple.ToField   as P
 
@@ -24,13 +25,16 @@ data Command
     = CmdAddTag PersonId TagName
     | CmdRemoveTag PersonId TagName
     | CmdEditPerson PersonId PersonEdit
+    | CmdNewPerson (Maybe PersonId) PersonEdit
   deriving (Eq, Show)
 
 commandMemberId :: Getter Command PersonId
 commandMemberId = to $ \cmd -> case cmd of
-    CmdAddTag memberId _     -> memberId
-    CmdRemoveTag memberId _  -> memberId
-    CmdEditPerson memberId _ -> memberId
+    CmdAddTag memberId _           -> memberId
+    CmdRemoveTag memberId _        -> memberId
+    CmdEditPerson memberId _       -> memberId
+    CmdNewPerson (Just memberId) _ -> memberId
+    CmdNewPerson Nothing         _ -> UUID.nil
 
 instance FromJSON Command where
     parseJSON = withObject "Command" $ \obj -> do
@@ -39,6 +43,7 @@ instance FromJSON Command where
           "add-tag"     -> CmdAddTag <$> obj .: "memberId" <*> obj .: "tagName"
           "remove-tag"  -> CmdRemoveTag <$> obj .: "memberId" <*> obj .: "tagName"
           "member-edit" -> CmdEditPerson <$> obj .: "memberId" <*> obj .: "edit"
+          "member-new"  -> CmdNewPerson <$> obj .:? "memberId" <*> obj .: "edit"
           _             -> fail $ "Unknown command: " <> cmd ^. from packed
 
 instance ToJSON Command where
@@ -57,6 +62,13 @@ instance ToJSON Command where
         , "memberId" .= mid
         , "edit"     .= pe
         ]
+    toJSON (CmdNewPerson mid pe) = object $
+        [ "type"     .= ("member-new" :: Text)
+        , "edit"     .= pe
+        ] ++
+        [ "memberId" .= mid'
+        | Just mid' <- pure mid 
+        ]
 
     toEncoding (CmdAddTag mid tn) = pairs $ mconcat
         [ "type"     .= ("add-tag" :: Text)
@@ -73,6 +85,13 @@ instance ToJSON Command where
         , "memberId" .= mid
         , "edit"     .= pe
         ]
+    toEncoding (CmdNewPerson mid pe) = pairs $ mconcat $
+        [ "type"     .= ("member-new" :: Text)
+        , "edit"     .= pe
+        ] ++
+        [ "memberId" .= mid'
+        | Just mid' <- pure mid
+        ]
 
 instance Arbitrary Command where
     arbitrary = sopArbitrary
@@ -84,6 +103,9 @@ applyCommand (CmdRemoveTag pid tn) w =
     w & worldMembers . ix pid . personTags . contains tn .~ False
 applyCommand (CmdEditPerson pid pe) w =
     w & worldMembers . ix pid %~ addMagicTags . toEndo pe
+applyCommand (CmdNewPerson Nothing _pe) w = w
+applyCommand (CmdNewPerson (Just pid) pe) w =
+    w & worldMembers . at pid ?~ (addMagicTags $ toEndo pe $ emptyPerson pid)
 
 deriveGeneric ''Command
 

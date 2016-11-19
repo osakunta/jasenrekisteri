@@ -97,6 +97,7 @@ library
       SatO.Jasenrekisteri.Pages.Logout
       SatO.Jasenrekisteri.Pages.Member
       SatO.Jasenrekisteri.Pages.Members
+      SatO.Jasenrekisteri.Pages.NewMember
       SatO.Jasenrekisteri.Pages.Search
       SatO.Jasenrekisteri.Pages.Tag
       SatO.Jasenrekisteri.Pages.Tags

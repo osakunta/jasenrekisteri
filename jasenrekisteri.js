@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
   tagModifier();
   searchButtons();
   personEdit();
+  personCreate();
   var overlay = addOverlay();
 
   // "components"
@@ -180,6 +181,34 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function personCreate() {
+    var formEl = $("div[data-jrek-member-new]");
+    if (!formEl) return;
+    var submitButton = $("button[data-jrek-action=submit]", formEl);
+    if (!submitButton) return;
+
+    console.info("Initialising new member form");
+
+    var fields = $$("input[data-jrek-field-name]");
+
+    submitButton.addEventListener("click", function () {
+      var edit = {};
+      var hasChanges = false;
+      fields.forEach(function (f) {
+        var n = f.dataset.jrekFieldName;
+        var v = f.value.trim();
+        if (v !== "") {
+          edit[n] = v;
+          hasChanges = true;
+        }
+      });
+
+      if (hasChanges) {
+        commandMemberNew(edit);
+      }
+    });
+  }
+
   function addOverlay() {
     var overlay = document.createElement("DIV");
     overlay.className = "jrek-overlay";
@@ -326,6 +355,31 @@ document.addEventListener("DOMContentLoaded", function () {
             location.reload();
           }
         }, [ "Päivitä" ]),
+      ]));
+      overlay.overlay.style.display = "";
+    });
+  }
+
+  function commandMemberNew(edit) {
+    assert(_.isPlainObject(edit), "edit should be a plain object");
+
+    console.info("command member-new", edit);
+    return command({
+      type: "member-new",
+      edit: edit,
+    })
+    .then(function (res) {
+      console.log(res);
+
+      overlay.message.innerText = "";
+      overlay.message.appendChild(dom("div", [
+        dom("p", [ "Käytäjä luotu. Siirry sen sivulle." ]),
+        dom("button", {
+          className: "button",
+          click: function () {
+            location.href = "/member/" + res;
+          }
+        }, [ "Siirry" ]),
       ]));
       overlay.overlay.style.display = "";
     });

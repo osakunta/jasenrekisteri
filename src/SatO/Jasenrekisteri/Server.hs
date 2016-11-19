@@ -27,6 +27,7 @@ import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Pages.Changelog
 import SatO.Jasenrekisteri.Pages.Member
 import SatO.Jasenrekisteri.Pages.Members
+import SatO.Jasenrekisteri.Pages.NewMember
 import SatO.Jasenrekisteri.Pages.Search
 import SatO.Jasenrekisteri.Pages.Tag
 import SatO.Jasenrekisteri.Pages.Tags
@@ -36,12 +37,19 @@ import SatO.Jasenrekisteri.World
 
 import qualified Data.Text.Encoding         as TE
 import qualified Data.Text.Encoding.Error   as TE
+import qualified Data.UUID                  as UUID
+import qualified Data.UUID.V4               as UUID
 import qualified Database.PostgreSQL.Simple as P
 
 commandEndpoint :: Ctx -> LoginUser -> Command -> Handler Text
 commandEndpoint ctx lu cmd = liftIO $ do
-    ctxApplyCmd lu cmd ctx
-    pure "OK"
+    cmd' <- case cmd of
+        CmdNewPerson _ pe -> do
+            memberId <- UUID.nextRandom
+            pure $ CmdNewPerson (Just memberId) pe
+        _                 -> pure cmd
+    ctxApplyCmd lu cmd' ctx
+    pure (UUID.toText $ cmd' ^. commandMemberId)
 
 memberlogHandler :: Ctx -> LoginUser -> PersonId -> Handler (HtmlPage "memberlog")
 memberlogHandler ctx lu memberId = liftIO $ do
@@ -74,7 +82,8 @@ basicAuthServerContext ctx = authCheck ctx :. EmptyContext
 server :: Ctx -> Server JasenrekisteriAPI
 server ctx = queryEndpoint ctx membersPage
     :<|> queryEndpoint ctx memberPage
-    :<|> changelogHandler ctx 
+    :<|> queryEndpoint ctx newMemberPage
+    :<|> changelogHandler ctx
     :<|> queryEndpoint ctx tagsPage
     :<|> queryEndpoint ctx tagPage
     :<|> queryEndpoint ctx searchPage

@@ -35,6 +35,7 @@ changelogPage lu cmds world = template' lu "Muutosloki" $ do
             td_ $ a_ [ memberlogHref memberId ] $ fromMaybe "<tuntematon>" $
                 world ^? worldMembers . ix memberId . personFullNameHtml
             td_ $ case cmd of
+                    CmdNewPerson _ _ -> "Luotu"
                     CmdAddTag _ tn -> do
                         span_ [ class_ "jrek-added" ] "Lisätty"
                         " "
@@ -81,6 +82,7 @@ memberlogPage lu memberId origWorld world cmds =
                         span_ [ class_ "jrek-removed" ] "Poistettu"
                         " "
                         tagNameLink_ world tn
+                    CmdNewPerson _ _pe -> "foo"
                     CmdEditPerson _ pe -> dl_ $ for_ personEdits' $ \(MkPE _ ftitle fp fpe) ->
                         case pe ^. fpe of
                             Nothing  -> pure ()
@@ -90,7 +92,6 @@ memberlogPage lu memberId origWorld world cmds =
                                     span_ [ class_ "jrek-removed" ] $ toHtml (ifEmpty "<tyhjä>" $ currMember ^. fp)
                                     " → "
                                     span_ [ class_ "jrek-added" ] $ toHtml new
-
   where
     member = fromMaybe (emptyPerson memberId) $ world ^? worldMembers . ix memberId
     origMember = fromMaybe (emptyPerson memberId) $ origWorld ^? worldMembers . ix memberId

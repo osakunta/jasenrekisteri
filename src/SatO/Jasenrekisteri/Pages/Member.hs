@@ -6,7 +6,7 @@ module SatO.Jasenrekisteri.Pages.Member (memberPage) where
 
 import Prelude ()
 import Futurice.Prelude
-import Control.Lens         (Getting, (<&>))
+import Control.Lens         ((<&>))
 import Control.Monad.Reader (ask)
 import Futurice.IdMap       (HasKey (..))
 
@@ -26,7 +26,7 @@ memberPage :: LoginUser -> PersonId -> QueryM (HtmlPage "member")
 memberPage lu personId = ask <&> \world -> case world ^? worldMembers . ix personId of
     -- TODO: not found page
     Nothing -> page404 lu
-    Just p@Person {..} ->  template' lu (p ^. personFullNameHtml) $ do
+    Just p@Person {..} -> template' lu (p ^. personFullNameHtml) $ do
         let pid = p ^. key
 
         row_ $ large_ 12 $ dl_ $ do
@@ -54,7 +54,7 @@ memberPage lu personId = ask <&> \world -> case world ^? worldMembers . ix perso
         row_ $ large_ 12 $ a_ [ memberlogHref pid ] "Muutosloki"
         hr_ []
         row_ $ large_ 12 $ div_ [ class_ "callout" ] $ div_ [ data_ "jrek-member-edit" $ UUID.toText pid] $ do
-            for_ (SOP.hcollapse personEditboxes) $ editbox p
+            for_ (SOP.hcollapse personEdits) $ editbox p
 
             hr_ []
             div_ [ class_ "button-group" ] $ do
@@ -71,10 +71,8 @@ tagnameList_ world ts = traverse_ (tagNameLink_ world) ts
 -- Editbox
 -------------------------------------------------------------------------------
 
-data Editbox = Editbox Text Text (Getting Text Person Text)
-
-editbox :: Person -> Editbox -> Html ()
-editbox p (Editbox i l getter) = label_ $ do
+editbox :: Person -> PE -> Html ()
+editbox p (MkPE i l getter _) = label_ $ do
     toHtml l
     input_
         [ type_ "text"
@@ -82,21 +80,3 @@ editbox p (Editbox i l getter) = label_ $ do
         , data_ "jrek-field-value" $ p ^. getter
         , value_ $ p ^. getter
         ]
-
-personEditboxes :: NP (K Editbox) (UnSingleton (SOP.Code PersonEdit))
-personEditboxes =
-    K (Editbox "birthday" "Syntymäpäivä" personBirthday) :*
-    K (Editbox "birthplace" "Syntymäpaikka" personBirthplace) :*
-    K (Editbox "lastName" "Sukunimi" personLastName) :*
-    K (Editbox "firstNames" "Etunimet" personFirstNames) :*
-    K (Editbox "matrikkeli" "Matrikkeli" personMatrikkeli) :*
-    K (Editbox "affiliationDate" "Liittymispäivä" personAffiliationDate) :*
-    K (Editbox "university" "Yliopisto" personUniversity) :*
-    K (Editbox "tDK" "Tiedekunta" personTDK) :*
-    K (Editbox "address" "Postiosoite" personAddress) :*
-    K (Editbox "zipcode" "Postinumero" personZipcode) :*
-    K (Editbox "city" "Kaupinki" personCity) :*
-    K (Editbox "country" "Maa" personCountry) :*
-    K (Editbox "email" "Sähköposti" personEmail) :*
-    K (Editbox "phone" "Puhelinnumero" personPhone) :*
-    Nil
