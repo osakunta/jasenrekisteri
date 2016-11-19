@@ -16,6 +16,7 @@ tags :: [Tag]
 tags =
     merkit
     <> [taloTag, senioriTag]
+    <> kuraattoriTags
     <> fuksiTags
     <> toList virkailijat
     <> jasenTags
@@ -75,6 +76,20 @@ hallitusVirat =
     , "tiedotussihteeri"
     -- , "opastussihteeri"
     ]
+
+-------------------------------------------------------------------------------
+-- Kuraattori
+-------------------------------------------------------------------------------
+
+kuraattoriTags :: [Tag]
+kuraattoriTags = t : ts
+  where
+    t = Tag "kuraattori" merkkiColour (tagNamesOf (folded . tagName) ts)
+    ts = kuraattoriTag <$> [ 2001, 2003 .. 2019 ]
+
+    kuraattoriTag :: Int -> Tag
+    kuraattoriTag year = Tag (_TagName # ("kuraattori" <> textShow year <> "-" <> textShow (year + 1))) merkkiColour mempty
+
 
 -------------------------------------------------------------------------------
 -- Fuksi
