@@ -47,6 +47,8 @@ ctxFetchCmds :: Ctx -> PersonId -> IO [(LoginUser, UTCTime, Command)]
 ctxFetchCmds ctx memberId = withResource (ctxPostgres ctx) $ \conn -> do
     P.query conn "SELECT username, updated, edata FROM jasen2.events WHERE edata :: json ->> 'memberId' = ? ORDER by eid DESC" (P.Only memberId)
 
-ctxFetchAllCmds :: Ctx -> IO [(LoginUser, UTCTime, Command)]
-ctxFetchAllCmds ctx = withResource (ctxPostgres ctx) $ \conn -> do
-    P.query_ conn "SELECT username, updated, edata FROM jasen2.events ORDER by eid DESC"
+ctxFetchAllCmds :: Ctx -> Maybe CID -> IO [(CID, LoginUser, UTCTime, Command)]
+ctxFetchAllCmds ctx Nothing = withResource (ctxPostgres ctx) $ \conn -> do
+    P.query_ conn "SELECT eid, username, updated, edata FROM jasen2.events ORDER by eid DESC LIMIT 100"
+ctxFetchAllCmds ctx (Just cid) = withResource (ctxPostgres ctx) $ \conn -> do
+    P.query conn "SELECT eid, username, updated, edata FROM jasen2.events WHERE eid < ? ORDER by eid DESC LIMIT 100" (P.Only cid)

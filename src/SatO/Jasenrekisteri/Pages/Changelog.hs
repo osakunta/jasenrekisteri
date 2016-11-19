@@ -20,7 +20,7 @@ import SatO.Jasenrekisteri.PersonEdit
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.World
 
-changelogPage :: LoginUser -> [(LoginUser, UTCTime, Command)] -> World -> HtmlPage "changelog"
+changelogPage :: LoginUser -> [(CID, LoginUser, UTCTime, Command)] -> World -> HtmlPage "changelog"
 changelogPage lu cmds world = template' lu "Muutosloki" $ do
     row_ $ large_ 12 $ table_ $ do
         thead_ $ tr_ $ do
@@ -28,7 +28,7 @@ changelogPage lu cmds world = template' lu "Muutosloki" $ do
             th_ "Aika"
             th_ "Jäsen"
             th_ "Muutos"
-        tbody_ $ for_ cmds $ \(editor, stamp, cmd) -> tr_ $ do
+        tbody_ $ for_ cmds $ \(_, editor, stamp, cmd) -> tr_ $ do
             let memberId = cmd ^. commandMemberId
             td_ $ toHtml editor
             td_ $ toHtml $ formatTime defaultTimeLocale "%F %H:%m" $ utcToHelsinkiTime stamp
@@ -45,6 +45,11 @@ changelogPage lu cmds world = template' lu "Muutosloki" $ do
                         tagNameLink_ world tn
                     CmdEditPerson _ pe -> toHtml $
                         "Muokattu: " <> T.intercalate ", " (mapMaybe (f pe) personEdits')
+    case safeLast cmds of
+        Nothing -> pure ()
+        Just (cid, _, _, _) -> do
+            hr_ []
+            row_ $ large_ 12 $ a_ [ changelogHref (Just cid) ] "Näytä vanhemmat"
   where
     f pe (MkPE _ ftitle _ e) = ftitle <$ pe ^. e
 
@@ -112,3 +117,8 @@ scan :: (s -> a -> (b, s)) -> s -> [a] -> [b]
 scan _f _initial []       = []
 scan  f  initial (a : as) = case f initial a of
     ~(b, s) -> b : scan f s as
+
+safeLast :: [a] -> Maybe a
+safeLast []       = Nothing
+safeLast [x]      = Just x
+safeLast (_ : xs) = safeLast xs

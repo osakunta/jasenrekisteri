@@ -64,14 +64,14 @@ tagHref :: TagName -> Attribute
 tagHref tn =
     href_ $ uriToText $ safeLink jasenrekisteriAPI tagEndpoint tn
 
-type ChangelogEndpoint = JasenrekisteriAuth :> "changelog" :> HTMLPageEndpoint "changelog"
+type ChangelogEndpoint = JasenrekisteriAuth :> "changelog" :> QueryParam "eid" CID :> HTMLPageEndpoint "changelog"
 
 changelogEndpoint :: Proxy ChangelogEndpoint
 changelogEndpoint = Proxy
 
-changelogHref :: Attribute
-changelogHref =
-    href_ $ uriToText $ safeLink jasenrekisteriAPI changelogEndpoint
+changelogHref :: Maybe CID -> Attribute
+changelogHref cid =
+    href_ $ uriToText $ safeLink jasenrekisteriAPI changelogEndpoint cid
 
 type MemberlogEndpoint = JasenrekisteriAuth :> "member-log" :> Capture "id" PersonId :> HTMLPageEndpoint "memberlog"
 

@@ -50,9 +50,9 @@ memberlogHandler ctx lu memberId = liftIO $ do
     let origWorld = ctxOrigWorld ctx
     pure $ memberlogPage lu memberId origWorld world cmds
 
-changelogHandler :: Ctx -> LoginUser -> Handler (HtmlPage "changelog")
-changelogHandler ctx lu = liftIO $ do
-    cmds <- ctxFetchAllCmds ctx
+changelogHandler :: Ctx -> LoginUser -> Maybe CID -> Handler (HtmlPage "changelog")
+changelogHandler ctx lu cid = liftIO $ do
+    cmds <- ctxFetchAllCmds ctx cid
     world <- ctxReadWorld ctx
     pure $ changelogPage lu cmds world
 

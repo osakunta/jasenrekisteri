@@ -10,6 +10,7 @@ import Control.Lens      hiding ((.=))
 import Data.Aeson
 import Data.Monoid       (mconcat)
 import Futurice.Generics
+import Web.HttpApiData   (FromHttpApiData (..), ToHttpApiData (..))
 
 import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.PersonEdit
@@ -95,3 +96,17 @@ instance P.FromField Command where
         case eitherDecode bs of
             Right x  -> return x
             Left err -> P.returnError P.ConversionFailed f err
+
+newtype CID = CID Int64
+
+instance P.ToField CID where
+    toField (CID cid) = P.toField cid
+
+instance P.FromField CID where
+    fromField f mdata = CID <$> P.fromField f mdata
+
+instance ToHttpApiData CID where
+    toUrlPiece (CID cid) = toUrlPiece cid
+
+instance FromHttpApiData CID where
+    parseUrlPiece x = CID <$> parseUrlPiece x
