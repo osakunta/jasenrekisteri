@@ -37,6 +37,7 @@ module SatO.Jasenrekisteri.Person (
 import Prelude ()
 import Futurice.Prelude
 import Control.Lens                  (Getter, contains, to)
+import Data.Char                     (isLetter)
 import Futurice.Generics
 import Futurice.IdMap                (HasKey (..))
 import Text.Regex.Applicative.Common (decimal)
@@ -89,12 +90,16 @@ personFullNameHtml = to $ \person -> formatName $
     person ^. personFirstNames <> " " <> person ^. personLastName
 
 formatName :: Monad m => Text -> HtmlT m ()
-formatName = either (const $ i_ "<???>") id . Atto.parseOnly p
+formatName = either (const $ i_ "<???>") id . Atto.parseOnly (p <* Atto.endOfInput)
   where
-    p = sequenceA_ <$> many (noUnderscore <|> underscored)
-    noUnderscore = toHtml <$> some (Atto.satisfy (/= '_'))
+    p = sequenceA_ <$> many (underscored <|> asterisk <|> noUnderscore)
+    noUnderscore = toHtml <$> some (Atto.satisfy (`notElem` ['_', '*']))
+    -- _Foo_
     underscored  = span_ [ class_ "underline" ] . toHtml <$> underscored'
     underscored' = Atto.char '_' *> many (Atto.satisfy (/= '_')) <* (() <$ Atto.char '_' <|> Atto.endOfInput)
+    -- *Foo
+    asterisk     = span_ [ class_ "underline" ] . toHtml <$> asterisk'
+    asterisk'    = Atto.char '*' *> many (Atto.satisfy isLetter)
 
 instance Csv.FromRecord Person
 instance Csv.ToRecord Person
