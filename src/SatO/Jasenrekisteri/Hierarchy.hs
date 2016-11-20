@@ -98,7 +98,7 @@ kaikkiVirat =
     , mk "musiikkihuoneenhoitaja"       (past ... future)
     , mk "haromäen-isäntä"              (past ... future)
     , mk "valvontatilintarkastaja"      (past ... future)
-    , mk "vara-valvontatilintarkastaja" (past ... future)
+    , mk "varavalvontatilintarkastaja"  (past ... future)
     , mk "seniorisihteeri"              (2017 ... future)
     , mk "juhlamestari"                 (past ... future)
     ]
