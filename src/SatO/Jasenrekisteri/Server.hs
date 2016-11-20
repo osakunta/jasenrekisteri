@@ -41,13 +41,9 @@ import qualified Data.UUID                  as UUID
 import qualified Data.UUID.V4               as UUID
 import qualified Database.PostgreSQL.Simple as P
 
-commandEndpoint :: Ctx -> LoginUser -> Command -> Handler Text
+commandEndpoint :: Ctx -> LoginUser -> Command Proxy -> Handler Text
 commandEndpoint ctx lu cmd = liftIO $ do
-    cmd' <- case cmd of
-        CmdNewPerson _ pe -> do
-            memberId <- UUID.nextRandom
-            pure $ CmdNewPerson (Just memberId) pe
-        _                 -> pure cmd
+    cmd' <- traverseCommand (\_ -> I <$> UUID.nextRandom) cmd
     ctxApplyCmd lu cmd' ctx
     pure (UUID.toText $ cmd' ^. commandMemberId)
 
