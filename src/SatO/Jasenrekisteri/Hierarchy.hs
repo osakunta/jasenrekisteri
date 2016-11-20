@@ -61,12 +61,12 @@ intervalSpan a = [inf a .. sup a]
 
 hallitusVirat :: [(Text, Interval Int)]
 hallitusVirat =
-    [ mk "hpj"              (past ... 2011)
-    , mk "pääsihteeri"      (past ... 2011)
-    , mk "isäntä"           (past ... 2011)
-    , mk "emäntä"           (past ... 2011)
+    [ mk "hpj"              (past ... future)
+    , mk "pääsihteeri"      (past ... future)
+    , mk "isäntä"           (past ... future)
+    , mk "emäntä"           (past ... future)
     , mk "tiedotussihteeri" (past ... future)
-    , mk "opastussihteeri"  (past ... 2011)
+    , mk "opastussihteeri"  (2011 ... future)
     ]
   where
     mk = (,)
