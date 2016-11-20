@@ -43,7 +43,7 @@ virkailijat = IdMap.fromFoldable $ virat ++ virat2 ++ hallitus
     virat2 :: [Tag]
     virat2 = flip map [virkailijatFrom .. virkailijatTo] $ \year ->
         Tag (TagName $ "virkailijat" <> textShow year) virkailijaColour $ tagNamesOf folded $
-            flip mapMaybe kaikkiVirat $ \(name, years) ->
+            (:) (TagName $ "hallitus" <> textShow year) $ flip mapMaybe kaikkiVirat $ \(name, years) ->
                 if Interval.elem year years
                     then Just $ TagName $ name <> textShow year
                     else Nothing
