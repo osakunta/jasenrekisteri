@@ -80,7 +80,7 @@ kaikkiVirat =
     , mk "isäntä"                       (past ... future)
     , mk "emäntä"                       (past ... future)
     , mk "tiedotussihteeri"             (past ... future)
-    , mk "pääToimittaja"                (past ... future)
+    , mk "päätoimittaja"                (past ... future)
     , mk "taloudenhoitaja"              (past ... future)
     , mk "urheiluohjaaja"               (past ... future)
     , mk "kulttuurisihteeri"            (past ... future)
