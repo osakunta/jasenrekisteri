@@ -20,7 +20,7 @@ import SatO.Jasenrekisteri.PersonEdit
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.World
 
-changelogPage :: LoginUser -> [(CID, LoginUser, UTCTime, Command)] -> World -> HtmlPage "changelog"
+changelogPage :: LoginUser -> [(CID, LoginUser, UTCTime, Command I)] -> World -> HtmlPage "changelog"
 changelogPage lu cmds world = template' lu "Muutosloki" $ do
     row_ $ large_ 12 $ table_ $ do
         thead_ $ tr_ $ do
@@ -35,6 +35,7 @@ changelogPage lu cmds world = template' lu "Muutosloki" $ do
             td_ $ a_ [ memberlogHref memberId ] $ fromMaybe "<tuntematon>" $
                 world ^? worldMembers . ix memberId . personFullNameHtml
             td_ $ case cmd of
+                    CmdNewPerson _ _ -> "Luotu"
                     CmdAddTag _ tn -> do
                         span_ [ class_ "jrek-added" ] "Lisätty"
                         " "
@@ -58,7 +59,7 @@ memberlogPage
     -> PersonId                         -- ^ Person's memberlog
     -> World                            -- ^ Original world, needed to show "from" states.
     -> World                            -- ^ Current world
-    -> [(LoginUser, UTCTime, Command)]  -- ^ Changes
+    -> [(LoginUser, UTCTime, Command I)]  -- ^ Changes
     -> HtmlPage "memberlog"
 memberlogPage lu memberId origWorld world cmds =
     template' lu ("Muutosloki - " <> name <> " - " <> toHtml (UUID.toText memberId)) $ do
@@ -81,6 +82,7 @@ memberlogPage lu memberId origWorld world cmds =
                         span_ [ class_ "jrek-removed" ] "Poistettu"
                         " "
                         tagNameLink_ world tn
+                    CmdNewPerson _ _pe -> "foo"
                     CmdEditPerson _ pe -> dl_ $ for_ personEdits' $ \(MkPE _ ftitle fp fpe) ->
                         case pe ^. fpe of
                             Nothing  -> pure ()
@@ -90,7 +92,6 @@ memberlogPage lu memberId origWorld world cmds =
                                     span_ [ class_ "jrek-removed" ] $ toHtml (ifEmpty "<tyhjä>" $ currMember ^. fp)
                                     " → "
                                     span_ [ class_ "jrek-added" ] $ toHtml new
-
   where
     member = fromMaybe (emptyPerson memberId) $ world ^? worldMembers . ix memberId
     origMember = fromMaybe (emptyPerson memberId) $ origWorld ^? worldMembers . ix memberId
@@ -105,8 +106,8 @@ ifEmpty def t
 
 members
     :: Person
-    -> [(LoginUser, UTCTime, Command)]
-    -> [(Person, LoginUser, UTCTime, Command)]
+    -> [(LoginUser, UTCTime, Command f)]
+    -> [(Person, LoginUser, UTCTime, Command f)]
 members = scan f
   where
     f member (lu, stamp, command) = ((member, lu, stamp, command), member')
