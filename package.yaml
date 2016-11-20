@@ -35,6 +35,7 @@ dependencies:
 - generics-sop
 - hashable
 - http-api-data
+- intervals
 - lens
 - lucid
 - mmorph
