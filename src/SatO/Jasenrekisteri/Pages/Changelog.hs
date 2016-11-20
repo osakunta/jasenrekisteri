@@ -70,7 +70,7 @@ memberlogPage lu memberId origWorld world cmds =
                 th_ "Muokkaaja"
                 th_ "Aika"
                 th_ "Muutos"
-            tbody_ $ for_ (members origMember cmds) $ \(currMember, editor, stamp, cmd) -> tr_ $ do
+            tbody_ $ for_ (reverse $ members origMember $ reverse cmds) $ \(currMember, editor, stamp, cmd) -> tr_ $ do
                 td_ $ toHtml editor
                 td_ $ toHtml $ formatTime defaultTimeLocale "%F %H:%m" $ utcToHelsinkiTime stamp
                 td_ $ case cmd of
@@ -82,7 +82,12 @@ memberlogPage lu memberId origWorld world cmds =
                         span_ [ class_ "jrek-removed" ] "Poistettu"
                         " "
                         tagNameLink_ world tn
-                    CmdNewPerson _ _pe -> "foo"
+                    CmdNewPerson _ pe  -> dl_ $ for_ personEdits' $ \(MkPE _ ftitle _ fpe) ->
+                        case pe ^. fpe of
+                            Nothing  -> pure ()
+                            Just new -> do
+                                dt_ $ toHtml ftitle
+                                dd_ $ span_ [ class_ "jrek-added" ] $ toHtml new
                     CmdEditPerson _ pe -> dl_ $ for_ personEdits' $ \(MkPE _ ftitle fp fpe) ->
                         case pe ^. fpe of
                             Nothing  -> pure ()
@@ -106,15 +111,16 @@ ifEmpty def t
 
 members
     :: Person
-    -> [(LoginUser, UTCTime, Command f)]
-    -> [(Person, LoginUser, UTCTime, Command f)]
+    -> [(LoginUser, UTCTime, Command I)]
+    -> [(Person, LoginUser, UTCTime, Command I)]
 members = scan f
   where
     f member (lu, stamp, command) = ((member, lu, stamp, command), member')
       where
         member' = case command of
-            CmdEditPerson _ pe -> toEndo pe member
-            _                  -> member
+            CmdEditPerson _ pe            -> toEndo pe member
+            CmdNewPerson (I memberId)  pe -> toEndo pe $ emptyPerson memberId
+            _                             -> member
 
 scan :: (s -> a -> (b, s)) -> s -> [a] -> [b]
 scan _f _initial []       = []

@@ -46,7 +46,7 @@ css = do
       marginTop $ em 5
 
     ".jrek-added" & do
-      color "#00cc00"
+      color "#0066cc"
 
     ".jrek-removed" & do
       color "#cc0000"
