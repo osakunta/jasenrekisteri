@@ -1,19 +1,21 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE TupleSections     #-}
 module SatO.Jasenrekisteri.Pages.Search (searchPage) where
 
 import Prelude ()
 import Futurice.Prelude
-import Control.Lens
-import Control.Lens.Att
 import Control.Monad.Reader (ask)
 import Data.Maybe           (mapMaybe)
+import Futurice.IdMap       (key)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set        as Set
+import qualified Data.Text       as T
 import qualified Futurice.IdMap  as IdMap
 
+import SatO.Jasenrekisteri.API
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Person
@@ -39,35 +41,18 @@ searchPage' lu world mquery = template' lu title $ do
                 "Haku"
                 input_ [ name_ "query", type_ "text", value_ $ prettySearchQuery query ]
             input_ [ type_ "submit" , value_ "Hae", class_ "button primary" ]
-    memberList_ queryTags' $ world ^..
-        worldMembers . folded
-        . filtered (\member -> personIds ^. contains (member ^. personUuid))
+    memberTagList_ world (itoList personIds)
   where
     title = "Haku: " <> toHtml (prettySearchQuery query)
 
     -- TODO:
     query = fromMaybe defaultSearchQuery mquery
 
-    -- TODO: extract positive tags
-    queryTags' = (\tn -> world ^. worldTags . att tn) <$> (queryTags allTags query ^.. folded)
-      where
-        allTags = Map.keysSet (world ^. worldTagPersons)
-
-    personIds :: Set PersonId
+    personIds :: Map PersonId (Set TagName)
     personIds = performSearchQuery
         (world ^. worldTagPersons)
         (IdMap.keysSet $ world ^. worldMembers)
         query
-
--- | TODO: take all tags
-queryTags :: Set TagName -> SearchQuery -> Set TagName
-queryTags _ (QLiteral tn)   = Set.singleton tn
-queryTags a (QOr q p)       = Set.union (queryTags a q) (queryTags a p)
-queryTags a (QAnd q p)      = Set.union (queryTags a q) (queryTags a p)
-queryTags a (QNot q)        = queryTags a q
-queryTags a (QInterval x y) = Set.fromList $ filter p $ Set.toList a
-  where
-    p tn = x <= tn && tn <= y
 
 defaultSearchQuery :: SearchQuery
 defaultSearchQuery = QAnd "talo" (QNot "2016-2017")
@@ -84,15 +69,55 @@ performSearchQuery
     :: Map TagName (Set PersonId)  -- ^ Tag lookup
     -> Set PersonId                -- ^ All persons
     -> SearchQuery
-    -> Set PersonId
+    -> Map PersonId (Set TagName)
+       -- ^ Returns persons, and an evidence why they are in the result set.
 performSearchQuery l a = go
   where
-    go (QLiteral tn)   = fromMaybe mempty $ l ^? ix tn
-    go (QOr q p)       = Set.union (go q) (go p)
-    go (QAnd q p)      = Set.intersection (go q) (go p)
-    go (QNot q)        = Set.difference a (go q)
-    go (QInterval x y) = Set.unions $ mapMaybe p $ itoList l
+    go (QLiteral tn)     = maybe mempty (literal tn) $ l ^? ix tn
+    go (QOr q p)         = Map.unionWith (<>) (go q) (go p)
+    go (QAnd q p)        = Map.intersectionWith (<>) (go q) (go p)
+    go (QNot q)
+        = Map.fromSet (const mempty)
+        $ Set.difference a
+        $ Map.keysSet
+        $ go q
+    go (QInterval x y) = Map.unionsWith (<>) $ map p $ itoList l
       where
         p (tn, s)
-            | x <= tn && tn <= y = Just s
-            | otherwise          = Nothing
+            | x <= tn && tn <= y = literal tn s
+            | otherwise          = Map.empty
+
+    literal tn s = Map.fromSet (const $ Set.singleton tn) s
+
+
+-------------------------------------------------------------------------------
+-- Markup
+-------------------------------------------------------------------------------
+
+memberTagList_
+    :: Monad m
+    => World
+    -> [(PersonId, Set TagName)]
+    -> HtmlT m ()
+memberTagList_ world xs = do
+    row_ $ do
+        largemed_ 6 $ toHtml $  "Yhteensä: " <> (show $ length xs')
+        largemed_ 6 $ label_ $ do
+            "Suodata: "
+            input_ [ type_ "text", id_ "member-filter" ]
+    row_ . large_ 12 $ table_ [ id_ "member-list", class_ "hover" ] $ do
+        thead_ $ tr_ $ do
+            th_ $ "Nimi"
+            th_ "Tagit"
+            th_ $ "2016-2017"
+        tbody_ $ for_ xs' $ \(person, tns) -> do
+            let memberId = person ^. key
+            let needle = T.toLower $ person ^. personFullName
+            tr_ [ data_ "member-haystack" needle ] $ do
+                td_ $ a_ [ memberHref memberId ] $ person ^. personFullNameHtml
+                td_ $ tagnameList_ world (tns ^.. folded)
+                td_ $ tagCheckbox person "2016-2017"
+  where
+    xs' = sortOn (view personFullName . fst)
+        $ mapMaybe lookupPerson xs
+    lookupPerson (memberId, tns) = (,tns) <$> world ^? worldMembers . ix memberId

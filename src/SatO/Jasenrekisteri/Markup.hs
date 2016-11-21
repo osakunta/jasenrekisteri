@@ -10,8 +10,10 @@ module SatO.Jasenrekisteri.Markup (
     tagLink',
     tagNameLink_,
     tagList_,
+    tagnameList_,
     -- * Members
     memberList_,
+    tagCheckbox,
     -- * Re-export
     module SatO.Foundation,
     ) where
@@ -105,6 +107,8 @@ tagLink_ tag = tagLink' tag (tag ^. key . _TagName)
 tagList_ :: Monad m => [Tag] -> HtmlT m ()
 tagList_ = row_ . large_ 12 . traverse_ tagLink_
 
+tagnameList_ :: Monad m => World -> [TagName] -> HtmlT m ()
+tagnameList_ world ts = traverse_ (tagNameLink_ world) ts
 -------------------------------------------------------------------------------
 -- Members
 -------------------------------------------------------------------------------

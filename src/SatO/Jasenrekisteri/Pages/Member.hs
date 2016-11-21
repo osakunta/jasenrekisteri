@@ -61,13 +61,6 @@ memberPage lu personId = ask <&> \world -> case world ^? worldMembers . ix perso
                 button_ [ data_ "jrek-action" "submit", class_ "button" ] "Tallenna"
 
 -------------------------------------------------------------------------------
--- Markup
--------------------------------------------------------------------------------
-
-tagnameList_ :: World -> [TagName] -> Html ()
-tagnameList_ world ts = traverse_ (tagNameLink_ world) ts
-
--------------------------------------------------------------------------------
 -- Editbox
 -------------------------------------------------------------------------------
 
