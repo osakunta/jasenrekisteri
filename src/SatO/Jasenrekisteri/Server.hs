@@ -6,10 +6,12 @@ module SatO.Jasenrekisteri.Server (defaultMain) where
 
 import Prelude ()
 import Futurice.Prelude
+import Control.Lens           (to)
 import Control.Concurrent.STM (atomically, writeTVar)
 import Data.Aeson.Compat
 import Data.List              (foldl')
 import Data.Pool              (withResource)
+import Futurice.IdMap         (key)
 import Network.Wai
 import Servant
 import System.Environment     (getArgs)
@@ -32,7 +34,9 @@ import SatO.Jasenrekisteri.Pages.Search
 import SatO.Jasenrekisteri.Pages.Tag
 import SatO.Jasenrekisteri.Pages.Tags
 import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.SearchData
 import SatO.Jasenrekisteri.Session
+import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
 import qualified Data.Text.Encoding         as TE
@@ -60,6 +64,30 @@ changelogHandler ctx lu cid = liftIO $ do
     world <- ctxReadWorld ctx
     pure $ changelogPage lu cmds world
 
+searchDataHandler :: Ctx -> LoginUser -> Handler [SearchItem]
+searchDataHandler ctx _ = liftIO $ do
+    world <- ctxReadWorld ctx
+    let members = world ^.. worldMembers . folded . to memberSearchItem
+    let tags' = world ^.. worldTags . ifoldedTagHierarchy . tagName . to tagSearchItem
+    pure $ sort $ members ++ tags'
+  where
+    memberSearchItem :: Person -> SearchItem
+    memberSearchItem m = SearchItem
+        { searchItemLabel = m ^. personFullName
+        , searchItemValue = m ^. personFullName
+        , searchItemType  = SearchItemMember
+        , searchItemHref  = memberHrefText (m ^. key)
+        }
+
+    tagSearchItem :: TagName -> SearchItem
+    tagSearchItem tn@(TagName tn') = SearchItem
+        { searchItemLabel = tn'
+        , searchItemValue = tn'
+        , searchItemType  = SearchItemTag
+        , searchItemHref  = tagHrefText tn
+        }
+
+
 authCheck :: Ctx -> BasicAuthCheck LoginUser
 authCheck ctx = BasicAuthCheck check
   where
@@ -85,6 +113,7 @@ server ctx = queryEndpoint ctx membersPage
     :<|> queryEndpoint ctx searchPage
     :<|> commandEndpoint ctx
     :<|> memberlogHandler ctx
+    :<|> searchDataHandler ctx
     :<|> serveDirectory "static"
 
 app :: Ctx -> Application

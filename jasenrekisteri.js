@@ -4,6 +4,9 @@
 */
 
 document.addEventListener("DOMContentLoaded", function () {
+  console.info("Initialising foundation");
+  jQuery(document).foundation();
+
   console.info("Initialising jasenrekisteri");
 
   var eventNames = [ "click", "change" ];
@@ -15,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
   searchButtons();
   personEdit();
   personCreate();
+  searchBox();
   var overlay = addOverlay();
 
   // "components"
@@ -224,6 +228,74 @@ document.addEventListener("DOMContentLoaded", function () {
     return {
       overlay: overlay,
       message: message,
+    };
+  }
+
+  function searchBox() {
+    var box = $(".top-bar .search");
+    if (!box) return;
+
+    console.info("Initialising search box");
+
+    var fetchData = _.once(function () {
+      var headers = new Headers();
+      headers.append("Accept", "application/json");
+
+      var opts = {
+        method: "GET",
+        headers: headers,
+        credentials: "same-origin",
+      };
+
+      return fetch("/search-data", opts)
+        .then(function (res) {
+          return res.json();
+        });
+    });
+
+    function typeToEl(type) {
+      if (type === "tag") {
+        return dom("i", [ "tägi: " ]);
+      } else {
+        return dom("i", [ "jäsen: " ]);
+      }
+    }
+
+    var ac = jQuery(box).autocomplete({
+      minLength: 3,
+
+      source: function (req, res) {
+        var term = req.term.toLowerCase();
+        fetchData().then(function (x) {
+          // check that items match the term
+          x = x.filter(function (item) {
+            return item.value.toLowerCase().includes(term);
+          });
+
+          res(x);
+        });
+      },
+
+      select: function (ev, ui) {
+        console.debug("Selected", ui);
+        location.href = ui.item.href;
+      },
+    });
+
+    ac.data("ui-autocomplete")._renderItem = function (ul, item) {
+      var li = dom("li", {
+        className: "ui-menu-item"
+      },
+      [ dom("span", { className: "ui-menu-item-wrapper" }, [
+          typeToEl(item.type), item.label
+        ])
+      ]);
+      var li = jQuery(li);
+      li.focus(function () {
+        console.log("focus");
+      });
+      ul.append(li);
+      return li;
     };
   }
 

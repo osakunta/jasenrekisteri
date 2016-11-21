@@ -54,6 +54,17 @@ css = do
     ".underline" & do
       textDecoration underline
 
+    ".ui-menu" & do
+        backgroundColor "#ffffff"
+
+    ".ui-state-focus" & do
+        color "#0066cc"
+        fontWeight bold
+
+    ".ui-state-active" & do
+        color "#0066cc"
+        fontWeight bold
+
   where
     satoFontFamily = fontFamily ["Lucida Grande", "Helvetica", "Arial"] [sansSerif]
     tagColors =

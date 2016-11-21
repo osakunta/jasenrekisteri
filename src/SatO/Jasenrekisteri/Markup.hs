@@ -53,20 +53,23 @@ template' lu title = template title $ navigation lu
 navigation :: Monad m => LoginUser -> HtmlT m ()
 navigation lu = do
     div_ [ class_ "top-bar" ] $ do
-        div_ [ class_ "top-bar-left" ] $ ul_ [ class_ "dropdown menu" ] $ do
+        div_ [ class_ "top-bar-left" ] $ ul_ [ class_ "dropdown menu", data_ "dropdown-menu" "" ] $ do
             li_ [ class_ "menu-text"] $ do
                 "Jäsenrekisteri"
                 sup_ "2"
             li_ $ a_ [href_ "/"] "Jäsenet"
             li_ $ a_ [newMemberHref] "Uusi"
-            li_ $ a_ [href_ "/tags"] "Tagit"
-            li_ $ a_ [tagHref "2014-2015"] "2014-2014"
-            li_ $ a_ [tagHref "2015-2016"] "2015-2016"
-            li_ $ a_ [tagHref "2016-2017"] "2016-2017"
-            li_ $ a_ [tagHref "talo"] "Talo"
+            li_ $ a_ [href_ "/tags"] "Tägit"
+            li_ [ class_ "is-dropdown-submenu-parent"] $ do
+                a_ [tagHref "2016-2017"] "2016-2017"
+                ul_ [ class_ "menu" ] $ do
+                    li_ $ a_ [tagHref "2015-2016"] "2015-2016"
+                    li_ $ a_ [tagHref "2014-2015"] "2014-2014"
+                    li_ $ a_ [tagHref "talo"] "Talo"
             li_ $ a_ [changelogHref Nothing ] "Muutosloki"
             li_ $ a_ [href_ "/search" ] "Haku"
-        div_ [ class_ "top-bar-right" ] $ ul_ [ class_ "dropdown menu" ] $ do
+        div_ [ class_ "top-bar-right" ] $ ul_ [ class_ "menu" ] $ do
+            li_ $ input_ [ class_ "search", placeholder_ "hae käyttäjä tai tägi" ]
             li_ [ class_ "menu-text" ] $ toHtml $ "Terve " <> getLoginUser lu
 
 page404 :: LoginUser -> HtmlPage sym
