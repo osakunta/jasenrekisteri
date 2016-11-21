@@ -265,11 +265,13 @@ document.addEventListener("DOMContentLoaded", function () {
       minLength: 3,
 
       source: function (req, res) {
-        var term = req.term.toLowerCase();
+        var terms = req.term.toLowerCase().split(/ +/);
         fetchData().then(function (x) {
           // check that items match the term
           x = x.filter(function (item) {
-            return item.value.toLowerCase().includes(term);
+            return terms.every(function (term) {
+              return item.value.toLowerCase().includes(term);
+            });
           });
 
           res(x);
