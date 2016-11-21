@@ -3,14 +3,16 @@
 {-# LANGUAGE RecordWildCards   #-}
 module SatO.Jasenrekisteri.Pages.Search (searchPage) where
 
+import Prelude ()
+import Futurice.Prelude
 import Control.Lens
 import Control.Lens.Att
-import Futurice.Prelude
 import Control.Monad.Reader (ask)
-import Prelude ()
+import Data.Maybe           (mapMaybe)
 
-import qualified Data.Set       as Set
-import qualified Futurice.IdMap as IdMap
+import qualified Data.Map.Strict as Map
+import qualified Data.Set        as Set
+import qualified Futurice.IdMap  as IdMap
 
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
@@ -47,7 +49,9 @@ searchPage' lu world mquery = template' lu title $ do
     query = fromMaybe defaultSearchQuery mquery
 
     -- TODO: extract positive tags
-    queryTags' = (\tn -> world ^. worldTags . att tn) <$> (queryTags query ^.. folded)
+    queryTags' = (\tn -> world ^. worldTags . att tn) <$> (queryTags allTags query ^.. folded)
+      where
+        allTags = Map.keysSet (world ^. worldTagPersons)
 
     personIds :: Set PersonId
     personIds = performSearchQuery
@@ -55,22 +59,25 @@ searchPage' lu world mquery = template' lu title $ do
         (IdMap.keysSet $ world ^. worldMembers)
         query
 
-queryTags :: SearchQuery -> Set TagName
-queryTags (QLiteral tn) = Set.singleton tn
-queryTags (QOr q p)     = Set.union (queryTags q) (queryTags p)
-queryTags (QAnd q p)    = Set.union (queryTags q) (queryTags p)
-queryTags (QNot q)      = queryTags q
+-- | TODO: take all tags
+queryTags :: Set TagName -> SearchQuery -> Set TagName
+queryTags _ (QLiteral tn)   = Set.singleton tn
+queryTags a (QOr q p)       = Set.union (queryTags a q) (queryTags a p)
+queryTags a (QAnd q p)      = Set.union (queryTags a q) (queryTags a p)
+queryTags a (QNot q)        = queryTags a q
+queryTags a (QInterval x y) = Set.fromList $ filter p $ Set.toList a
+  where
+    p tn = x <= tn && tn <= y
 
 defaultSearchQuery :: SearchQuery
-defaultSearchQuery = QAnd
-    (QLiteral "talo")
-    (QNot (QLiteral "2016-2017"))
+defaultSearchQuery = QAnd "talo" (QNot "2016-2017")
 
 exampleQueries :: [SearchQuery]
 exampleQueries =
     [ defaultSearchQuery
-    , QAnd (QLiteral "2016-2017") (QNot (QLiteral "talo"))
-    , QOr (QLiteral "virkailijat2016") (QLiteral "virkailijat2017")
+    , QAnd "2016-2017" (QNot "talo")
+    , QOr "virkailijat2016" "virkailijat2017"
+    , QInterval "hallitus2014" "hallitus2017"
     ]
 
 performSearchQuery
@@ -80,7 +87,12 @@ performSearchQuery
     -> Set PersonId
 performSearchQuery l a = go
   where
-    go (QLiteral tn) = fromMaybe mempty $ l ^? ix tn
-    go (QOr q p)     = Set.union (go q) (go p)
-    go (QAnd q p)    = Set.intersection (go q) (go p)
-    go (QNot q)      = Set.difference a (go q)
+    go (QLiteral tn)   = fromMaybe mempty $ l ^? ix tn
+    go (QOr q p)       = Set.union (go q) (go p)
+    go (QAnd q p)      = Set.intersection (go q) (go p)
+    go (QNot q)        = Set.difference a (go q)
+    go (QInterval x y) = Set.unions $ mapMaybe p $ itoList l
+      where
+        p (tn, s)
+            | x <= tn && tn <= y = Just s
+            | otherwise          = Nothing

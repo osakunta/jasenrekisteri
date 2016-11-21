@@ -19,7 +19,11 @@ data SearchQuery
     | QOr SearchQuery SearchQuery
     | QAnd SearchQuery SearchQuery
     | QNot SearchQuery
+    | QInterval TagName TagName
   deriving (Eq, Show)
+
+instance IsString SearchQuery where
+    fromString = QLiteral . fromString
 
 qOr :: SearchQuery -> SearchQuery -> SearchQuery
 qOr = QOr
@@ -28,10 +32,11 @@ qAnd :: SearchQuery -> SearchQuery -> SearchQuery
 qAnd = QAnd
 
 qNot :: SearchQuery -> SearchQuery
-qNot (QNot q)       = q
-qNot (QOr q p)      = QAnd (qNot q) (qNot p)
-qNot (QAnd q p)     = QOr (qNot q) (qNot p)
-qNot q@(QLiteral _) = QNot q
+qNot (QNot q)          = q
+qNot (QOr q p)         = QAnd (qNot q) (qNot p)
+qNot (QAnd q p)        = QOr (qNot q) (qNot p)
+qNot q@(QLiteral _)    = QNot q
+qNot q@(QInterval _ _) = QNot q
 
 -- /TODO/ avoid unnecessary parentheses
 prettySearchQuery :: SearchQuery -> Text
@@ -44,6 +49,7 @@ prettySearchQuery'  d (QAnd q p) = prettyParens (d > andPrec) $
 prettySearchQuery'  d (QOr q p) = prettyParens (d > orPrec) $
     prettySearchQuery' orPrec q <> " OR " <> prettySearchQuery' orPrec p
 prettySearchQuery' _d (QNot q) = "NOT " <> prettySearchQuery' notPrec q
+prettySearchQuery' _d (QInterval a b) = "[" <> (a ^. _TagName) <> " .. " <> (b ^. _TagName) <> "]"
 
 prettyParens :: Bool -> Text -> Text
 prettyParens True t  = "(" <> t <> ")"
@@ -64,8 +70,13 @@ searchQueryParser = queryP
     andP      = foldl QAnd <$> notP <*> many (stringP "AND" *> notP)
     notP      = maybe id (\_ -> QNot) <$> optional (stringP "NOT") <*> litP
 
-    litP      = litP' <|> parensP queryP
-    litP'     = QLiteral . fromString <$> some (alphaNum <|> oneOf "-") <* spaces <?> "Tagin nimi"
+    litP      = litP' <|> parensP queryP <|> intervalP
+    litP'     = QLiteral <$> tagP
+
+    tagP      = fromString <$> some (alphaNum <|> oneOf "-") <* spaces <?> "Tagin nimi"
+
+    intervalP = between (char '[' *> spaces) (char ']' *> spaces) $
+        QInterval <$> tagP <* stringP ".." <*> tagP
 
     stringP s = string s <* spacesP
     spacesP   = space *> spaces -- at least one space
