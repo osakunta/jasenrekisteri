@@ -19,6 +19,7 @@ import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.SearchQuery
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
+import SatO.Jasenrekisteri.SearchData
 
 type HTMLPageEndpoint sym = Get '[HTML] (HtmlPage sym)
 
@@ -38,6 +39,7 @@ type JasenrekisteriAPI =
     :<|> JasenrekisteriAuth :> "search" :> QueryParam "query" SearchQuery :> HTMLPageEndpoint "search"
     :<|> JasenrekisteriAuth :> "command" :> ReqBody '[JSON] (Command Proxy) :> Post '[JSON] Text
     :<|> MemberlogEndpoint
+    :<|> JasenrekisteriAuth :> "search-data" :> Get '[JSON] [SearchItem]
     :<|> Raw
 
 jasenrekisteriAPI :: Proxy JasenrekisteriAPI
@@ -52,9 +54,12 @@ type MemberEndpoint = JasenrekisteriAuth :> "member" :> Capture "id" PersonId :>
 memberEndpoint :: Proxy MemberEndpoint
 memberEndpoint = Proxy
 
+memberHrefText :: PersonId -> Text
+memberHrefText personId =
+    uriToText $ safeLink jasenrekisteriAPI memberEndpoint personId
+
 memberHref :: PersonId -> Attribute
-memberHref personId =
-    href_ $ uriToText $ safeLink jasenrekisteriAPI memberEndpoint personId
+memberHref = href_ . memberHrefText
 
 type NewMemberEndpoint = JasenrekisteriAuth :> "new-member" :> HTMLPageEndpoint "new-member"
 
@@ -70,9 +75,12 @@ type TagEndpoint = JasenrekisteriAuth :> "tag" :> Capture "tag" TagName :> HTMLP
 tagEndpoint :: Proxy TagEndpoint
 tagEndpoint = Proxy
 
+tagHrefText :: TagName -> Text
+tagHrefText tn =
+    uriToText $ safeLink jasenrekisteriAPI tagEndpoint tn
+
 tagHref :: TagName -> Attribute
-tagHref tn =
-    href_ $ uriToText $ safeLink jasenrekisteriAPI tagEndpoint tn
+tagHref = href_ . tagHrefText
 
 type ChangelogEndpoint = JasenrekisteriAuth :> "changelog" :> QueryParam "eid" CID :> HTMLPageEndpoint "changelog"
 

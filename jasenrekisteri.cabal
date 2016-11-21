@@ -104,6 +104,7 @@ library
       SatO.Jasenrekisteri.Pages.Tags
       SatO.Jasenrekisteri.Person
       SatO.Jasenrekisteri.PersonEdit
+      SatO.Jasenrekisteri.SearchData
       SatO.Jasenrekisteri.SearchQuery
       SatO.Jasenrekisteri.Server
       SatO.Jasenrekisteri.Session

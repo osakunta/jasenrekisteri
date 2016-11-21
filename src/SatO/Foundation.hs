@@ -8,8 +8,6 @@
 {-# LANGUAGE TemplateHaskell        #-}
 {-# LANGUAGE UndecidableInstances   #-}
 module SatO.Foundation (
-    -- * Embedded style
-    embeddedFoundationStyle_,
     -- * Grid
     row_,
     large_,
@@ -37,21 +35,6 @@ import Lucid                 hiding (for_)
 import SatO.Clay             (satoCss_)
 
 import qualified Lucid     as L
-
-embeddedFoundationStyle_ :: Monad m => HtmlT m ()
-embeddedFoundationStyle_ =
-    style_ [type_ "text/css"] ($(embedStringFile "foundation.min.css") :: String)
-
--- | <https://lodash.com/ Lodash>.
-embeddedLodash_ :: Monad m => HtmlT m ()
-embeddedLodash_ = script_ ($(embedStringFile "lodash.fp.min.js") :: Text)
-
--- | Data-flow library <https://github.com/phadej/menrva menrva>.
-embeddedMenrva_ :: Monad m => HtmlT m ()
-embeddedMenrva_ = script_ ($(embedStringFile "menrva.standalone.js") :: Text)
-
-embeddedJasenrekisteri_ :: Monad m => HtmlT m ()
-embeddedJasenrekisteri_ = script_ ($(embedStringFile "jasenrekisteri.js") :: Text)
 
 attrfor_ :: Text -> Attribute
 attrfor_ = L.for_
@@ -110,11 +93,15 @@ page_ t b = HtmlPage $ doctypehtml_ $ do
         meta_ [charset_ "utf-8"]
         meta_ [name_ "viewport", content_ "width=device-width, initial-scale=1.0"]
         meta_ [httpEquiv_ "x-ua-compatible", content_"ie=edge"]
-        embeddedFoundationStyle_
-        embeddedLodash_
-        embeddedMenrva_
+        style_ [type_ "text/css"] ($(embedStringFile "foundation.min.css") :: String)
+        style_ [type_ "text/css"] ($(embedStringFile "jquery-ui.min.css") :: String)
+        script_ ($(embedStringFile "lodash.fp.min.js") :: Text)
+        script_ ($(embedStringFile "menrva.standalone.js") :: Text)
+        script_ ($(embedStringFile "jquery-3.1.1.slim.min.js") :: Text)
+        script_ ($(embedStringFile "jquery-ui.min.js") :: Text)
+        script_ ($(embedStringFile "foundation.min.js") :: Text)
         -- TODO: add fetch
-        embeddedJasenrekisteri_
+        script_ ($(embedStringFile "jasenrekisteri.js") :: Text)
         satoCss_
     body_ b
 
