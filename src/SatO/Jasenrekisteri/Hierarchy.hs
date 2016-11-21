@@ -6,7 +6,7 @@ module SatO.Jasenrekisteri.Hierarchy (tags) where
 import Prelude ()
 import Futurice.Prelude
 import Control.Lens              hiding ((...))
-import Data.Maybe                (mapMaybe)
+import Data.Maybe                (mapMaybe, listToMaybe)
 import Futurice.IdMap            (IdMap)
 import Numeric.Interval.NonEmpty (Interval, inf, sup, (...))
 import SatO.Jasenrekisteri.Tag
@@ -34,11 +34,27 @@ virkailijat = IdMap.fromFoldable $ virat ++ virat2 ++ hallitus
     virat = flip concatMap kaikkiVirat $ \(name, years) ->
         let years'        = intervalSpan years
             tagName'      = TagName name
-            childTagNames = map (\y -> TagName $ name <> textShow y) years'
-            -- TODO:
-            colour        = virkailijaColour
-        in Tag tagName' colour (tagNamesOf folded childTagNames)
-            : map (\n -> Tag n colour mempty) childTagNames
+            childTags     = map makeTag years'
+
+            makeTag y     = Tag (TagName $ name <> textShow y) colour mempty
+              where
+                colour = if any p hallitusVirat
+                    then hallitusColour
+                    else virkailijaColour
+                p (n, ys) = n == name && Interval.elem y ys
+
+            -- Colour of the parent tag, e.g. "hpj"
+            parentColour  =
+                if maybe False (intervalEq years) $ listToMaybe $ mapMaybe pick hallitusVirat
+                    then hallitusColour
+                    else virkailijaColour
+              where
+                -- pick years for this duty
+                pick (n, ys)
+                    | n == name = Just ys
+                    | otherwise = Nothing
+
+        in Tag tagName' parentColour (tagNamesOf (folded . tagName) childTags) : childTags
 
     virat2 :: [Tag]
     virat2 = flip map [virkailijatFrom .. virkailijatTo] $ \year ->
@@ -66,7 +82,7 @@ hallitusVirat =
     , mk "isäntä"           (past ... future)
     , mk "emäntä"           (past ... future)
     , mk "tiedotussihteeri" (past ... future)
-    , mk "opastussihteeri"  (2011 ... future)
+    , mk "opastussihteeri"  (past ... 2011)
     ]
   where
     mk = (,)
@@ -200,3 +216,11 @@ taloColour = 9
 
 jasenColour :: TagColour
 jasenColour = 4
+
+-------------------------------------------------------------------------------
+-- Intervals
+-------------------------------------------------------------------------------
+
+-- https://github.com/ekmett/intervals/pull/48
+intervalEq :: Eq a => Interval a -> Interval a -> Bool
+intervalEq a b = sup a == sup b && inf a == inf b
