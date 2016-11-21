@@ -30,16 +30,22 @@ tagPage lu tn = do
 -- TODO: use closure fields
 tagPage' :: LoginUser -> World -> Tag -> HtmlPage "tag"
 tagPage' lu world tag = template' lu ("Tagi: " <> toHtml (tn ^. _TagName)) $ do
-    subheader_ "Alatagit"
-    tagList_ tags
+    when (not $ null tags) $ do
+        subheader_ "Alatägit"
+        tagList_ tags
+    when (not $ null parentTags) $ do
+        subheader_ "Ylätägit"
+        tagList_ parentTags
     subheader_ "Jäsenet"
     memberList_ tags (world ^.. membersFold)
   where
     tn = tag ^. tagName
 
-    -- | TODO: use tag closure
     tags :: [Tag]
     tags = world ^.. subtagsFold . filtered (\subtag -> subtag ^. tagName /= tn)
+
+    parentTags :: [Tag]
+    parentTags = world ^.. parenttagsFold . filtered (\parentTag -> parentTag ^. tagName /= tn)
 
     subtagNames = setOf (subtagsFold . key) world
 
@@ -48,6 +54,13 @@ tagPage' lu world tag = template' lu ("Tagi: " <> toHtml (tn ^. _TagName)) $ do
         = worldTags
         . _TagHierarchy
         . to (flip G.closure [tn])
+        . _Just . folded
+
+    parenttagsFold :: Fold World Tag
+    parenttagsFold
+        = worldTags
+        . _TagHierarchy
+        . to (flip G.revClosure [tn])
         . _Just . folded
 
     membersFold :: Fold World Person

@@ -64,7 +64,7 @@ navigation lu = do
                 a_ [tagHref "2016-2017"] "2016-2017"
                 ul_ [ class_ "menu" ] $ do
                     li_ $ a_ [tagHref "2015-2016"] "2015-2016"
-                    li_ $ a_ [tagHref "2014-2015"] "2014-2014"
+                    li_ $ a_ [tagHref "2014-2015"] "2014-2015"
                     li_ $ a_ [tagHref "talo"] "Talo"
             li_ $ a_ [changelogHref Nothing ] "Muutosloki"
             li_ $ a_ [href_ "/search" ] "Haku"
