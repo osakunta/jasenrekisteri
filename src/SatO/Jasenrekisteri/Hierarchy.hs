@@ -101,20 +101,29 @@ kaikkiVirat =
     , mk "yhteiskuntasihteeri"          (past ... future)
     , mk "kirjastonhoitaja"             (past ... future)
     , mk "opastussihteeri"              (past ... future)
-    , mk "jäsensihteeri"                (past ... future)
+    , mk "jäsensihteeri"                (2012 ... future)
     , mk "mainossihteeri"               (past ... future)
     , mk "historioitsija"               (past ... future)
-    , mk "galleristi"                   (past ... future)
+    , mk "galleristi"                   (2012 ... future)
     , mk "valokuvaaja"                  (past ... future)
     , mk "laulunjohtaja"                (past ... future)
-    , mk "tietotekniikkavastaava"       (past ... future)
-    , mk "verkkovastaava"               (past ... future)
+    , mk "tietotekniikkavastaava"       (2012 ... future)
+    , mk "verkkovastaava"               (2012 ... future)
     , mk "musiikkihuoneenhoitaja"       (past ... future)
     , mk "haromäenisäntä"               (past ... future)
     , mk "valvontatilintarkastaja"      (past ... future)
     , mk "varavalvontatilintarkastaja"  (past ... future)
     , mk "seniorisihteeri"              (2017 ... future)
     , mk "juhlamestari"                 (past ... future)
+    , mk "apulaissihteeri"              (past ... 2011)
+    , mk "ulkoasiainsihteeri"           (past ... 2011)
+    , mk "naistenurheiluohjaaja"        (past ... 2011)
+    , mk "miestenurheiluohjaaja"        (past ... 2011)
+    , mk "arkistonhoitaja"              (past ... 2011)
+    , mk "julkaisuvarastonhoitaja"      (past ... 2011)
+    , mk "lehtihuoneenhoitaja"          (past ... 2011)
+    , mk "urho"                         (past ... 2011)
+    , mk "otso"                         (past ... 2011)
     ]
   where
     mk = (,)
@@ -122,7 +131,7 @@ kaikkiVirat =
     past   = virkailijatFrom
 
 virkailijatFrom :: Int
-virkailijatFrom = 2011
+virkailijatFrom = 2008
 
 virkailijatTo :: Int
 virkailijatTo = 2017
