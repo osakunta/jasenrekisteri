@@ -72,9 +72,6 @@ virkailijat = IdMap.fromFoldable $ virat ++ virat2 ++ hallitus
                     then Just $ TagName $ name <> textShow year
                     else Nothing
 
-intervalSpan :: Enum a => Interval a -> [a]
-intervalSpan a = [inf a .. sup a]
-
 hallitusVirat :: [(Text, Interval Int)]
 hallitusVirat =
     [ mk "hpj"              (past ... future)
@@ -220,6 +217,9 @@ jasenColour = 4
 -------------------------------------------------------------------------------
 -- Intervals
 -------------------------------------------------------------------------------
+
+intervalSpan :: Enum a => Interval a -> [a]
+intervalSpan a = [inf a .. sup a]
 
 -- https://github.com/ekmett/intervals/pull/48
 intervalEq :: Eq a => Interval a -> Interval a -> Bool
