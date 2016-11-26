@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TupleSections     #-}
 module SatO.Jasenrekisteri.SearchQuery where
 
 import Prelude ()
@@ -88,5 +89,14 @@ parseSearchQuery bs =
         Success q -> Right q
         Failure e -> Left $ PP.displayS (PP.renderCompact  $ _errDoc e) ""
 
-instance FromHttpApiData SearchQuery where
-    parseUrlPiece = first (view packed) . parseSearchQuery . TE.encodeUtf8
+-- | 'Left' constructor is (error, input)
+newtype SearchQuery' = SearchQuery' { unwrapSearchQuery' :: Either (String, Text) SearchQuery }
+
+instance FromHttpApiData SearchQuery' where
+    parseUrlPiece t
+        = pure
+        . SearchQuery'
+        . first (, t)
+        . parseSearchQuery
+        . TE.encodeUtf8
+        $ t

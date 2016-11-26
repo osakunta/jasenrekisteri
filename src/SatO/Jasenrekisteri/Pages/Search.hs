@@ -24,12 +24,12 @@ import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-searchPage :: LoginUser -> Maybe SearchQuery -> QueryM (HtmlPage "search")
+searchPage :: LoginUser -> Maybe SearchQuery' -> QueryM (HtmlPage "search")
 searchPage lu mquery = do
     world <- ask
     pure $ searchPage' lu world mquery
 
-searchPage' :: LoginUser -> World -> Maybe SearchQuery -> HtmlPage "search"
+searchPage' :: LoginUser -> World -> Maybe SearchQuery' -> HtmlPage "search"
 searchPage' lu world mquery = template' lu title $ do
     row_ $ large_ 12 $ div_ [ class_ "jrek-search callout secondary" ] $ do
         div_ [ class_ "button-group" ] $ for_ exampleQueries $ \q -> do
@@ -37,22 +37,31 @@ searchPage' lu world mquery = template' lu title $ do
             button_ [ data_ "jrek-search-string" pq,  class_ "button" ] $ toHtml pq
         hr_ []
         form_ [ method_ "GET"] $ do
+            whenLeft (unwrapSearchQuery' query) $ \(err, _) ->
+                div_ [ class_ "callout alert" ] $ pre_ $ toHtml $ T.strip $ err ^. packed
             label_ $ do
                 "Haku"
-                input_ [ name_ "query", type_ "text", value_ $ prettySearchQuery query ]
+                input_ [ name_ "query", type_ "text", value_ pquery ] 
             input_ [ type_ "submit" , value_ "Hae", class_ "button primary" ]
     memberTagList_ world (itoList personIds)
   where
-    title = "Haku: " <> toHtml (prettySearchQuery query)
+    title = "Haku: " <> toHtml pquery
 
-    -- TODO:
-    query = fromMaybe defaultSearchQuery mquery
+    query :: SearchQuery'
+    query = fromMaybe (SearchQuery' $ Right defaultSearchQuery) mquery
+
+    pquery :: Text
+    pquery = case unwrapSearchQuery' query of
+        Left (_, q) -> q
+        Right q     -> prettySearchQuery q
 
     personIds :: Map PersonId (Set TagName)
-    personIds = performSearchQuery
-        (world ^. worldTagPersons)
-        (IdMap.keysSet $ world ^. worldMembers)
-        query
+    personIds = case unwrapSearchQuery' query of
+        Left _       -> Map.empty
+        Right query' -> performSearchQuery
+            (world ^. worldTagPersons)
+            (IdMap.keysSet $ world ^. worldMembers)
+            query'
 
 defaultSearchQuery :: SearchQuery
 defaultSearchQuery = QAnd (QOr "talo" "osakehuoneisto") (QNot "2016-2017")
@@ -133,3 +142,11 @@ memberTagList_ world xs = do
     -- todo: use regexp
     modifyAddress :: Text -> Text
     modifyAddress = T.replace "Lapinrinne 1 " ""
+
+-------------------------------------------------------------------------------
+-- utilities
+-------------------------------------------------------------------------------
+
+whenLeft :: Applicative m => Either a b -> (a -> m ()) -> m ()
+whenLeft (Right _) _ = pure ()
+whenLeft (Left x)  f = f x
