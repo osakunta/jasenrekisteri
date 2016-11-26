@@ -36,7 +36,7 @@ type JasenrekisteriAPI =
     :<|> ChangelogEndpoint
     :<|> JasenrekisteriAuth :> "tags" :> HTMLPageEndpoint "tags"
     :<|> TagEndpoint
-    :<|> JasenrekisteriAuth :> "search" :> QueryParam "query" SearchQuery :> HTMLPageEndpoint "search"
+    :<|> JasenrekisteriAuth :> "search" :> QueryParam "query" SearchQuery' :> HTMLPageEndpoint "search"
     :<|> JasenrekisteriAuth :> "command" :> ReqBody '[JSON] (Command Proxy) :> Post '[JSON] Text
     :<|> MemberlogEndpoint
     :<|> JasenrekisteriAuth :> "search-data" :> Get '[JSON] [SearchItem]

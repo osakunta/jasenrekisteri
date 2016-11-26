@@ -42,10 +42,6 @@ template title nav inner = page_ title $ do
         header_ $ do
             nav
             row_ $ large_ 12 $ h1_ title
-            -- TODO: remove me
-            row_ $ large_ 12 $ div_ [ class_ "callout alert"] $ do
-                b_ "HUOM!"
-                " Muutokset eivät tallennu pysyvästi"
         section_ inner
 
 template' :: LoginUser -> Html () -> Html () -> HtmlPage sym
@@ -98,7 +94,7 @@ tagLink' tag t = do
     " "
   where
     name = tag ^. key
-    colour = (tag ^. tagColour) `mod` 10
+    colour = (tag ^. tagColour) `mod` 12
     lblColour = "lbl" <> (show colour ^. packed)
 
 tagLink_ :: Monad m => Tag -> HtmlT m ()

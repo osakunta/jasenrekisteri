@@ -78,4 +78,6 @@ css = do
         , (".label.lbl7", "#4829c1", "#ffcbff")
         , (".label.lbl8", "#7215a4", "#ffc3ff")
         , (".label.lbl9", "#930061", "#ffbdff")
+        , (".label.lbl10", "#ff8c00", "#ffffff")
+        , (".label.lbl11", "#000000", "#ffffff")
         ]

@@ -36,7 +36,7 @@ module SatO.Jasenrekisteri.Person (
 
 import Prelude ()
 import Futurice.Prelude
-import Control.Lens                  (Getter, contains, to)
+import Control.Lens                  (Getter, contains, to, re, (%~))
 import Data.Char                     (isLetter)
 import Futurice.Generics
 import Futurice.IdMap                (HasKey (..))
@@ -108,14 +108,14 @@ instance ToJSON Person where
     toJSON     = sopToJSON
     toEncoding = sopToEncoding
 instance FromJSON Person where
-    parseJSON = fmap (addTaloTag . addFuksiTag). sopParseJSON
+    parseJSON = fmap addMagicTags . sopParseJSON
 
 instance HasKey Person where
     type Key Person = UUID
     key = personUuid
 
 addMagicTags :: Person -> Person
-addMagicTags = addTaloTag . addFuksiTag
+addMagicTags = addTaloTag . addFuksiTag . addSchoolTag
 
 -- TODO: use regexp
 addTaloTag :: Person -> Person
@@ -134,3 +134,9 @@ addFuksiTag p = case match affYear (p ^. personAffiliationDate) of
 
     decimalInt :: RE' Int
     decimalInt = decimal
+
+addSchoolTag :: Person -> Person
+addSchoolTag p = p & personTags %~ addSchools
+  where
+    schools = fmap T.strip . T.splitOn "," $ p ^. personUniversity
+    addSchools ts = ts <> tagNamesOf (folded . re _TagName) schools
