@@ -17,7 +17,7 @@ import qualified Numeric.Interval.NonEmpty as Interval
 tags :: [Tag]
 tags =
     merkit
-    <> [taloTag, senioriTag]
+    <> [taloTag, osakehuoneistoTag, senioriTag]
     <> kuraattoriTags
     <> fuksiTags
     <> toList virkailijat
@@ -187,6 +187,9 @@ senioriTag = Tag "seniori" senioriColour mempty
 
 taloTag :: Tag
 taloTag = Tag "talo" taloColour mempty
+
+osakehuoneistoTag :: Tag
+osakehuoneistoTag = Tag "osakehuoneisto" taloColour mempty
 
 -------------------------------------------------------------------------------
 -- Merkit

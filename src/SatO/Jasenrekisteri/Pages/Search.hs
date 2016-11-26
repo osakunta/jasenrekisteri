@@ -55,7 +55,7 @@ searchPage' lu world mquery = template' lu title $ do
         query
 
 defaultSearchQuery :: SearchQuery
-defaultSearchQuery = QAnd "talo" (QNot "2016-2017")
+defaultSearchQuery = QAnd (QOr "talo" "osakehuoneisto") (QNot "2016-2017")
 
 exampleQueries :: [SearchQuery]
 exampleQueries =
@@ -110,6 +110,7 @@ memberTagList_ world xs = do
             th_ $ "Nimi"
             th_ "Tagit"
             th_ $ "2016-2017"
+            when hasTalo $ th_ $ "Huone"
         tbody_ $ for_ xs' $ \(person, tns) -> do
             let memberId = person ^. key
             let needle = T.toLower $ person ^. personFullName
@@ -117,7 +118,18 @@ memberTagList_ world xs = do
                 td_ $ a_ [ memberHref memberId ] $ person ^. personFullNameHtml
                 td_ $ tagnameList_ world (tns ^.. folded)
                 td_ $ tagCheckbox person "2016-2017"
+                when hasTalo $ td_ $ toHtml $ modifyAddress $ person ^. personAddress
   where
     xs' = sortOn (view personFullName . fst)
         $ mapMaybe lookupPerson xs
+
     lookupPerson (memberId, tns) = (,tns) <$> world ^? worldMembers . ix memberId
+
+    -- if 'talo' tag is present, print addresses as well.
+    hasTalo = any (f . snd) xs
+      where
+        f s = Set.member "talo" s || Set.member "osakehuoneisto" s
+
+    -- todo: use regexp
+    modifyAddress :: Text -> Text
+    modifyAddress = T.replace "Lapinrinne 1 " ""
