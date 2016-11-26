@@ -94,7 +94,7 @@ tagLink' tag t = do
     " "
   where
     name = tag ^. key
-    colour = (tag ^. tagColour) `mod` 10
+    colour = (tag ^. tagColour) `mod` 12
     lblColour = "lbl" <> (show colour ^. packed)
 
 tagLink_ :: Monad m => Tag -> HtmlT m ()

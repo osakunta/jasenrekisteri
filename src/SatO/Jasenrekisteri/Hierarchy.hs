@@ -17,7 +17,8 @@ import qualified Numeric.Interval.NonEmpty as Interval
 tags :: [Tag]
 tags =
     merkit
-    <> [taloTag, osakehuoneistoTag, senioriTag]
+    <> [taloTag, osakehuoneistoTag, senioriTag, kuollutTag]
+    <> schools
     <> kuraattoriTags
     <> fuksiTags
     <> toList virkailijat
@@ -202,6 +203,38 @@ merkit =
     ]
 
 -------------------------------------------------------------------------------
+-- kuollut
+-------------------------------------------------------------------------------
+
+kuollutTag :: Tag
+kuollutTag = Tag "kuollut" kuollutColour mempty
+
+-------------------------------------------------------------------------------
+-- Schools
+ -------------------------------------------------------------------------------
+
+schools :: [Tag]
+schools = map (\n -> Tag n schoolColour mempty)
+    [ "Aalto"
+    , "HKKK"
+    , "HY"
+    , "Haaga-Helia"
+    , "Hanken"
+    , "JYI"
+    , "Laurea"
+    , "MPKK"
+    , "Metropolia"
+    , "SAMK"
+    , "Siba"
+    , "TAIK"
+    , "TEAK"
+    , "TKK"
+    , "TTY"
+    , "Taideyliopisto"
+    , "UTU"
+    ]
+
+-------------------------------------------------------------------------------
 -- Colours
 -------------------------------------------------------------------------------
 
@@ -225,6 +258,12 @@ taloColour = 9
 
 jasenColour :: TagColour
 jasenColour = 4
+
+schoolColour :: TagColour
+schoolColour = 10
+
+kuollutColour :: TagColour
+kuollutColour = 11
 
 -------------------------------------------------------------------------------
 -- Intervals
