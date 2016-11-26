@@ -373,8 +373,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     return fetch(url, opts)
       .then(function (res) {
-        console.debug("response", url, res.ok);
-        return res.json();
+        var contentType = res.headers.get("content-type");
+        console.debug("res", url, contentType, res.ok);
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          return res.json();
+        } else {
+          return res.text().then(function (txt) {
+            throw new Error("Not a JSON" + txt);
+          });
+        }
       })
       .catch(function (exc) {
         overlay.message.classList.add("alert");
@@ -440,6 +447,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.info("command member-new", edit);
     return command({
       type: "member-new",
+      memberId: null, // has to be here, and be null.
       edit: edit,
     })
     .then(function (res) {
