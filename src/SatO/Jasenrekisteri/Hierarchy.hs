@@ -111,7 +111,7 @@ kaikkiVirat =
     , mk "tietotekniikkavastaava"       (2012 ... future)
     , mk "verkkovastaava"               (2012 ... future)
     , mk "musiikkihuoneenhoitaja"       (past ... future)
-    , mk "haromäenisäntä"               (past ... future)
+    , mk "haronmäenisäntä"              (past ... future)
     , mk "valvontatilintarkastaja"      (past ... future)
     , mk "varavalvontatilintarkastaja"  (past ... future)
     , mk "seniorisihteeri"              (2017 ... future)
