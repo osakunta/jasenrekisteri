@@ -49,7 +49,7 @@ dependencies:
 - resource-pool
 - semigroups
 - servant        ==0.9.*
-- servant-lucid
+- servant-cassava
 - servant-lucid
 - servant-server ==0.9.*
 - stm

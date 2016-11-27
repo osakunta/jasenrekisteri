@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TupleSections     #-}
-module SatO.Jasenrekisteri.Pages.Search (searchPage) where
+module SatO.Jasenrekisteri.Pages.Search (searchPage, searchCsv) where
 
 import Prelude ()
 import Futurice.Prelude
@@ -17,6 +17,7 @@ import qualified Data.Text       as T
 import qualified Futurice.IdMap  as IdMap
 
 import SatO.Jasenrekisteri.API
+import SatO.Jasenrekisteri.Contact
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Person
@@ -63,6 +64,9 @@ searchPage' today lu world mquery = template' today lu title $ do
             (world ^. worldTagPersons)
             (IdMap.keysSet $ world ^. worldMembers)
             query'
+
+searchCsv :: LoginUser -> Maybe SearchQuery -> QueryM [Contact]
+searchCsv _ _ = pure []
 
 defaultSearchQuery :: Day -> SearchQuery
 defaultSearchQuery today = QAnd (QOr "talo" "osakehuoneisto") (QNot ayearTag)

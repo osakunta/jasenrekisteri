@@ -13,8 +13,10 @@ import Lucid
 import SatO.Foundation    (HtmlPage)
 import Servant
 import Servant.HTML.Lucid
+import Servant.CSV.Cassava
 
 import SatO.Jasenrekisteri.Command
+import SatO.Jasenrekisteri.Contact
 import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.SearchQuery
 import SatO.Jasenrekisteri.Session
@@ -37,6 +39,7 @@ type JasenrekisteriAPI =
     :<|> JasenrekisteriAuth :> "tags" :> HTMLPageEndpoint "tags"
     :<|> TagEndpoint
     :<|> JasenrekisteriAuth :> "search" :> QueryParam "query" SearchQuery' :> HTMLPageEndpoint "search"
+    :<|> SearchCsvEndpoint
     :<|> JasenrekisteriAuth :> "command" :> ReqBody '[JSON] (Command Proxy) :> Post '[JSON] Text
     :<|> MemberlogEndpoint
     :<|> JasenrekisteriAuth :> "search-data" :> Get '[JSON] [SearchItem]
@@ -99,6 +102,15 @@ memberlogEndpoint = Proxy
 memberlogHref :: PersonId -> Attribute
 memberlogHref memberId =
     href_ $ uriToText $ safeLink jasenrekisteriAPI memberlogEndpoint memberId
+
+type SearchCsvEndpoint = JasenrekisteriAuth :> "search.csv" :> QueryParam "query" SearchQuery :> Get '[CSV] [Contact]
+
+searchCsvEndpoint :: Proxy SearchCsvEndpoint
+searchCsvEndpoint = Proxy
+
+searchCsvHref :: SearchQuery -> Attribute
+searchCsvHref query =
+    href_ $ uriToText $ safeLink jasenrekisteriAPI searchCsvEndpoint (Just query)
 
 -------------------------------------------------------------------------------
 -- Utilities

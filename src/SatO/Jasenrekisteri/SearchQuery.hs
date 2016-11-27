@@ -7,7 +7,7 @@ import Futurice.Prelude
 import Data.ByteString     (ByteString)
 import Text.Trifecta
 import Text.Trifecta.Delta (Delta (Directed))
-import Web.HttpApiData     (FromHttpApiData (..))
+import Web.HttpApiData     (FromHttpApiData (..), ToHttpApiData (..))
 
 import qualified Data.Text.Encoding           as TE
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
@@ -100,3 +100,13 @@ instance FromHttpApiData SearchQuery' where
         . parseSearchQuery
         . TE.encodeUtf8
         $ t
+
+instance FromHttpApiData SearchQuery where
+    parseUrlPiece t
+        = first (view packed)
+        . parseSearchQuery
+        . TE.encodeUtf8
+        $ t
+
+instance ToHttpApiData SearchQuery where
+    toUrlPiece = prettySearchQuery

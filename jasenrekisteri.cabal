@@ -64,7 +64,7 @@ library
     , resource-pool
     , semigroups
     , servant        ==0.9.*
-    , servant-lucid
+    , servant-cassava
     , servant-lucid
     , servant-server ==0.9.*
     , stm
@@ -91,6 +91,7 @@ library
       SatO.Jasenrekisteri.API
       SatO.Jasenrekisteri.Command
       SatO.Jasenrekisteri.Config
+      SatO.Jasenrekisteri.Contact
       SatO.Jasenrekisteri.Ctx
       SatO.Jasenrekisteri.Endpoints
       SatO.Jasenrekisteri.Hierarchy
@@ -154,7 +155,7 @@ executable excel
     , resource-pool
     , semigroups
     , servant        ==0.9.*
-    , servant-lucid
+    , servant-cassava
     , servant-lucid
     , servant-server ==0.9.*
     , stm
@@ -215,7 +216,7 @@ executable jasenrekisteri-server
     , resource-pool
     , semigroups
     , servant        ==0.9.*
-    , servant-lucid
+    , servant-cassava
     , servant-lucid
     , servant-server ==0.9.*
     , stm
@@ -277,7 +278,7 @@ test-suite unit-tests
     , resource-pool
     , semigroups
     , servant        ==0.9.*
-    , servant-lucid
+    , servant-cassava
     , servant-lucid
     , servant-server ==0.9.*
     , stm
