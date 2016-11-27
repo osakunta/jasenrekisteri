@@ -15,13 +15,15 @@ import SatO.Jasenrekisteri.PersonEdit
 import SatO.Jasenrekisteri.Session
 
 newMemberPage :: LoginUser -> QueryM (HtmlPage "new-member")
-newMemberPage lu = pure $ template' lu "Uusi jäsen" $ do
-    row_ $ large_ 12 $ div_ [ class_ "callout" ] $ div_ [ data_ "jrek-member-new" ""] $ do
-        for_ (SOP.hcollapse personEdits) editbox
+newMemberPage lu = do
+    (_, today) <- ask
+    pure $ template' today lu "Uusi jäsen" $ do
+        row_ $ large_ 12 $ div_ [ class_ "callout" ] $ div_ [ data_ "jrek-member-new" ""] $ do
+            for_ (SOP.hcollapse personEdits) editbox
 
-        hr_ []
-        div_ [ class_ "button-group" ] $ do
-            button_ [ data_ "jrek-action" "submit", class_ "button" ] "Luo"
+            hr_ []
+            div_ [ class_ "button-group" ] $ do
+                button_ [ data_ "jrek-action" "submit", class_ "button" ] "Luo"
 
 editbox :: PE -> Html ()
 editbox (MkPE i l _ _) = label_ $ do

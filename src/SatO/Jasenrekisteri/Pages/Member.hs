@@ -23,10 +23,10 @@ import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
 memberPage :: LoginUser -> PersonId -> QueryM (HtmlPage "member")
-memberPage lu personId = ask <&> \world -> case world ^? worldMembers . ix personId of
+memberPage lu personId = ask <&> \(world, today) -> case world ^? worldMembers . ix personId of
     -- TODO: not found page
-    Nothing -> page404 lu
-    Just p@Person {..} -> template' lu (p ^. personFullNameHtml) $ do
+    Nothing -> page404 today lu
+    Just p@Person {..} -> template' today lu (p ^. personFullNameHtml) $ do
         let pid = p ^. key
 
         row_ $ large_ 12 $ dl_ $ do

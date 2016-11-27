@@ -85,6 +85,7 @@ library
       Control.Lens.Att
       Data.ByteString.Lazy.Extra
       Data.Csv.Extra
+      SatO.AcademicYear
       SatO.Clay
       SatO.Foundation
       SatO.Jasenrekisteri.API

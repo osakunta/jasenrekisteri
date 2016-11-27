@@ -20,8 +20,8 @@ import SatO.Jasenrekisteri.PersonEdit
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.World
 
-changelogPage :: LoginUser -> [(CID, LoginUser, UTCTime, Command I)] -> World -> HtmlPage "changelog"
-changelogPage lu cmds world = template' lu "Muutosloki" $ do
+changelogPage :: Day -> LoginUser -> [(CID, LoginUser, UTCTime, Command I)] -> World -> HtmlPage "changelog"
+changelogPage today lu cmds world = template' today lu "Muutosloki" $ do
     row_ $ large_ 12 $ table_ $ do
         thead_ $ tr_ $ do
             th_ "Muokkaaja"
@@ -55,14 +55,15 @@ changelogPage lu cmds world = template' lu "Muutosloki" $ do
     f pe (MkPE _ ftitle _ e) = ftitle <$ pe ^. e
 
 memberlogPage
-    :: LoginUser                        -- ^ Viewer
+    :: Day
+    -> LoginUser                        -- ^ Viewer
     -> PersonId                         -- ^ Person's memberlog
     -> World                            -- ^ Original world, needed to show "from" states.
     -> World                            -- ^ Current world
     -> [(LoginUser, UTCTime, Command I)]  -- ^ Changes
     -> HtmlPage "memberlog"
-memberlogPage lu memberId origWorld world cmds =
-    template' lu ("Muutosloki - " <> name <> " - " <> toHtml (UUID.toText memberId)) $ do
+memberlogPage today lu memberId origWorld world cmds =
+    template' today lu ("Muutosloki - " <> name <> " - " <> toHtml (UUID.toText memberId)) $ do
         row_ $ large_ 12 $ a_ [ memberHref memberId ] $ "Jäsenen sivu"
         hr_ []
         row_ $ large_ 12 $ table_ $ do

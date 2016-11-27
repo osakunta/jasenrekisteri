@@ -55,14 +55,16 @@ memberlogHandler :: Ctx -> LoginUser -> PersonId -> Handler (HtmlPage "memberlog
 memberlogHandler ctx lu memberId = liftIO $ do
     cmds <- ctxFetchCmds ctx memberId
     world <- ctxReadWorld ctx
+    today <- currentDay
     let origWorld = ctxOrigWorld ctx
-    pure $ memberlogPage lu memberId origWorld world cmds
+    pure $ memberlogPage today lu memberId origWorld world cmds
 
 changelogHandler :: Ctx -> LoginUser -> Maybe CID -> Handler (HtmlPage "changelog")
 changelogHandler ctx lu cid = liftIO $ do
     cmds <- ctxFetchAllCmds ctx cid
     world <- ctxReadWorld ctx
-    pure $ changelogPage lu cmds world
+    today <- currentDay
+    pure $ changelogPage today lu cmds world
 
 searchDataHandler :: Ctx -> LoginUser -> Handler [SearchItem]
 searchDataHandler ctx _ = liftIO $ do

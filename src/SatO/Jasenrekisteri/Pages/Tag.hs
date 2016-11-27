@@ -23,13 +23,13 @@ import SatO.Jasenrekisteri.World
 
 tagPage :: LoginUser -> TagName -> QueryM (HtmlPage "tag")
 tagPage lu tn = do
-    world <- ask
+    (world, today) <- ask
     let tag = world ^. worldTags . att tn
-    pure $ tagPage' lu world tag
+    pure $ tagPage' today lu world tag
 
 -- TODO: use closure fields
-tagPage' :: LoginUser -> World -> Tag -> HtmlPage "tag"
-tagPage' lu world tag = template' lu ("Tagi: " <> toHtml (tn ^. _TagName)) $ do
+tagPage' :: Day -> LoginUser -> World -> Tag -> HtmlPage "tag"
+tagPage' today lu world tag = template' today lu ("Tagi: " <> toHtml (tn ^. _TagName)) $ do
     when (not $ null tags) $ do
         subheader_ "Alatägit"
         tagList_ tags
@@ -37,7 +37,7 @@ tagPage' lu world tag = template' lu ("Tagi: " <> toHtml (tn ^. _TagName)) $ do
         subheader_ "Ylätägit"
         tagList_ parentTags
     subheader_ "Jäsenet"
-    memberList_ tags (world ^.. membersFold)
+    memberList_ today tags (world ^.. membersFold)
   where
     tn = tag ^. tagName
 
