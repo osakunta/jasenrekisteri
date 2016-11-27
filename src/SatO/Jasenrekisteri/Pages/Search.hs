@@ -9,6 +9,7 @@ import Futurice.Prelude
 import Control.Monad.Reader (ask)
 import Data.Maybe           (mapMaybe)
 import Futurice.IdMap       (key)
+import SatO.AcademicYear
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set        as Set
@@ -26,13 +27,13 @@ import SatO.Jasenrekisteri.World
 
 searchPage :: LoginUser -> Maybe SearchQuery' -> QueryM (HtmlPage "search")
 searchPage lu mquery = do
-    world <- ask
-    pure $ searchPage' lu world mquery
+    (world, today) <- ask
+    pure $ searchPage' today lu world mquery
 
-searchPage' :: LoginUser -> World -> Maybe SearchQuery' -> HtmlPage "search"
-searchPage' lu world mquery = template' lu title $ do
+searchPage' :: Day -> LoginUser -> World -> Maybe SearchQuery' -> HtmlPage "search"
+searchPage' today lu world mquery = template' today lu title $ do
     row_ $ large_ 12 $ div_ [ class_ "jrek-search callout secondary" ] $ do
-        div_ [ class_ "button-group" ] $ for_ exampleQueries $ \q -> do
+        div_ [ class_ "button-group" ] $ for_ (exampleQueries today) $ \q -> do
             let pq = prettySearchQuery q
             button_ [ data_ "jrek-search-string" pq,  class_ "button" ] $ toHtml pq
         hr_ []
@@ -41,14 +42,14 @@ searchPage' lu world mquery = template' lu title $ do
                 div_ [ class_ "callout alert" ] $ pre_ $ toHtml $ T.strip $ err ^. packed
             label_ $ do
                 "Haku"
-                input_ [ name_ "query", type_ "text", value_ pquery ] 
+                input_ [ name_ "query", type_ "text", value_ pquery ]
             input_ [ type_ "submit" , value_ "Hae", class_ "button primary" ]
-    memberTagList_ world (itoList personIds)
+    memberTagList_ today world (itoList personIds)
   where
     title = "Haku: " <> toHtml pquery
 
     query :: SearchQuery'
-    query = fromMaybe (SearchQuery' $ Right defaultSearchQuery) mquery
+    query = fromMaybe (SearchQuery' $ Right $ defaultSearchQuery today) mquery
 
     pquery :: Text
     pquery = case unwrapSearchQuery' query of
@@ -63,16 +64,40 @@ searchPage' lu world mquery = template' lu title $ do
             (IdMap.keysSet $ world ^. worldMembers)
             query'
 
-defaultSearchQuery :: SearchQuery
-defaultSearchQuery = QAnd (QOr "talo" "osakehuoneisto") (QNot "2016-2017")
+defaultSearchQuery :: Day -> SearchQuery
+defaultSearchQuery today = QAnd (QOr "talo" "osakehuoneisto") (QNot ayearTag)
+  where
+    ayear :: Integer
+    ayear = academicYear today
 
-exampleQueries :: [SearchQuery]
-exampleQueries =
-    [ defaultSearchQuery
-    , QAnd "2016-2017" (QNot "talo")
-    , QOr "virkailijat2016" "virkailijat2017"
-    , QInterval "hallitus2014" "hallitus2017"
+    ayearTag :: IsString a => a
+    ayearTag = fromString $ show ayear ++ "-" ++ show (succ ayear)
+
+exampleQueries :: Day -> [SearchQuery]
+exampleQueries today =
+    [ defaultSearchQuery today
+    , QAnd ayearTag (QNot "talo")
+    , QOr virk virk'
+    , QInterval hallitus hallitus'
     ]
+  where
+    ayear :: Integer
+    ayear = academicYear today
+
+    ayearTag :: IsString a => a
+    ayearTag = fromString $ show ayear ++ "-" ++ show (succ ayear)
+
+    virk :: IsString a => a
+    virk = fromString $ "virkailijat" ++ show ayear
+
+    virk' :: IsString a => a
+    virk' = fromString $ "virkailijat" ++ show (succ ayear)
+
+    hallitus :: IsString a => a
+    hallitus = fromString $ "hallitus" ++ show (pred $ pred ayear)
+
+    hallitus' :: IsString a => a
+    hallitus' = fromString $ "hallitus" ++ show (succ ayear)
 
 performSearchQuery
     :: Map TagName (Set PersonId)  -- ^ Tag lookup
@@ -105,10 +130,11 @@ performSearchQuery l a = go
 
 memberTagList_
     :: Monad m
-    => World
+    => Day
+    -> World
     -> [(PersonId, Set TagName)]
     -> HtmlT m ()
-memberTagList_ world xs = do
+memberTagList_ today world xs = do
     row_ $ do
         largemed_ 6 $ toHtml $  "Yhteensä: " <> (show $ length xs')
         largemed_ 6 $ label_ $ do
@@ -116,9 +142,9 @@ memberTagList_ world xs = do
             input_ [ type_ "text", id_ "member-filter" ]
     row_ . large_ 12 $ table_ [ id_ "member-list", class_ "hover" ] $ do
         thead_ $ tr_ $ do
-            th_ $ "Nimi"
+            th_ "Nimi"
             th_ "Tagit"
-            th_ $ "2016-2017"
+            th_ ayearTag
             when hasTalo $ th_ $ "Huone"
         tbody_ $ for_ xs' $ \(person, tns) -> do
             let memberId = person ^. key
@@ -126,7 +152,7 @@ memberTagList_ world xs = do
             tr_ [ data_ "member-haystack" needle ] $ do
                 td_ $ a_ [ memberHref memberId ] $ person ^. personFullNameHtml
                 td_ $ tagnameList_ world (tns ^.. folded)
-                td_ $ tagCheckbox person "2016-2017"
+                td_ $ tagCheckbox person ayearTag
                 when hasTalo $ td_ $ toHtml $ modifyAddress $ person ^. personAddress
   where
     xs' = sortOn (view personFullName . fst)
@@ -142,6 +168,12 @@ memberTagList_ world xs = do
     -- todo: use regexp
     modifyAddress :: Text -> Text
     modifyAddress = T.replace "Lapinrinne 1 " ""
+
+    ayear :: Integer
+    ayear = academicYear today
+
+    ayearTag :: IsString a => a
+    ayearTag = fromString $ show ayear ++ "-" ++ show (succ ayear)
 
 -------------------------------------------------------------------------------
 -- utilities

@@ -22,8 +22,9 @@ import Prelude ()
 import Futurice.Prelude
 import Control.Lens
 import Control.Lens.Att
-import Data.Ord         (comparing)
-import Futurice.IdMap   (key)
+import Data.Ord          (comparing)
+import Futurice.IdMap    (key)
+import SatO.AcademicYear
 import SatO.Foundation
 
 import qualified Data.Aeson         as A
@@ -44,12 +45,12 @@ template title nav inner = page_ title $ do
             row_ $ large_ 12 $ h1_ title
         section_ inner
 
-template' :: LoginUser -> Html () -> Html () -> HtmlPage sym
-template' lu title = template title $ navigation lu
+template' :: Day -> LoginUser -> Html () -> Html () -> HtmlPage sym
+template' today lu title = template title $ navigation today lu
 
 -- http://foundation.zurb.com/sites/docs/top-bar.html
-navigation :: Monad m => LoginUser -> HtmlT m ()
-navigation lu = do
+navigation :: Monad m => Day -> LoginUser -> HtmlT m ()
+navigation today lu = do
     div_ [ class_ "top-bar" ] $ do
         div_ [ class_ "top-bar-left" ] $ ul_ [ class_ "dropdown menu", data_ "dropdown-menu" "" ] $ do
             li_ [ class_ "menu-text"] $ do
@@ -59,19 +60,31 @@ navigation lu = do
             li_ $ a_ [newMemberHref] "Uusi"
             li_ $ a_ [href_ "/tags"] "Tägit"
             li_ [ class_ "is-dropdown-submenu-parent"] $ do
-                a_ [tagHref "2016-2017"] "2016-2017"
+                a_ [tagHref ayearTag] ayearTag
                 ul_ [ class_ "menu" ] $ do
-                    li_ $ a_ [tagHref "2015-2016"] "2015-2016"
-                    li_ $ a_ [tagHref "2014-2015"] "2014-2015"
+                    li_ $ a_ [tagHref ayearTag'] ayearTag'
+                    li_ $ a_ [tagHref ayearTag''] ayearTag''
                     li_ $ a_ [tagHref "talo"] "Talo"
             li_ $ a_ [changelogHref Nothing ] "Muutosloki"
             li_ $ a_ [href_ "/search" ] "Haku"
         div_ [ class_ "top-bar-right" ] $ ul_ [ class_ "menu" ] $ do
             li_ $ input_ [ class_ "search", placeholder_ "hae käyttäjä tai tägi" ]
             li_ [ class_ "menu-text" ] $ toHtml $ "Terve " <> getLoginUser lu
+  where
+    ayear :: Integer
+    ayear = academicYear today 
 
-page404 :: LoginUser -> HtmlPage sym
-page404 lu = template' lu "ei löydy" $ pure ()
+    ayearTag :: IsString a => a
+    ayearTag = fromString $ show ayear ++ "-" ++ show (succ ayear)
+
+    ayearTag' :: IsString a => a
+    ayearTag' = fromString $ show (pred ayear) ++ "-" ++ show ayear
+
+    ayearTag'' :: IsString a => a
+    ayearTag'' = fromString $ show (pred $ pred ayear) ++ "-" ++ show (pred ayear)
+
+page404 :: Day -> LoginUser -> HtmlPage sym
+page404 today lu = template' today lu "ei löydy" $ pure ()
 
 -------------------------------------------------------------------------------
 -- Subheader
@@ -111,10 +124,11 @@ tagnameList_ world ts = traverse_ (tagNameLink_ world) ts
 
 memberList_
     :: Monad m
-    => [Tag]       -- ^ tag to show in the list
+    => Day
+    -> [Tag]       -- ^ tag to show in the list
     -> [Person]
     -> HtmlT m ()
-memberList_ ts ps = do
+memberList_ today ts ps = do
     row_ $ do
         largemed_ 6 $ toHtml $  "Yhteensä: " <> (show $ length ps')
         largemed_ 6 $ label_ $ do
@@ -125,7 +139,7 @@ memberList_ ts ps = do
             th_ $ "Nimi"
             when (isn't _Empty ts) $
                 th_ "Tagit"
-            th_ $ "2016-2017"
+            th_ $ ayearTag
         tbody_ $ for_ ps' $ \person -> do
             let memberId = person ^. key
             let needle = T.toLower
@@ -134,9 +148,15 @@ memberList_ ts ps = do
                 td_ $ a_ [ memberHref memberId ] $ person ^. personFullNameHtml
                 when (isn't _Empty ts) $ td_ $
                     tagList_ (ts ^.. folded . filtered (\t -> person ^. personTags . contains (t ^. key)))
-                td_ $ tagCheckbox person "2016-2017"
+                td_ $ tagCheckbox person ayearTag
   where
     ps' = sortBy (comparing _personFirstNames <> comparing _personLastName) ps
+
+    ayear :: Integer
+    ayear = academicYear today 
+
+    ayearTag :: IsString a => a
+    ayearTag = fromString $ show ayear ++ "-" ++ show (succ ayear)
 
 tagCheckbox :: Monad m => Person -> TagName -> HtmlT m ()
 tagCheckbox person tn = label_ $ do
