@@ -33,6 +33,7 @@ dependencies:
 - file-embed
 - futurice-prelude
 - generics-sop
+- http-media
 - hashable
 - http-api-data
 - intervals
@@ -49,7 +50,7 @@ dependencies:
 - resource-pool
 - semigroups
 - servant        ==0.9.*
-- servant-lucid
+- servant-cassava
 - servant-lucid
 - servant-server ==0.9.*
 - stm
@@ -66,6 +67,7 @@ dependencies:
 - vector-instances
 - wai
 - warp
+- xlsx
 
 library:
   source-dirs: src/

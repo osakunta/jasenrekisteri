@@ -48,6 +48,7 @@ library
     , file-embed
     , futurice-prelude
     , generics-sop
+    , http-media
     , hashable
     , http-api-data
     , intervals
@@ -64,7 +65,7 @@ library
     , resource-pool
     , semigroups
     , servant        ==0.9.*
-    , servant-lucid
+    , servant-cassava
     , servant-lucid
     , servant-server ==0.9.*
     , stm
@@ -81,6 +82,7 @@ library
     , vector-instances
     , wai
     , warp
+    , xlsx
   exposed-modules:
       Control.Lens.Att
       Data.ByteString.Lazy.Extra
@@ -91,6 +93,7 @@ library
       SatO.Jasenrekisteri.API
       SatO.Jasenrekisteri.Command
       SatO.Jasenrekisteri.Config
+      SatO.Jasenrekisteri.Contact
       SatO.Jasenrekisteri.Ctx
       SatO.Jasenrekisteri.Endpoints
       SatO.Jasenrekisteri.Hierarchy
@@ -111,6 +114,7 @@ library
       SatO.Jasenrekisteri.Session
       SatO.Jasenrekisteri.Tag
       SatO.Jasenrekisteri.World
+      Servant.Xlsx
   default-language: Haskell2010
 
 executable excel
@@ -138,6 +142,7 @@ executable excel
     , file-embed
     , futurice-prelude
     , generics-sop
+    , http-media
     , hashable
     , http-api-data
     , intervals
@@ -154,7 +159,7 @@ executable excel
     , resource-pool
     , semigroups
     , servant        ==0.9.*
-    , servant-lucid
+    , servant-cassava
     , servant-lucid
     , servant-server ==0.9.*
     , stm
@@ -171,6 +176,7 @@ executable excel
     , vector-instances
     , wai
     , warp
+    , xlsx
     , jasenrekisteri
   default-language: Haskell2010
 
@@ -199,6 +205,7 @@ executable jasenrekisteri-server
     , file-embed
     , futurice-prelude
     , generics-sop
+    , http-media
     , hashable
     , http-api-data
     , intervals
@@ -215,7 +222,7 @@ executable jasenrekisteri-server
     , resource-pool
     , semigroups
     , servant        ==0.9.*
-    , servant-lucid
+    , servant-cassava
     , servant-lucid
     , servant-server ==0.9.*
     , stm
@@ -232,6 +239,7 @@ executable jasenrekisteri-server
     , vector-instances
     , wai
     , warp
+    , xlsx
     , jasenrekisteri
   default-language: Haskell2010
 
@@ -261,6 +269,7 @@ test-suite unit-tests
     , file-embed
     , futurice-prelude
     , generics-sop
+    , http-media
     , hashable
     , http-api-data
     , intervals
@@ -277,7 +286,7 @@ test-suite unit-tests
     , resource-pool
     , semigroups
     , servant        ==0.9.*
-    , servant-lucid
+    , servant-cassava
     , servant-lucid
     , servant-server ==0.9.*
     , stm
@@ -294,6 +303,7 @@ test-suite unit-tests
     , vector-instances
     , wai
     , warp
+    , xlsx
     , tasty
     , tasty-quickcheck
     , jasenrekisteri

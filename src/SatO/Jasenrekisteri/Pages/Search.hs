@@ -2,10 +2,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TupleSections     #-}
-module SatO.Jasenrekisteri.Pages.Search (searchPage) where
+module SatO.Jasenrekisteri.Pages.Search (searchPage, searchCsv, searchXlsx) where
 
 import Prelude ()
 import Futurice.Prelude
+import Control.Lens         (to)
 import Control.Monad.Reader (ask)
 import Data.Maybe           (mapMaybe)
 import Futurice.IdMap       (key)
@@ -17,6 +18,7 @@ import qualified Data.Text       as T
 import qualified Futurice.IdMap  as IdMap
 
 import SatO.Jasenrekisteri.API
+import SatO.Jasenrekisteri.Contact
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Person
@@ -44,6 +46,10 @@ searchPage' today lu world mquery = template' today lu title $ do
                 "Haku"
                 input_ [ name_ "query", type_ "text", value_ pquery ]
             input_ [ type_ "submit" , value_ "Hae", class_ "button primary" ]
+    whenRight (unwrapSearchQuery' query) $ \query' -> do
+        row_ $ large_ 12 $ do
+            a_ [ searchXlsxHref query' ] "Lataa excelissä osoitteiden kera"
+        hr_ []
     memberTagList_ today world (itoList personIds)
   where
     title = "Haku: " <> toHtml pquery
@@ -63,6 +69,35 @@ searchPage' today lu world mquery = template' today lu title $ do
             (world ^. worldTagPersons)
             (IdMap.keysSet $ world ^. worldMembers)
             query'
+
+searchCsv :: LoginUser -> Maybe SearchQuery -> QueryM [Contact]
+searchCsv _ mquery = do
+    (world, today) <- ask
+    pure $ searchContacts world $ fromMaybe (defaultSearchQuery today) mquery
+
+searchXlsx :: LoginUser -> Maybe SearchQuery -> QueryM SearchResult
+searchXlsx _ mquery = do
+    (world, today) <- ask
+    let query = fromMaybe (defaultSearchQuery today) mquery
+    pure $ SearchResult query $ searchContacts world query
+
+searchContacts :: World -> SearchQuery -> [Contact]
+searchContacts world query = postprocess $ performSearchQuery
+    (world ^. worldTagPersons)
+    (IdMap.keysSet $ world ^. worldMembers)
+    query
+  where
+    postprocess :: Map PersonId x -> [Contact]
+    postprocess m = m ^..
+        to Map.keys
+        . folded
+        . to (\memberId -> world ^. worldMembers . at memberId)
+        . folded
+        . to contactFromPerson
+
+-------------------------------------------------------------------------------
+-- Implementation details
+-------------------------------------------------------------------------------
 
 defaultSearchQuery :: Day -> SearchQuery
 defaultSearchQuery today = QAnd (QOr "talo" "osakehuoneisto") (QNot ayearTag)
@@ -182,3 +217,7 @@ memberTagList_ today world xs = do
 whenLeft :: Applicative m => Either a b -> (a -> m ()) -> m ()
 whenLeft (Right _) _ = pure ()
 whenLeft (Left x)  f = f x
+
+whenRight :: Applicative m => Either a b -> (b -> m ()) -> m ()
+whenRight (Right x) f = f x
+whenRight (Left _)  _ = pure ()

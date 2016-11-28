@@ -9,17 +9,21 @@ module SatO.Jasenrekisteri.API where
 
 import Prelude ()
 import Futurice.Prelude
+import Data.Csv            (EncodeOptions (..), defaultEncodeOptions)
 import Lucid
-import SatO.Foundation    (HtmlPage)
+import SatO.Foundation     (HtmlPage)
 import Servant
+import Servant.CSV.Cassava
 import Servant.HTML.Lucid
+import Servant.Xlsx
 
 import SatO.Jasenrekisteri.Command
+import SatO.Jasenrekisteri.Contact
 import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.SearchData
 import SatO.Jasenrekisteri.SearchQuery
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
-import SatO.Jasenrekisteri.SearchData
 
 type HTMLPageEndpoint sym = Get '[HTML] (HtmlPage sym)
 
@@ -37,6 +41,8 @@ type JasenrekisteriAPI =
     :<|> JasenrekisteriAuth :> "tags" :> HTMLPageEndpoint "tags"
     :<|> TagEndpoint
     :<|> JasenrekisteriAuth :> "search" :> QueryParam "query" SearchQuery' :> HTMLPageEndpoint "search"
+    :<|> SearchCsvEndpoint
+    :<|> SearchXlsxEndpoint
     :<|> JasenrekisteriAuth :> "command" :> ReqBody '[JSON] (Command Proxy) :> Post '[JSON] Text
     :<|> MemberlogEndpoint
     :<|> JasenrekisteriAuth :> "search-data" :> Get '[JSON] [SearchItem]
@@ -100,9 +106,37 @@ memberlogHref :: PersonId -> Attribute
 memberlogHref memberId =
     href_ $ uriToText $ safeLink jasenrekisteriAPI memberlogEndpoint memberId
 
+type SearchCsvEndpoint = JasenrekisteriAuth :> "search.csv" :> QueryParam "query" SearchQuery :> Get '[(CSV', SemiColonOpts)] [Contact]
+
+searchCsvEndpoint :: Proxy SearchCsvEndpoint
+searchCsvEndpoint = Proxy
+
+searchCsvHref :: SearchQuery -> Attribute
+searchCsvHref query =
+    href_ $ uriToText $ safeLink jasenrekisteriAPI searchCsvEndpoint (Just query)
+
+type SearchXlsxEndpoint = JasenrekisteriAuth :> "search.xlsx" :> QueryParam "query" SearchQuery :> Get '[XLSX] SearchResult
+
+searchXlsxEndpoint :: Proxy SearchXlsxEndpoint
+searchXlsxEndpoint = Proxy
+
+searchXlsxHref :: SearchQuery -> Attribute
+searchXlsxHref query =
+    href_ $ uriToText $ safeLink jasenrekisteriAPI searchXlsxEndpoint (Just query)
+
 -------------------------------------------------------------------------------
 -- Utilities
 -------------------------------------------------------------------------------
 
 uriToText :: URI -> Text
 uriToText uri = view packed $ "/" <> uriPath uri <> uriQuery uri
+
+-------------------------------------------------------------------------------
+-- Cassave
+-------------------------------------------------------------------------------
+
+data SemiColonOpts
+instance EncodeOpts SemiColonOpts where
+    encodeOpts _ = defaultEncodeOptions
+        { encDelimiter = fromIntegral $ fromEnum ';'
+        }
