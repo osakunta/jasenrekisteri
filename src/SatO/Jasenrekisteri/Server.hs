@@ -114,6 +114,7 @@ server ctx = queryEndpoint ctx membersPage
     :<|> queryEndpoint ctx tagPage
     :<|> queryEndpoint ctx searchPage
     :<|> queryEndpoint ctx searchCsv
+    :<|> queryEndpoint ctx searchXlsx
     :<|> commandEndpoint ctx
     :<|> memberlogHandler ctx
     :<|> searchDataHandler ctx
