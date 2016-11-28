@@ -6,6 +6,7 @@ module SatO.Jasenrekisteri.Pages.Search (searchPage, searchCsv) where
 
 import Prelude ()
 import Futurice.Prelude
+import Control.Lens         (to)
 import Control.Monad.Reader (ask)
 import Data.Maybe           (mapMaybe)
 import Futurice.IdMap       (key)
@@ -45,6 +46,10 @@ searchPage' today lu world mquery = template' today lu title $ do
                 "Haku"
                 input_ [ name_ "query", type_ "text", value_ pquery ]
             input_ [ type_ "submit" , value_ "Hae", class_ "button primary" ]
+    whenRight (unwrapSearchQuery' query) $ \query' -> do
+        row_ $ large_ 12 $ do
+            a_ [ searchCsvHref query' ] "Vie csv (excel)"
+        hr_ []
     memberTagList_ today world (itoList personIds)
   where
     title = "Haku: " <> toHtml pquery
@@ -66,7 +71,23 @@ searchPage' today lu world mquery = template' today lu title $ do
             query'
 
 searchCsv :: LoginUser -> Maybe SearchQuery -> QueryM [Contact]
-searchCsv _ _ = pure []
+searchCsv _ mquery = do
+    (world, today) <- ask
+    pure $ searchCsv' world $ fromMaybe (defaultSearchQuery today) mquery
+  where
+    searchCsv' world query = postprocess $ performSearchQuery
+        (world ^. worldTagPersons)
+        (IdMap.keysSet $ world ^. worldMembers)
+        query
+      where
+        postprocess :: Map PersonId x -> [Contact]
+        postprocess m = m ^..
+            to Map.keys
+            . folded
+            . to (\memberId -> world ^. worldMembers . at memberId)
+            . folded
+            . to contactFromPerson
+
 
 defaultSearchQuery :: Day -> SearchQuery
 defaultSearchQuery today = QAnd (QOr "talo" "osakehuoneisto") (QNot ayearTag)
@@ -186,3 +207,7 @@ memberTagList_ today world xs = do
 whenLeft :: Applicative m => Either a b -> (a -> m ()) -> m ()
 whenLeft (Right _) _ = pure ()
 whenLeft (Left x)  f = f x
+
+whenRight :: Applicative m => Either a b -> (b -> m ()) -> m ()
+whenRight (Right x) f = f x
+whenRight (Left _)  _ = pure ()

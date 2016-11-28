@@ -9,19 +9,20 @@ module SatO.Jasenrekisteri.API where
 
 import Prelude ()
 import Futurice.Prelude
+import Data.Csv            (EncodeOptions (..), defaultEncodeOptions)
 import Lucid
-import SatO.Foundation    (HtmlPage)
+import SatO.Foundation     (HtmlPage)
 import Servant
-import Servant.HTML.Lucid
 import Servant.CSV.Cassava
+import Servant.HTML.Lucid
 
 import SatO.Jasenrekisteri.Command
 import SatO.Jasenrekisteri.Contact
 import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.SearchData
 import SatO.Jasenrekisteri.SearchQuery
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
-import SatO.Jasenrekisteri.SearchData
 
 type HTMLPageEndpoint sym = Get '[HTML] (HtmlPage sym)
 
@@ -103,7 +104,7 @@ memberlogHref :: PersonId -> Attribute
 memberlogHref memberId =
     href_ $ uriToText $ safeLink jasenrekisteriAPI memberlogEndpoint memberId
 
-type SearchCsvEndpoint = JasenrekisteriAuth :> "search.csv" :> QueryParam "query" SearchQuery :> Get '[CSV] [Contact]
+type SearchCsvEndpoint = JasenrekisteriAuth :> "search.csv" :> QueryParam "query" SearchQuery :> Get '[(CSV', SemiColonOpts)] [Contact]
 
 searchCsvEndpoint :: Proxy SearchCsvEndpoint
 searchCsvEndpoint = Proxy
@@ -118,3 +119,13 @@ searchCsvHref query =
 
 uriToText :: URI -> Text
 uriToText uri = view packed $ "/" <> uriPath uri <> uriQuery uri
+
+-------------------------------------------------------------------------------
+-- Cassave
+-------------------------------------------------------------------------------
+
+data SemiColonOpts
+instance EncodeOpts SemiColonOpts where
+    encodeOpts _ = defaultEncodeOptions
+        { encDelimiter = fromIntegral $ fromEnum ';'
+        }
