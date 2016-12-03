@@ -39,7 +39,6 @@ module SatO.Jasenrekisteri.Member (
 import Prelude ()
 import Futurice.Prelude
 import Control.Lens        (Getter, contains, re, to, (%~))
-import Control.Applicative (liftA2)
 import Data.Char           (isLetter)
 import Data.Maybe          (mapMaybe)
 import Futurice.Generics
@@ -155,7 +154,7 @@ memberTaloAddress = to $ \member -> RE.replace regex (member ^. memberAddress)
   where
     regex          = T.pack <$> (taloRe <|> many RE.anySym)
     taloRe         = "Lapinrinne 1" *> skipSpaces *> (b <|> a)
-    a              = liftA2 (<>) "A" strippedSpaces
+    a              = (:) <$> RE.psym (/= 'B') <*> strippedSpaces
     b              = "B" *> strippedSpaces
     strippedSpaces = mapMaybe nonSpace <$> many RE.anySym
     nonSpace ' '   = Nothing
