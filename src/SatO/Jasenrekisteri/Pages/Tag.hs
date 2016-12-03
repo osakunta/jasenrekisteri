@@ -14,6 +14,7 @@ import Futurice.IdMap       (key)
 import qualified Data.Set       as Set
 import qualified Futurice.Graph as G
 
+import SatO.Jasenrekisteri.API
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Member
@@ -21,15 +22,15 @@ import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-tagPage :: LoginUser -> TagName -> QueryM (HtmlPage "tag")
-tagPage lu tn = do
+tagPage :: LoginUser -> Maybe Column -> TagName -> QueryM (HtmlPage "tag")
+tagPage lu mcolumn tn = do
     (world, today) <- ask
     let tag = world ^. worldTags . att tn
-    pure $ tagPage' today lu world tag
+    pure $ tagPage' today lu world mcolumn tag
 
 -- TODO: use closure fields
-tagPage' :: Day -> LoginUser -> World -> Tag -> HtmlPage "tag"
-tagPage' today lu world tag = template' today lu ("Tagi: " <> toHtml (tn ^. _TagName)) $ do
+tagPage' :: Day -> LoginUser -> World -> Maybe Column -> Tag -> HtmlPage "tag"
+tagPage' today lu world mcolumn tag = template' today lu ("Tagi: " <> toHtml (tn ^. _TagName)) $ do
     when (not $ null tags) $ do
         subheader_ "Alatägit"
         tagList_ tags
@@ -37,9 +38,14 @@ tagPage' today lu world tag = template' today lu ("Tagi: " <> toHtml (tn ^. _Tag
         subheader_ "Ylätägit"
         tagList_ parentTags
     subheader_ "Jäsenet"
-    memberList_ today tags (world ^.. membersFold)
+    memberList_ today (\c -> tagHref (Just c) tn) column hasTalo tags (world ^.. membersFold)
   where
     tn = tag ^. tagName
+
+    column = case mcolumn of
+        Just ColumnRoom | hasTalo           -> ColumnRoom
+        Just ColumnTags | isn't _Empty tags -> ColumnTags
+        _                                   -> ColumnName
 
     tags :: [Tag]
     tags = world ^.. subtagsFold . filtered (\subtag -> subtag ^. tagName /= tn)
@@ -48,6 +54,10 @@ tagPage' today lu world tag = template' today lu ("Tagi: " <> toHtml (tn ^. _Tag
     parentTags = world ^.. parenttagsFold . filtered (\parentTag -> parentTag ^. tagName /= tn)
 
     subtagNames = setOf (subtagsFold . key) world
+
+    hasTalo = p tn || any (p . view tagName) tags
+      where
+        p t = t == "talo" || t == "osakehuoneisto"
 
     subtagsFold :: Fold World Tag
     subtagsFold

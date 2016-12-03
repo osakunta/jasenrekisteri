@@ -101,6 +101,10 @@ instance FromHttpApiData SearchQuery' where
         . TE.encodeUtf8
         $ t
 
+instance ToHttpApiData SearchQuery' where
+    toUrlPiece (SearchQuery' (Left (_, t))) = t
+    toUrlPiece (SearchQuery' (Right q))     = toUrlPiece q
+
 instance FromHttpApiData SearchQuery where
     parseUrlPiece t
         = first (view packed)

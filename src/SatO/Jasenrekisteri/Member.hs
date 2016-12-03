@@ -12,6 +12,7 @@ module SatO.Jasenrekisteri.Member (
     MemberId,
     -- * Modifications
     addMagicTags,
+    modifyTaloAddress,
     -- * Getters
     memberFullName,
     memberFullNameHtml,
@@ -146,3 +147,7 @@ addSchoolTag p = p & memberTags %~ addSchools
   where
     schools = fmap T.strip . T.splitOn "," $ p ^. memberUniversity
     addSchools ts = ts <> tagNamesOf (folded . re _TagName) schools
+
+-- todo: use regexp
+modifyTaloAddress :: Text -> Text
+modifyTaloAddress = T.replace "Lapinrinne 1 " ""

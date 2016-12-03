@@ -34,13 +34,13 @@ type HTMLPageEndpoint sym = Get '[HTML] (HtmlPage sym)
 type JasenrekisteriAuth = BasicAuth "jasenrekisteri" LoginUser
 
 type JasenrekisteriAPI =
-    JasenrekisteriAuth :> HTMLPageEndpoint "members"
+    MembersEndpoint
     :<|> MemberEndpoint
     :<|> NewMemberEndpoint
     :<|> ChangelogEndpoint
     :<|> JasenrekisteriAuth :> "tags" :> HTMLPageEndpoint "tags"
     :<|> TagEndpoint
-    :<|> JasenrekisteriAuth :> "search" :> QueryParam "query" SearchQuery' :> HTMLPageEndpoint "search"
+    :<|> SearchEndpoint
     :<|> SearchCsvEndpoint
     :<|> SearchXlsxEndpoint
     :<|> JasenrekisteriAuth :> "command" :> ReqBody '[JSON] (Command Proxy) :> Post '[JSON] Text
@@ -54,6 +54,35 @@ jasenrekisteriAPI = Proxy
 -------------------------------------------------------------------------------
 -- Endpoints
 -------------------------------------------------------------------------------
+
+type SearchEndpoint
+    = JasenrekisteriAuth
+    :> "search"
+    :> QueryParam "order-by" Column
+    :> QueryParam "query" SearchQuery'
+    :> HTMLPageEndpoint "search"
+
+searchEndpoint :: Proxy SearchEndpoint
+searchEndpoint = Proxy
+
+searchHrefText :: Maybe Column -> Maybe SearchQuery' -> Text
+searchHrefText c q =
+    uriToText $ safeLink jasenrekisteriAPI searchEndpoint c q
+
+searchHref :: Maybe Column -> Maybe SearchQuery' -> Attribute
+searchHref c q = href_ $ searchHrefText c q
+
+type MembersEndpoint = JasenrekisteriAuth :> HTMLPageEndpoint "members"
+
+membersEndpoint :: Proxy MembersEndpoint
+membersEndpoint = Proxy
+
+membersHrefText :: Text
+membersHrefText =
+    uriToText $ safeLink jasenrekisteriAPI membersEndpoint
+
+membersHref :: Attribute
+membersHref = href_ membersHrefText
 
 type MemberEndpoint = JasenrekisteriAuth :> "member" :> Capture "id" MemberId :> HTMLPageEndpoint "member"
 
@@ -76,17 +105,22 @@ newMemberHref :: Attribute
 newMemberHref  =
     href_ $ uriToText $ safeLink jasenrekisteriAPI newMemberEndpoint
 
-type TagEndpoint = JasenrekisteriAuth :> "tag" :> Capture "tag" TagName :> HTMLPageEndpoint "tag"
+type TagEndpoint
+    = JasenrekisteriAuth
+    :> "tag"
+    :> QueryParam "order-by" Column
+    :> Capture "tag" TagName
+    :> HTMLPageEndpoint "tag"
 
 tagEndpoint :: Proxy TagEndpoint
 tagEndpoint = Proxy
 
-tagHrefText :: TagName -> Text
-tagHrefText tn =
-    uriToText $ safeLink jasenrekisteriAPI tagEndpoint tn
+tagHrefText :: Maybe Column -> TagName -> Text
+tagHrefText c tn =
+    uriToText $ safeLink jasenrekisteriAPI tagEndpoint c tn
 
-tagHref :: TagName -> Attribute
-tagHref = href_ . tagHrefText
+tagHref :: Maybe Column -> TagName -> Attribute
+tagHref c tn = href_ $ tagHrefText c tn
 
 type ChangelogEndpoint = JasenrekisteriAuth :> "changelog" :> QueryParam "eid" CID :> HTMLPageEndpoint "changelog"
 
@@ -123,6 +157,26 @@ searchXlsxEndpoint = Proxy
 searchXlsxHref :: SearchQuery -> Attribute
 searchXlsxHref query =
     href_ $ uriToText $ safeLink jasenrekisteriAPI searchXlsxEndpoint (Just query)
+
+-------------------------------------------------------------------------------
+-- Columns
+-------------------------------------------------------------------------------
+
+data Column
+    = ColumnName
+    | ColumnTags
+    | ColumnRoom
+
+instance ToHttpApiData Column where
+    toUrlPiece ColumnName = "name"
+    toUrlPiece ColumnTags = "tags"
+    toUrlPiece ColumnRoom = "room"
+
+instance FromHttpApiData Column where
+    parseUrlPiece "name" = pure ColumnName
+    parseUrlPiece "tags" = pure ColumnTags
+    parseUrlPiece "room" = pure ColumnRoom
+    parseUrlPiece _      = throwError "unknown"
 
 -------------------------------------------------------------------------------
 -- Utilities
