@@ -27,13 +27,13 @@ import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-searchPage :: LoginUser -> Maybe SearchQuery' -> QueryM (HtmlPage "search")
-searchPage lu mquery = do
+searchPage :: LoginUser -> Maybe Column -> Maybe SearchQuery' -> QueryM (HtmlPage "search")
+searchPage lu mcolumn mquery = do
     (world, today) <- ask
-    pure $ searchPage' today lu world mquery
+    pure $ searchPage' today lu world mcolumn mquery
 
-searchPage' :: Day -> LoginUser -> World -> Maybe SearchQuery' -> HtmlPage "search"
-searchPage' today lu world mquery = template' today lu title $ do
+searchPage' :: Day -> LoginUser -> World -> Maybe Column -> Maybe SearchQuery' -> HtmlPage "search"
+searchPage' today lu world mcolumn mquery = template' today lu title $ do
     row_ $ large_ 12 $ div_ [ class_ "jrek-search callout secondary" ] $ do
         div_ [ class_ "button-group" ] $ for_ (exampleQueries today) $ \q -> do
             let pq = prettySearchQuery q
@@ -50,7 +50,7 @@ searchPage' today lu world mquery = template' today lu title $ do
         row_ $ large_ 12 $ do
             a_ [ searchXlsxHref query' ] "Lataa excelissä osoitteiden kera"
         hr_ []
-    memberTagList_ today world (itoList memberIds)
+    memberTagList_ today (\c -> searchHref (Just c) mquery) column world (itoList memberIds)
   where
     title = "Haku: " <> toHtml pquery
 
@@ -61,6 +61,14 @@ searchPage' today lu world mquery = template' today lu title $ do
     pquery = case unwrapSearchQuery' query of
         Left (_, q) -> q
         Right q     -> prettySearchQuery q
+
+    column = case mcolumn of
+        Just ColumnRoom | hasTalo -> ColumnRoom
+        _ -> ColumnName
+
+    hasTalo = any f memberIds
+      where
+        f s = Set.member "talo" s || Set.member "osakehuoneisto" s
 
     memberIds :: Map MemberId (Set TagName)
     memberIds = case unwrapSearchQuery' query of
@@ -166,10 +174,12 @@ performSearchQuery l a = go
 memberTagList_
     :: Monad m
     => Day
+    -> (Column -> Attribute)
+    -> Column
     -> World
     -> [(MemberId, Set TagName)]
     -> HtmlT m ()
-memberTagList_ today world xs = do
+memberTagList_ today columnHref column world xs = do
     row_ $ do
         largemed_ 6 $ toHtml $  "Yhteensä: " <> (show $ length xs')
         largemed_ 6 $ label_ $ do
@@ -177,10 +187,10 @@ memberTagList_ today world xs = do
             input_ [ type_ "text", id_ "member-filter" ]
     row_ . large_ 12 $ table_ [ id_ "member-list", class_ "hover" ] $ do
         thead_ $ tr_ $ do
-            th_ "Nimi"
-            th_ "Tagit"
+            th_ $ a_ [ columnHref ColumnName ] $ "Nimi"
+            th_ $ "Tagit"
             th_ ayearTag
-            when hasTalo $ th_ $ "Huone"
+            when hasTalo $ th_ $ a_ [ columnHref ColumnRoom ] $ "Huone"
         tbody_ $ for_ xs' $ \(member, tns) -> do
             let memberId = member ^. key
             let needle = T.toLower $ member ^. memberFullName
@@ -190,8 +200,12 @@ memberTagList_ today world xs = do
                 td_ $ tagCheckbox member ayearTag
                 when hasTalo $ td_ $ toHtml $ modifyAddress $ member ^. memberAddress
   where
-    xs' = sortOn (view memberSortKey . fst)
-        $ mapMaybe lookupMember xs
+    sortOnColumn = case column of
+        ColumnName -> sortOn (view memberSortKey . fst)
+        ColumnTags -> sortOn (view memberSortKey . fst)
+        ColumnRoom -> sortOn (view memberAddress . fst)
+
+    xs' = sortOnColumn $ mapMaybe lookupMember xs
 
     lookupMember (memberId, tns) = (,tns) <$> world ^? worldMembers . ix memberId
 

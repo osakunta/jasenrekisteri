@@ -40,7 +40,7 @@ type JasenrekisteriAPI =
     :<|> ChangelogEndpoint
     :<|> JasenrekisteriAuth :> "tags" :> HTMLPageEndpoint "tags"
     :<|> TagEndpoint
-    :<|> JasenrekisteriAuth :> "search" :> QueryParam "query" SearchQuery' :> HTMLPageEndpoint "search"
+    :<|> SearchEndpoint
     :<|> SearchCsvEndpoint
     :<|> SearchXlsxEndpoint
     :<|> JasenrekisteriAuth :> "command" :> ReqBody '[JSON] (Command Proxy) :> Post '[JSON] Text
@@ -54,6 +54,23 @@ jasenrekisteriAPI = Proxy
 -------------------------------------------------------------------------------
 -- Endpoints
 -------------------------------------------------------------------------------
+
+type SearchEndpoint
+    = JasenrekisteriAuth
+    :> "search"
+    :> QueryParam "order-by" Column
+    :> QueryParam "query" SearchQuery'
+    :> HTMLPageEndpoint "search"
+
+searchEndpoint :: Proxy SearchEndpoint
+searchEndpoint = Proxy
+
+searchHrefText :: Maybe Column -> Maybe SearchQuery' -> Text
+searchHrefText c q =
+    uriToText $ safeLink jasenrekisteriAPI searchEndpoint c q
+
+searchHref :: Maybe Column -> Maybe SearchQuery' -> Attribute
+searchHref c q = href_ $ searchHrefText c q
 
 type MemberEndpoint = JasenrekisteriAuth :> "member" :> Capture "id" MemberId :> HTMLPageEndpoint "member"
 
@@ -123,6 +140,26 @@ searchXlsxEndpoint = Proxy
 searchXlsxHref :: SearchQuery -> Attribute
 searchXlsxHref query =
     href_ $ uriToText $ safeLink jasenrekisteriAPI searchXlsxEndpoint (Just query)
+
+-------------------------------------------------------------------------------
+-- Columns
+-------------------------------------------------------------------------------
+
+data Column
+    = ColumnName
+    | ColumnTags
+    | ColumnRoom
+
+instance ToHttpApiData Column where
+    toUrlPiece ColumnName = "name"
+    toUrlPiece ColumnTags = "tags"
+    toUrlPiece ColumnRoom = "room"
+
+instance FromHttpApiData Column where
+    parseUrlPiece "name" = pure ColumnName
+    parseUrlPiece "tags" = pure ColumnTags
+    parseUrlPiece "room" = pure ColumnRoom
+    parseUrlPiece _      = throwError "unknown"
 
 -------------------------------------------------------------------------------
 -- Utilities

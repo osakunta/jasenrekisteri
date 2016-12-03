@@ -65,7 +65,7 @@ navigation today lu = do
                     li_ $ a_ [tagHref ayearTag''] ayearTag''
                     li_ $ a_ [tagHref "talo"] "Talo"
             li_ $ a_ [changelogHref Nothing ] "Muutosloki"
-            li_ $ a_ [href_ "/search" ] "Haku"
+            li_ $ a_ [searchHref Nothing Nothing] "Haku"
         div_ [ class_ "top-bar-right" ] $ ul_ [ class_ "menu" ] $ do
             li_ $ input_ [ class_ "search", placeholder_ "hae käyttäjä tai tägi" ]
             li_ [ class_ "menu-text" ] $ toHtml $ "Terve " <> getLoginUser lu
