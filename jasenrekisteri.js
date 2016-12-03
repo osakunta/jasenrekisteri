@@ -16,8 +16,8 @@ document.addEventListener("DOMContentLoaded", function () {
   tagToggler();
   tagModifier();
   searchButtons();
-  personEdit();
-  personCreate();
+  memberEdit();
+  memberCreate();
   searchBox();
   var overlay = addOverlay();
 
@@ -86,12 +86,12 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function tagModifier() {
-    $$("div.row[data-jrek-person-tag]").forEach(function (wrapper) {
+    $$("div.row[data-jrek-member-tag]").forEach(function (wrapper) {
       var input = $("input[type=text]", wrapper);
       var addButton = $("button[data-jrek-action=add]", wrapper);
       var removeButton = $("button[data-jrek-action=remove]", wrapper);
 
-      var memberId = wrapper.dataset.jrekPersonTag;
+      var memberId = wrapper.dataset.jrekMemberTag;
       console.info("Initialising member tag edit for", memberId);
 
       var input$ = menrva.source("");
@@ -137,7 +137,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  function personEdit() {
+  function memberEdit() {
     var formEl = $("div[data-jrek-member-edit]");
     if (!formEl) return;
     var submitButton = $("button[data-jrek-action=submit]", formEl);
@@ -185,7 +185,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  function personCreate() {
+  function memberCreate() {
     var formEl = $("div[data-jrek-member-new]");
     if (!formEl) return;
     var submitButton = $("button[data-jrek-action=submit]", formEl);
@@ -394,7 +394,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function commandAddTag(memberId, tagName) {
     assert(_.isString(memberId), "memberId should be string");
-    assert(_.isString(tagName), "memberId should be string");
+    assert(_.isString(tagName), "tagName should be string");
 
     console.info("command add-tag", memberId, tagName);
     return command({
@@ -406,7 +406,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function commandRemoveTag(memberId, tagName) {
     assert(_.isString(memberId), "memberId should be string");
-    assert(_.isString(tagName), "memberId should be string");
+    assert(_.isString(tagName), "tagName should be string");
 
     console.info("command remove-tag", memberId, tagName);
     return command({
