@@ -190,7 +190,7 @@ memberTagList_ today world xs = do
                 td_ $ tagCheckbox member ayearTag
                 when hasTalo $ td_ $ toHtml $ modifyAddress $ member ^. memberAddress
   where
-    xs' = sortOn (view memberFullName . fst)
+    xs' = sortOn (view memberSortKey . fst)
         $ mapMaybe lookupMember xs
 
     lookupMember (memberId, tns) = (,tns) <$> world ^? worldMembers . ix memberId

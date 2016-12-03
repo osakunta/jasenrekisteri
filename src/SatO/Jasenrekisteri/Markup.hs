@@ -22,7 +22,6 @@ import Prelude ()
 import Futurice.Prelude
 import Control.Lens
 import Control.Lens.Att
-import Data.Ord          (comparing)
 import Futurice.IdMap    (key)
 import SatO.AcademicYear
 import SatO.Foundation
@@ -150,7 +149,7 @@ memberList_ today ts ps = do
                     tagList_ (ts ^.. folded . filtered (\t -> member ^. memberTags . contains (t ^. key)))
                 td_ $ tagCheckbox member ayearTag
   where
-    ps' = sortBy (comparing _memberFirstNames <> comparing _memberLastName) ps
+    ps' = sortOn (view memberSortKey) ps
 
     ayear :: Integer
     ayear = academicYear today

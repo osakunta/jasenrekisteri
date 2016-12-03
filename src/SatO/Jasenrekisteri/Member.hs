@@ -15,6 +15,7 @@ module SatO.Jasenrekisteri.Member (
     -- * Getters
     memberFullName,
     memberFullNameHtml,
+    memberSortKey,
     -- * Lenses
     memberUuid,
     memberBirthday,
@@ -84,6 +85,11 @@ deriveGeneric ''Member
 memberFullName :: Getter Member Text
 memberFullName = to $ \member -> T.replace "_" "" $
     member ^. memberFirstNames <> " " <> member ^. memberLastName
+
+memberSortKey :: Getter Member [Text]
+memberSortKey = to $ \member ->
+    member ^. memberLastName
+    : T.splitOn " " (T.replace "_" "" $ member ^. memberFirstNames)
 
 memberFullNameHtml :: Monad m => Getter Member (HtmlT m ())
 memberFullNameHtml = to $ \member -> formatName $
