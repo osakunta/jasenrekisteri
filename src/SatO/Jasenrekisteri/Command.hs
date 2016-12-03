@@ -17,8 +17,8 @@ import Data.Monoid          (mconcat)
 import Futurice.Generics
 import Web.HttpApiData      (FromHttpApiData (..), ToHttpApiData (..))
 
-import SatO.Jasenrekisteri.Person
-import SatO.Jasenrekisteri.PersonEdit
+import SatO.Jasenrekisteri.Member
+import SatO.Jasenrekisteri.MemberEdit
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
@@ -26,23 +26,23 @@ import qualified Database.PostgreSQL.Simple.FromField as P
 import qualified Database.PostgreSQL.Simple.ToField   as P
 
 data Command f
-    = CmdAddTag PersonId TagName
-    | CmdRemoveTag PersonId TagName
-    | CmdEditPerson PersonId PersonEdit
-    | CmdNewPerson (f PersonId) PersonEdit
+    = CmdAddTag MemberId TagName
+    | CmdRemoveTag MemberId TagName
+    | CmdEditMember MemberId MemberEdit
+    | CmdNewMember (f MemberId) MemberEdit
 --  deriving (Eq, Show)
 
-traverseCommand :: Applicative m => (f PersonId -> m (g PersonId)) -> Command f -> m (Command g)
+traverseCommand :: Applicative m => (f MemberId -> m (g MemberId)) -> Command f -> m (Command g)
 traverseCommand _f (CmdAddTag memberId tn)       = pure $ CmdAddTag memberId tn
 traverseCommand _f (CmdRemoveTag memberId tn)    = pure $ CmdRemoveTag memberId tn
-traverseCommand _f (CmdEditPerson memberId edit) = pure $ CmdEditPerson memberId edit
-traverseCommand  f (CmdNewPerson memberId tn)    = CmdNewPerson <$> f memberId <*> pure tn
+traverseCommand _f (CmdEditMember memberId edit) = pure $ CmdEditMember memberId edit
+traverseCommand  f (CmdNewMember memberId tn)    = CmdNewMember <$> f memberId <*> pure tn
 
 instance Eq1 f => Eq (Command f) where
     CmdAddTag a b     == CmdAddTag a' b'     = a == a'  && b == b'
     CmdRemoveTag a b  == CmdRemoveTag a' b'  = a == a'  && b == b'
-    CmdEditPerson a b == CmdEditPerson a' b' = a == a'  && b == b'
-    CmdNewPerson a b  == CmdNewPerson a' b'  = eq1 a a' && b == b'
+    CmdEditMember a b == CmdEditMember a' b' = a == a'  && b == b'
+    CmdNewMember a b  == CmdNewMember a' b'  = eq1 a a' && b == b'
     _ == _ = False
 
 instance Show1 f => Show (Command f) where
@@ -56,14 +56,14 @@ instance Show1 f => Show (Command f) where
         . showsPrec 11 memberId
         . showString " "
         . showsPrec 11 (getTagName tn)
-    showsPrec d (CmdEditPerson memberId edit) = showParen (d > 10)
-        $ showString "CmdEditPerson "
+    showsPrec d (CmdEditMember memberId edit) = showParen (d > 10)
+        $ showString "CmdEditMember "
         . showsPrec 11 memberId
         . showString " "
         . showsPrec 11 edit
-    showsPrec d (CmdNewPerson memberId edit) =
+    showsPrec d (CmdNewMember memberId edit) =
         showsBinaryWith (liftShowsPrec showsPrec showList) showsPrec
-        "CmdNewPerson" d memberId edit
+        "CmdNewMember" d memberId edit
 
 instance Show1 I where
     liftShowsPrec sp _ d (I x) =
@@ -73,12 +73,12 @@ instance FromJSON1 Proxy where
     liftParseJSON _ _ Null = pure Proxy
     liftParseJSON _ _ _    = fail "Proxy should be encoded as Null"
 
-commandMemberId :: Getter (Command I) PersonId
+commandMemberId :: Getter (Command I) MemberId
 commandMemberId = to $ \cmd -> case cmd of
     CmdAddTag memberId _        -> memberId
     CmdRemoveTag memberId _     -> memberId
-    CmdEditPerson memberId _    -> memberId
-    CmdNewPerson (I memberId) _ -> memberId
+    CmdEditMember memberId _    -> memberId
+    CmdNewMember (I memberId) _ -> memberId
 
 instance FromJSON1 f => FromJSON (Command f) where
     parseJSON = withObject "Command" $ \obj -> do
@@ -86,8 +86,8 @@ instance FromJSON1 f => FromJSON (Command f) where
         case (cmd :: Text) of
           "add-tag"     -> CmdAddTag <$> obj .: "memberId" <*> obj .: "tagName"
           "remove-tag"  -> CmdRemoveTag <$> obj .: "memberId" <*> obj .: "tagName"
-          "member-edit" -> CmdEditPerson <$> obj .: "memberId" <*> obj .: "edit"
-          "member-new"  -> CmdNewPerson <$> (obj .: "memberId" >>= parseJSON1) <*> obj .: "edit"
+          "member-edit" -> CmdEditMember <$> obj .: "memberId" <*> obj .: "edit"
+          "member-new"  -> CmdNewMember <$> (obj .: "memberId" >>= parseJSON1) <*> obj .: "edit"
           _             -> fail $ "Unknown command: " <> cmd ^. from packed
 
 instance ToJSON1 f => ToJSON (Command f) where
@@ -101,12 +101,12 @@ instance ToJSON1 f => ToJSON (Command f) where
         , "memberId" .= mid
         , "tagName"  .= tn
         ]
-    toJSON (CmdEditPerson mid pe) = object
+    toJSON (CmdEditMember mid pe) = object
         [ "type"     .= ("member-edit" :: Text)
         , "memberId" .= mid
         , "edit"     .= pe
         ]
-    toJSON (CmdNewPerson mid pe) = object
+    toJSON (CmdNewMember mid pe) = object
         [ "type"     .= ("member-new" :: Text)
         , "edit"     .= pe
         , "memberId" .= toJSON1 mid
@@ -122,28 +122,28 @@ instance ToJSON1 f => ToJSON (Command f) where
         , "memberId" .= mid
         , "tagName"  .= tn
         ]
-    toEncoding (CmdEditPerson mid pe) = pairs $ mconcat
+    toEncoding (CmdEditMember mid pe) = pairs $ mconcat
         [ "type"     .= ("member-edit" :: Text)
         , "memberId" .= mid
         , "edit"     .= pe
         ]
-    toEncoding (CmdNewPerson mid pe) = pairs $ mconcat
+    toEncoding (CmdNewMember mid pe) = pairs $ mconcat
         [ "type"     .= ("member-new" :: Text)
         , "edit"     .= pe
         ] <> pair "memberId" (toEncoding1 mid)
 
-instance Arbitrary (f PersonId) => Arbitrary (Command f) where
+instance Arbitrary (f MemberId) => Arbitrary (Command f) where
     arbitrary = sopArbitrary
 
 applyCommand :: Command I -> World -> World
 applyCommand (CmdAddTag pid tn) w =
-    w & worldMembers . ix pid . personTags . contains tn .~ True
+    w & worldMembers . ix pid . memberTags . contains tn .~ True
 applyCommand (CmdRemoveTag pid tn) w =
-    w & worldMembers . ix pid . personTags . contains tn .~ False
-applyCommand (CmdEditPerson pid pe) w =
+    w & worldMembers . ix pid . memberTags . contains tn .~ False
+applyCommand (CmdEditMember pid pe) w =
     w & worldMembers . ix pid %~ addMagicTags . toEndo pe
-applyCommand (CmdNewPerson (I pid) pe) w =
-    w & worldMembers . at pid ?~ (addMagicTags $ toEndo pe $ emptyPerson pid)
+applyCommand (CmdNewMember (I pid) pe) w =
+    w & worldMembers . at pid ?~ (addMagicTags $ toEndo pe $ emptyMember pid)
 
 deriveGeneric ''Command
 

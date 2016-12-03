@@ -23,8 +23,8 @@ module SatO.Foundation (
     attrfor_,
     ) where
 
-import Futurice.Prelude
 import Prelude ()
+import Futurice.Prelude
 
 import Control.Monad.Morph   (hoist)
 import Data.FileEmbed        (embedStringFile)
@@ -34,7 +34,7 @@ import GHC.TypeLits          (KnownSymbol, Symbol, symbolVal)
 import Lucid                 hiding (for_)
 import SatO.Clay             (satoCss_)
 
-import qualified Lucid     as L
+import qualified Lucid as L
 
 attrfor_ :: Text -> Attribute
 attrfor_ = L.for_

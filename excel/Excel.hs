@@ -13,12 +13,12 @@ import qualified Data.Aeson.Compat          as A
 import qualified Data.ByteString.Lazy.Extra as LBS
 import qualified Data.Csv.Extra             as Csv
 
-import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Member
 
 run :: FilePath -> FilePath -> IO ()
 run filepathIn filepathOut = do
     contents <- LBS.readFileAscii filepathIn
-    members <- Csv.decodeSmart contents :: IO (Vector Person)
+    members <- Csv.decodeSmart contents :: IO (Vector Member)
     LBS.writeFile filepathOut $ A.encode members
 
 main :: IO ()

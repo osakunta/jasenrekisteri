@@ -4,8 +4,8 @@ module Data.Csv.Extra (
     module Data.Csv,
     ) where
 
-import Futurice.Prelude
 import Prelude ()
+import Futurice.Prelude
 
 import Data.Csv
 

@@ -12,8 +12,8 @@ import Data.Pool              (Pool, createPool, withResource)
 import qualified Database.PostgreSQL.Simple as P
 
 import SatO.Jasenrekisteri.Command
+import SatO.Jasenrekisteri.Member
 import SatO.Jasenrekisteri.Session
-import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.World
 
 data Ctx = Ctx
@@ -43,7 +43,7 @@ ctxApplyCmd lu cmd ctx = do
         -- | TODO: log what happened?
         pure ()
 
-ctxFetchCmds :: Ctx -> PersonId -> IO [(LoginUser, UTCTime, Command I)]
+ctxFetchCmds :: Ctx -> MemberId -> IO [(LoginUser, UTCTime, Command I)]
 ctxFetchCmds ctx memberId = withResource (ctxPostgres ctx) $ \conn -> do
     P.query conn "SELECT username, updated, edata FROM jasen2.events WHERE edata :: json ->> 'memberId' = ? ORDER by eid DESC" (P.Only memberId)
 

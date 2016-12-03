@@ -16,35 +16,35 @@ import qualified Generics.SOP as SOP
 import SatO.Jasenrekisteri.API
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
-import SatO.Jasenrekisteri.Person
-import SatO.Jasenrekisteri.PersonEdit
+import SatO.Jasenrekisteri.Member
+import SatO.Jasenrekisteri.MemberEdit
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-memberPage :: LoginUser -> PersonId -> QueryM (HtmlPage "member")
-memberPage lu personId = ask <&> \(world, today) -> case world ^? worldMembers . ix personId of
+memberPage :: LoginUser -> MemberId -> QueryM (HtmlPage "member")
+memberPage lu memberId = ask <&> \(world, today) -> case world ^? worldMembers . ix memberId of
     -- TODO: not found page
     Nothing -> page404 today lu
-    Just p@Person {..} -> template' today lu (p ^. personFullNameHtml) $ do
+    Just p@Member {..} -> template' today lu (p ^. memberFullNameHtml) $ do
         let pid = p ^. key
 
         row_ $ large_ 12 $ dl_ $ do
             dt_ "Sähköposti"
-            dd_ $ a_ [href_ $ "mailto:" <> _personEmail] $ toHtml _personEmail
+            dd_ $ a_ [href_ $ "mailto:" <> _memberEmail] $ toHtml _memberEmail
             dt_ "Puhelin"
-            dd_ $ a_ [href_ $ "tel:" <> _personPhone] $ toHtml _personPhone
+            dd_ $ a_ [href_ $ "tel:" <> _memberPhone] $ toHtml _memberPhone
             dt_ "Osoite"
             dd_ $ do
-                toHtml _personAddress
+                toHtml _memberAddress
                 br_ []
-                toHtml $ _personZipcode <> " " <> _personCity
+                toHtml $ _memberZipcode <> " " <> _memberCity
 
         subheader_ "Tagit"
         row_ $ large_ 12 $ div_ [ class_ "callout" ] $ do
-            tagnameList_ world (world ^.. worldPersonTags . ix pid . _TagNames . folded)
+            tagnameList_ world (world ^.. worldMemberTags . ix pid . _TagNames . folded)
             hr_ []
-            row_ [ data_ "jrek-person-tag" $ UUID.toText pid ] $ do
+            row_ [ data_ "jrek-member-tag" $ UUID.toText pid ] $ do
                 large_ 6 $ input_ [ type_ "text", placeholder_ "tagi" ]
                 large_ 6 $ div_ [ class_ "button-group" ] $ do
                     button_ [ data_ "jrek-action" "add", class_ "button" ] "Lisää"
@@ -54,7 +54,7 @@ memberPage lu personId = ask <&> \(world, today) -> case world ^? worldMembers .
         row_ $ large_ 12 $ a_ [ memberlogHref pid ] "Muutosloki"
         hr_ []
         row_ $ large_ 12 $ div_ [ class_ "callout" ] $ div_ [ data_ "jrek-member-edit" $ UUID.toText pid] $ do
-            for_ (SOP.hcollapse personEdits) $ editbox p
+            for_ (SOP.hcollapse memberEdits) $ editbox p
 
             hr_ []
             div_ [ class_ "button-group" ] $ do
@@ -64,7 +64,7 @@ memberPage lu personId = ask <&> \(world, today) -> case world ^? worldMembers .
 -- Editbox
 -------------------------------------------------------------------------------
 
-editbox :: Person -> PE -> Html ()
+editbox :: Member -> PE -> Html ()
 editbox p (MkPE i l getter _) = label_ $ do
     toHtml l
     input_

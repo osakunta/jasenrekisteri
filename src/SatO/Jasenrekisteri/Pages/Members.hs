@@ -3,9 +3,9 @@
 {-# LANGUAGE RecordWildCards   #-}
 module SatO.Jasenrekisteri.Pages.Members (membersPage) where
 
-import Control.Lens
-import Futurice.Prelude
 import Prelude ()
+import Futurice.Prelude
+import Control.Lens
 
 import Control.Monad.Reader (ask)
 

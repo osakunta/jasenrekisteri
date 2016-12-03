@@ -16,7 +16,7 @@ import qualified Futurice.Graph as G
 
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
-import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Member
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
@@ -63,11 +63,11 @@ tagPage' today lu world tag = template' today lu ("Tagi: " <> toHtml (tn ^. _Tag
         . to (flip G.revClosure [tn])
         . _Just . folded
 
-    membersFold :: Fold World Person
+    membersFold :: Fold World Member
     membersFold
         = worldMembers
         . folded
-        . filtered (\member -> overlaps (member ^. personTags) subtagNames)
+        . filtered (\member -> overlaps (member ^. memberTags) subtagNames)
 
     overlaps :: TagNames -> Set TagName -> Bool
     overlaps tns tns' = not $ null $ Set.intersection

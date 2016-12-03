@@ -22,7 +22,6 @@ import Prelude ()
 import Futurice.Prelude
 import Control.Lens
 import Control.Lens.Att
-import Data.Ord          (comparing)
 import Futurice.IdMap    (key)
 import SatO.AcademicYear
 import SatO.Foundation
@@ -32,7 +31,7 @@ import qualified Data.Text          as T
 import qualified Data.Text.Encoding as TE
 
 import SatO.Jasenrekisteri.API
-import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Member
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
@@ -72,7 +71,7 @@ navigation today lu = do
             li_ [ class_ "menu-text" ] $ toHtml $ "Terve " <> getLoginUser lu
   where
     ayear :: Integer
-    ayear = academicYear today 
+    ayear = academicYear today
 
     ayearTag :: IsString a => a
     ayearTag = fromString $ show ayear ++ "-" ++ show (succ ayear)
@@ -126,7 +125,7 @@ memberList_
     :: Monad m
     => Day
     -> [Tag]       -- ^ tag to show in the list
-    -> [Person]
+    -> [Member]
     -> HtmlT m ()
 memberList_ today ts ps = do
     row_ $ do
@@ -140,31 +139,31 @@ memberList_ today ts ps = do
             when (isn't _Empty ts) $
                 th_ "Tagit"
             th_ $ ayearTag
-        tbody_ $ for_ ps' $ \person -> do
-            let memberId = person ^. key
+        tbody_ $ for_ ps' $ \member -> do
+            let memberId = member ^. key
             let needle = T.toLower
-                  $ person ^. personFullName
+                  $ member ^. memberFullName
             tr_ [ data_ "member-haystack" needle ] $ do
-                td_ $ a_ [ memberHref memberId ] $ person ^. personFullNameHtml
+                td_ $ a_ [ memberHref memberId ] $ member ^. memberFullNameHtml
                 when (isn't _Empty ts) $ td_ $
-                    tagList_ (ts ^.. folded . filtered (\t -> person ^. personTags . contains (t ^. key)))
-                td_ $ tagCheckbox person ayearTag
+                    tagList_ (ts ^.. folded . filtered (\t -> member ^. memberTags . contains (t ^. key)))
+                td_ $ tagCheckbox member ayearTag
   where
-    ps' = sortBy (comparing _personFirstNames <> comparing _personLastName) ps
+    ps' = sortOn (view memberSortKey) ps
 
     ayear :: Integer
-    ayear = academicYear today 
+    ayear = academicYear today
 
     ayearTag :: IsString a => a
     ayearTag = fromString $ show ayear ++ "-" ++ show (succ ayear)
 
-tagCheckbox :: Monad m => Person -> TagName -> HtmlT m ()
-tagCheckbox person tn = label_ $ do
+tagCheckbox :: Monad m => Member -> TagName -> HtmlT m ()
+tagCheckbox member tn = label_ $ do
    checkbox_
-        (person ^. personTags . contains tn)
+        (member ^. memberTags . contains tn)
         [ data_ "tag" d ]
    (toHtml $ tn ^. _TagName)
  where
-   memberId = person ^. key
+   memberId = member ^. key
    json = A.object [ "tagName" A..= tn, "memberId" A..= memberId ]
    d = TE.decodeUtf8 $ A.encode json ^. strict

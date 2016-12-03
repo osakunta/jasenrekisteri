@@ -19,7 +19,7 @@ import Servant.Xlsx
 
 import SatO.Jasenrekisteri.Command
 import SatO.Jasenrekisteri.Contact
-import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Member
 import SatO.Jasenrekisteri.SearchData
 import SatO.Jasenrekisteri.SearchQuery
 import SatO.Jasenrekisteri.Session
@@ -55,16 +55,16 @@ jasenrekisteriAPI = Proxy
 -- Endpoints
 -------------------------------------------------------------------------------
 
-type MemberEndpoint = JasenrekisteriAuth :> "member" :> Capture "id" PersonId :> HTMLPageEndpoint "member"
+type MemberEndpoint = JasenrekisteriAuth :> "member" :> Capture "id" MemberId :> HTMLPageEndpoint "member"
 
 memberEndpoint :: Proxy MemberEndpoint
 memberEndpoint = Proxy
 
-memberHrefText :: PersonId -> Text
-memberHrefText personId =
-    uriToText $ safeLink jasenrekisteriAPI memberEndpoint personId
+memberHrefText :: MemberId -> Text
+memberHrefText memberId =
+    uriToText $ safeLink jasenrekisteriAPI memberEndpoint memberId
 
-memberHref :: PersonId -> Attribute
+memberHref :: MemberId -> Attribute
 memberHref = href_ . memberHrefText
 
 type NewMemberEndpoint = JasenrekisteriAuth :> "new-member" :> HTMLPageEndpoint "new-member"
@@ -97,12 +97,12 @@ changelogHref :: Maybe CID -> Attribute
 changelogHref cid =
     href_ $ uriToText $ safeLink jasenrekisteriAPI changelogEndpoint cid
 
-type MemberlogEndpoint = JasenrekisteriAuth :> "member-log" :> Capture "id" PersonId :> HTMLPageEndpoint "memberlog"
+type MemberlogEndpoint = JasenrekisteriAuth :> "member-log" :> Capture "id" MemberId :> HTMLPageEndpoint "memberlog"
 
 memberlogEndpoint :: Proxy MemberlogEndpoint
 memberlogEndpoint = Proxy
 
-memberlogHref :: PersonId -> Attribute
+memberlogHref :: MemberId -> Attribute
 memberlogHref memberId =
     href_ $ uriToText $ safeLink jasenrekisteriAPI memberlogEndpoint memberId
 

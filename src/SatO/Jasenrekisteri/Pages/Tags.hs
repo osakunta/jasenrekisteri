@@ -2,13 +2,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 module SatO.Jasenrekisteri.Pages.Tags (tagsPage) where
 
-import Control.Lens
-import Futurice.Prelude
 import Prelude ()
+import Futurice.Prelude
+import Control.Lens
 
 import Control.Monad.Reader (ask)
-import Data.Monoid    (Sum (..))
-import Futurice.IdMap (key)
+import Data.Monoid          (Sum (..))
+import Futurice.IdMap       (key)
 
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
@@ -19,7 +19,7 @@ import SatO.Jasenrekisteri.World
 tagsPage :: LoginUser -> QueryM (HtmlPage "tags")
 tagsPage lu = ask <&> \(world, today) -> template' today lu "Tagit" $ do
     let withCount :: Tag -> (Tag, Sum Int)
-        withCount tag = (tag, world ^. worldTagPersonCount . ix (tag ^. key))
+        withCount tag = (tag, world ^. worldTagMemberCount . ix (tag ^. key))
 
     let tagsWithCounts = world ^.. worldTags . ifoldedTagHierarchy . to withCount
     subheader_ "Enemmän kuin yksi"

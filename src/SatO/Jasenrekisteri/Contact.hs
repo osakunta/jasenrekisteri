@@ -4,19 +4,19 @@
 {-# LANGUAGE TypeFamilies      #-}
 module SatO.Jasenrekisteri.Contact (
     Contact (..),
-    contactFromPerson,
+    contactFromMember,
     SearchResult (..),
     ) where
 
 import Prelude ()
 import Futurice.Prelude
-import Control.Lens ((?=))
+import Control.Lens                     ((?=))
 import Codec.Xlsx
 import Control.Monad.Trans.State.Strict (execState)
 import Futurice.Generics
 import Servant.Xlsx                     (ToXlsx (..))
 
-import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Member
 import SatO.Jasenrekisteri.SearchQuery
 
 data Contact = Contact
@@ -26,12 +26,12 @@ data Contact = Contact
     , contactCity    :: !Text
     }
 
-contactFromPerson :: Person -> Contact
-contactFromPerson p = Contact
-    { contactName    = p ^. personFullName
-    , contactAddress = p ^. personAddress
-    , contactZipcode = p ^. personZipcode
-    , contactCity    = p ^. personCity
+contactFromMember :: Member -> Contact
+contactFromMember p = Contact
+    { contactName    = p ^. memberFullName
+    , contactAddress = p ^. memberAddress
+    , contactZipcode = p ^. memberZipcode
+    , contactCity    = p ^. memberCity
     }
 
 deriveGeneric ''Contact
