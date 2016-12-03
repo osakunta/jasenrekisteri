@@ -198,7 +198,7 @@ memberTagList_ today columnHref column world xs = do
                 td_ $ a_ [ memberHref memberId ] $ member ^. memberFullNameHtml
                 td_ $ tagnameList_ world (tns ^.. folded)
                 td_ $ tagCheckbox member ayearTag
-                when hasTalo $ td_ $ toHtml $ modifyTaloAddress $ member ^. memberAddress
+                when hasTalo $ td_ $ toHtml $ member ^. memberTaloAddress
   where
     sortOnColumn = case column of
         ColumnName -> sortOn (view memberSortKey . fst)

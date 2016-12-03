@@ -12,11 +12,11 @@ module SatO.Jasenrekisteri.Member (
     MemberId,
     -- * Modifications
     addMagicTags,
-    modifyTaloAddress,
     -- * Getters
     memberFullName,
     memberFullNameHtml,
     memberSortKey,
+    memberTaloAddress,
     -- * Lenses
     memberUuid,
     memberBirthday,
@@ -38,16 +38,18 @@ module SatO.Jasenrekisteri.Member (
 
 import Prelude ()
 import Futurice.Prelude
-import Control.Lens                  (Getter, contains, re, to, (%~))
-import Data.Char                     (isLetter)
+import Control.Lens        (Getter, contains, re, to, (%~))
+import Control.Applicative (liftA2)
+import Data.Char           (isLetter)
+import Data.Maybe          (mapMaybe)
 import Futurice.Generics
-import Futurice.IdMap                (HasKey (..))
-import Text.Regex.Applicative.Common (decimal)
-import Text.Regex.Applicative.Text   (RE', match, sym)
+import Futurice.IdMap      (HasKey (..))
 
-import qualified Data.Attoparsec.Text as Atto
-import qualified Data.Csv             as Csv
-import qualified Data.Text            as T
+import qualified Data.Attoparsec.Text          as Atto
+import qualified Data.Csv                      as Csv
+import qualified Data.Text                     as T
+import qualified Text.Regex.Applicative.Common as RE
+import qualified Text.Regex.Applicative.Text   as RE
 
 import SatO.Foundation
 import SatO.Jasenrekisteri.Tag
@@ -132,15 +134,15 @@ addTaloTag p = p & memberTags . contains "talo" .~ isTalo
 
 -- | TODO: drop fuksi tags
 addFuksiTag :: Member -> Member
-addFuksiTag p = case match affYear (p ^. memberAffiliationDate) of
+addFuksiTag p = case RE.match affYear (p ^. memberAffiliationDate) of
     Nothing   -> p
     Just year -> p & memberTags . contains (fromString $ "fuksi" ++ show year) .~ True
   where
-    affYear :: RE' Int
-    affYear = decimalInt *> sym '.' *> decimalInt *> sym '.' *> decimalInt
+    affYear :: RE.RE' Int
+    affYear = decimalInt *> RE.sym '.' *> decimalInt *> RE.sym '.' *> decimalInt
 
-    decimalInt :: RE' Int
-    decimalInt = decimal
+    decimalInt :: RE.RE' Int
+    decimalInt = RE.decimal
 
 addSchoolTag :: Member -> Member
 addSchoolTag p = p & memberTags %~ addSchools
@@ -148,6 +150,14 @@ addSchoolTag p = p & memberTags %~ addSchools
     schools = fmap T.strip . T.splitOn "," $ p ^. memberUniversity
     addSchools ts = ts <> tagNamesOf (folded . re _TagName) schools
 
--- todo: use regexp
-modifyTaloAddress :: Text -> Text
-modifyTaloAddress = T.replace "Lapinrinne 1 " ""
+memberTaloAddress :: Getter Member Text
+memberTaloAddress = to $ \member -> RE.replace regex (member ^. memberAddress)
+  where
+    regex          = T.pack <$> (taloRe <|> many RE.anySym)
+    taloRe         = "Lapinrinne 1" *> skipSpaces *> (b <|> a)
+    a              = liftA2 (<>) "A" strippedSpaces
+    b              = "B" *> strippedSpaces
+    strippedSpaces = mapMaybe nonSpace <$> many RE.anySym
+    nonSpace ' '   = Nothing
+    nonSpace c     = Just c
+    skipSpaces     = many (RE.sym ' ')

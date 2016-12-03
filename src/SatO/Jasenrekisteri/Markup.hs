@@ -152,7 +152,7 @@ memberList_ today columnHref column hasTalo ts ps = do
                 when (isn't _Empty ts) $ td_ $
                     tagList_ (memberTags' member)
                 td_ $ tagCheckbox member ayearTag
-                when hasTalo $ td_ $ toHtml $ modifyTaloAddress $ member ^. memberAddress
+                when hasTalo $ td_ $ toHtml $ member ^. memberTaloAddress
   where
     sortOnColumn :: [Member] -> [Member]
     sortOnColumn = case column of
