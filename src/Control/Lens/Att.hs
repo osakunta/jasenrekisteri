@@ -1,9 +1,9 @@
 {-# LANGUAGE RankNTypes #-}
 module Control.Lens.Att where
 
-import Control.Lens
-import Futurice.Prelude
 import Prelude ()
+import Futurice.Prelude
+import Control.Lens
 
 -- | 'Att' provides a 'Lens' that can be used to read,
 -- or write the value associated with a key in a function-like

@@ -21,7 +21,7 @@ import SatO.Jasenrekisteri.API
 import SatO.Jasenrekisteri.Contact
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
-import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Member
 import SatO.Jasenrekisteri.SearchQuery
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
@@ -50,7 +50,7 @@ searchPage' today lu world mquery = template' today lu title $ do
         row_ $ large_ 12 $ do
             a_ [ searchXlsxHref query' ] "Lataa excelissä osoitteiden kera"
         hr_ []
-    memberTagList_ today world (itoList personIds)
+    memberTagList_ today world (itoList memberIds)
   where
     title = "Haku: " <> toHtml pquery
 
@@ -62,11 +62,11 @@ searchPage' today lu world mquery = template' today lu title $ do
         Left (_, q) -> q
         Right q     -> prettySearchQuery q
 
-    personIds :: Map PersonId (Set TagName)
-    personIds = case unwrapSearchQuery' query of
+    memberIds :: Map MemberId (Set TagName)
+    memberIds = case unwrapSearchQuery' query of
         Left _       -> Map.empty
         Right query' -> performSearchQuery
-            (world ^. worldTagPersons)
+            (world ^. worldTagMembers)
             (IdMap.keysSet $ world ^. worldMembers)
             query'
 
@@ -83,17 +83,17 @@ searchXlsx _ mquery = do
 
 searchContacts :: World -> SearchQuery -> [Contact]
 searchContacts world query = postprocess $ performSearchQuery
-    (world ^. worldTagPersons)
+    (world ^. worldTagMembers)
     (IdMap.keysSet $ world ^. worldMembers)
     query
   where
-    postprocess :: Map PersonId x -> [Contact]
+    postprocess :: Map MemberId x -> [Contact]
     postprocess m = m ^..
         to Map.keys
         . folded
         . to (\memberId -> world ^. worldMembers . at memberId)
         . folded
-        . to contactFromPerson
+        . to contactFromMember
 
 -------------------------------------------------------------------------------
 -- Implementation details
@@ -135,11 +135,11 @@ exampleQueries today =
     hallitus' = fromString $ "hallitus" ++ show (succ ayear)
 
 performSearchQuery
-    :: Map TagName (Set PersonId)  -- ^ Tag lookup
-    -> Set PersonId                -- ^ All persons
+    :: Map TagName (Set MemberId)  -- ^ Tag lookup
+    -> Set MemberId                -- ^ All members
     -> SearchQuery
-    -> Map PersonId (Set TagName)
-       -- ^ Returns persons, and an evidence why they are in the result set.
+    -> Map MemberId (Set TagName)
+       -- ^ Returns members, and an evidence why they are in the result set.
 performSearchQuery l a = go
   where
     go (QLiteral tn)     = maybe mempty (literal tn) $ l ^? ix tn
@@ -167,7 +167,7 @@ memberTagList_
     :: Monad m
     => Day
     -> World
-    -> [(PersonId, Set TagName)]
+    -> [(MemberId, Set TagName)]
     -> HtmlT m ()
 memberTagList_ today world xs = do
     row_ $ do
@@ -181,19 +181,19 @@ memberTagList_ today world xs = do
             th_ "Tagit"
             th_ ayearTag
             when hasTalo $ th_ $ "Huone"
-        tbody_ $ for_ xs' $ \(person, tns) -> do
-            let memberId = person ^. key
-            let needle = T.toLower $ person ^. personFullName
+        tbody_ $ for_ xs' $ \(member, tns) -> do
+            let memberId = member ^. key
+            let needle = T.toLower $ member ^. memberFullName
             tr_ [ data_ "member-haystack" needle ] $ do
-                td_ $ a_ [ memberHref memberId ] $ person ^. personFullNameHtml
+                td_ $ a_ [ memberHref memberId ] $ member ^. memberFullNameHtml
                 td_ $ tagnameList_ world (tns ^.. folded)
-                td_ $ tagCheckbox person ayearTag
-                when hasTalo $ td_ $ toHtml $ modifyAddress $ person ^. personAddress
+                td_ $ tagCheckbox member ayearTag
+                when hasTalo $ td_ $ toHtml $ modifyAddress $ member ^. memberAddress
   where
-    xs' = sortOn (view personFullName . fst)
-        $ mapMaybe lookupPerson xs
+    xs' = sortOn (view memberFullName . fst)
+        $ mapMaybe lookupMember xs
 
-    lookupPerson (memberId, tns) = (,tns) <$> world ^? worldMembers . ix memberId
+    lookupMember (memberId, tns) = (,tns) <$> world ^? worldMembers . ix memberId
 
     -- if 'talo' tag is present, print addresses as well.
     hasTalo = any (f . snd) xs

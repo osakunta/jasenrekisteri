@@ -15,8 +15,8 @@ import qualified Data.UUID as UUID
 import SatO.Jasenrekisteri.API
 import SatO.Jasenrekisteri.Command
 import SatO.Jasenrekisteri.Markup
-import SatO.Jasenrekisteri.Person
-import SatO.Jasenrekisteri.PersonEdit
+import SatO.Jasenrekisteri.Member
+import SatO.Jasenrekisteri.MemberEdit
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.World
 
@@ -33,9 +33,9 @@ changelogPage today lu cmds world = template' today lu "Muutosloki" $ do
             td_ $ toHtml editor
             td_ $ toHtml $ formatTime defaultTimeLocale "%F %H:%m" $ utcToHelsinkiTime stamp
             td_ $ a_ [ memberlogHref memberId ] $ fromMaybe "<tuntematon>" $
-                world ^? worldMembers . ix memberId . personFullNameHtml
+                world ^? worldMembers . ix memberId . memberFullNameHtml
             td_ $ case cmd of
-                    CmdNewPerson _ _ -> "Luotu"
+                    CmdNewMember _ _ -> "Luotu"
                     CmdAddTag _ tn -> do
                         span_ [ class_ "jrek-added" ] "Lisätty"
                         " "
@@ -44,8 +44,8 @@ changelogPage today lu cmds world = template' today lu "Muutosloki" $ do
                         span_ [ class_ "jrek-removed" ] "Poistettu"
                         " "
                         tagNameLink_ world tn
-                    CmdEditPerson _ pe -> toHtml $
-                        "Muokattu: " <> T.intercalate ", " (mapMaybe (f pe) personEdits')
+                    CmdEditMember _ pe -> toHtml $
+                        "Muokattu: " <> T.intercalate ", " (mapMaybe (f pe) memberEdits')
     case safeLast cmds of
         Nothing -> pure ()
         Just (cid, _, _, _) -> do
@@ -57,7 +57,7 @@ changelogPage today lu cmds world = template' today lu "Muutosloki" $ do
 memberlogPage
     :: Day
     -> LoginUser                        -- ^ Viewer
-    -> PersonId                         -- ^ Person's memberlog
+    -> MemberId                         -- ^ Member's memberlog
     -> World                            -- ^ Original world, needed to show "from" states.
     -> World                            -- ^ Current world
     -> [(LoginUser, UTCTime, Command I)]  -- ^ Changes
@@ -83,13 +83,13 @@ memberlogPage today lu memberId origWorld world cmds =
                         span_ [ class_ "jrek-removed" ] "Poistettu"
                         " "
                         tagNameLink_ world tn
-                    CmdNewPerson _ pe  -> dl_ $ for_ personEdits' $ \(MkPE _ ftitle _ fpe) ->
+                    CmdNewMember _ pe  -> dl_ $ for_ memberEdits' $ \(MkPE _ ftitle _ fpe) ->
                         case pe ^. fpe of
                             Nothing  -> pure ()
                             Just new -> do
                                 dt_ $ toHtml ftitle
                                 dd_ $ span_ [ class_ "jrek-added" ] $ toHtml new
-                    CmdEditPerson _ pe -> dl_ $ for_ personEdits' $ \(MkPE _ ftitle fp fpe) ->
+                    CmdEditMember _ pe -> dl_ $ for_ memberEdits' $ \(MkPE _ ftitle fp fpe) ->
                         case pe ^. fpe of
                             Nothing  -> pure ()
                             Just new -> do
@@ -99,11 +99,11 @@ memberlogPage today lu memberId origWorld world cmds =
                                     " → "
                                     span_ [ class_ "jrek-added" ] $ toHtml new
   where
-    member = fromMaybe (emptyPerson memberId) $ world ^? worldMembers . ix memberId
-    origMember = fromMaybe (emptyPerson memberId) $ origWorld ^? worldMembers . ix memberId
+    member = fromMaybe (emptyMember memberId) $ world ^? worldMembers . ix memberId
+    origMember = fromMaybe (emptyMember memberId) $ origWorld ^? worldMembers . ix memberId
 
     name :: Html ()
-    name = member ^. personFullNameHtml
+    name = member ^. memberFullNameHtml
 
 ifEmpty :: Text -> Text -> Text
 ifEmpty def t
@@ -111,16 +111,16 @@ ifEmpty def t
     | otherwise = t
 
 members
-    :: Person
+    :: Member
     -> [(LoginUser, UTCTime, Command I)]
-    -> [(Person, LoginUser, UTCTime, Command I)]
+    -> [(Member, LoginUser, UTCTime, Command I)]
 members = scan f
   where
     f member (lu, stamp, command) = ((member, lu, stamp, command), member')
       where
         member' = case command of
-            CmdEditPerson _ pe            -> toEndo pe member
-            CmdNewPerson (I memberId)  pe -> toEndo pe $ emptyPerson memberId
+            CmdEditMember _ pe            -> toEndo pe member
+            CmdNewMember (I memberId)  pe -> toEndo pe $ emptyMember memberId
             _                             -> member
 
 scan :: (s -> a -> (b, s)) -> s -> [a] -> [b]

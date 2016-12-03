@@ -3,8 +3,8 @@
 {-# LANGUAGE RecordWildCards   #-}
 module SatO.Jasenrekisteri.Pages.Logout (logoutPage) where
 
-import Futurice.Prelude
 import Prelude ()
+import Futurice.Prelude
 import SatO.Jasenrekisteri.Markup
 
 logoutPage :: HtmlPage "logout"

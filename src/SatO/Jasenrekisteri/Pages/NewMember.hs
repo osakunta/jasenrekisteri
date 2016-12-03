@@ -11,7 +11,7 @@ import qualified Generics.SOP as SOP
 
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Markup
-import SatO.Jasenrekisteri.PersonEdit
+import SatO.Jasenrekisteri.MemberEdit
 import SatO.Jasenrekisteri.Session
 
 newMemberPage :: LoginUser -> QueryM (HtmlPage "new-member")
@@ -19,7 +19,7 @@ newMemberPage lu = do
     (_, today) <- ask
     pure $ template' today lu "Uusi jäsen" $ do
         row_ $ large_ 12 $ div_ [ class_ "callout" ] $ div_ [ data_ "jrek-member-new" ""] $ do
-            for_ (SOP.hcollapse personEdits) editbox
+            for_ (SOP.hcollapse memberEdits) editbox
 
             hr_ []
             div_ [ class_ "button-group" ] $ do

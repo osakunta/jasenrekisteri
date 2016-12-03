@@ -26,6 +26,7 @@ import SatO.Jasenrekisteri.Ctx
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Hierarchy       (tags)
 import SatO.Jasenrekisteri.Markup
+import SatO.Jasenrekisteri.Member
 import SatO.Jasenrekisteri.Pages.Changelog
 import SatO.Jasenrekisteri.Pages.Member
 import SatO.Jasenrekisteri.Pages.Members
@@ -33,7 +34,6 @@ import SatO.Jasenrekisteri.Pages.NewMember
 import SatO.Jasenrekisteri.Pages.Search
 import SatO.Jasenrekisteri.Pages.Tag
 import SatO.Jasenrekisteri.Pages.Tags
-import SatO.Jasenrekisteri.Person
 import SatO.Jasenrekisteri.SearchData
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
@@ -51,7 +51,7 @@ commandEndpoint ctx lu cmd = liftIO $ do
     ctxApplyCmd lu cmd' ctx
     pure (UUID.toText $ cmd' ^. commandMemberId)
 
-memberlogHandler :: Ctx -> LoginUser -> PersonId -> Handler (HtmlPage "memberlog")
+memberlogHandler :: Ctx -> LoginUser -> MemberId -> Handler (HtmlPage "memberlog")
 memberlogHandler ctx lu memberId = liftIO $ do
     cmds <- ctxFetchCmds ctx memberId
     world <- ctxReadWorld ctx
@@ -73,10 +73,10 @@ searchDataHandler ctx _ = liftIO $ do
     let tags' = world ^.. worldTags . ifoldedTagHierarchy . tagName . to tagSearchItem
     pure $ sort $ members ++ tags'
   where
-    memberSearchItem :: Person -> SearchItem
+    memberSearchItem :: Member -> SearchItem
     memberSearchItem m = SearchItem
-        { searchItemLabel = m ^. personFullName
-        , searchItemValue = m ^. personFullName
+        { searchItemLabel = m ^. memberFullName
+        , searchItemValue = m ^. memberFullName
         , searchItemType  = SearchItemMember
         , searchItemHref  = memberHrefText (m ^. key)
         }
@@ -131,9 +131,9 @@ defaultMain = do
     case args of
         [filepathData] -> do
             contentsData <- LBS.readFile filepathData
-            persons <- decode contentsData :: IO [Person]
-            -- mapM_ print $ V.filter (not . (== mempty) . _personTags) persons
-            let world = mkWorld persons tags
+            members <- decode contentsData :: IO [Member]
+            -- mapM_ print $ V.filter (not . (== mempty) . _memberTags) members
+            let world = mkWorld members tags
             cfg <- readConfig
             ctx <- newCtx (cfgConnectInfo cfg) world
             -- Query stored commands, and apply to the initial world

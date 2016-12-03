@@ -98,6 +98,8 @@ library
       SatO.Jasenrekisteri.Endpoints
       SatO.Jasenrekisteri.Hierarchy
       SatO.Jasenrekisteri.Markup
+      SatO.Jasenrekisteri.Member
+      SatO.Jasenrekisteri.MemberEdit
       SatO.Jasenrekisteri.Pages.Changelog
       SatO.Jasenrekisteri.Pages.Logout
       SatO.Jasenrekisteri.Pages.Member
@@ -106,8 +108,6 @@ library
       SatO.Jasenrekisteri.Pages.Search
       SatO.Jasenrekisteri.Pages.Tag
       SatO.Jasenrekisteri.Pages.Tags
-      SatO.Jasenrekisteri.Person
-      SatO.Jasenrekisteri.PersonEdit
       SatO.Jasenrekisteri.SearchData
       SatO.Jasenrekisteri.SearchQuery
       SatO.Jasenrekisteri.Server

@@ -3,10 +3,10 @@ module Data.ByteString.Lazy.Extra (
     module LBS,
     ) where
 
-import Futurice.Prelude
 import Prelude ()
+import Futurice.Prelude
 
-import Data.ByteString.Lazy    as LBS
+import Data.ByteString.Lazy as LBS
 
 import qualified Data.Text.Lazy.Encoding as LTE
 

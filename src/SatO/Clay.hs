@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 module SatO.Clay where
 
-import Futurice.Prelude hiding (span, (&))
-import Prelude ()
-import Clay
-import qualified Lucid as L
+import           Prelude ()
+import           Futurice.Prelude hiding (span, (&))
+import           Clay
+import qualified Lucid            as L
 
 satoCss_ :: Monad m => L.HtmlT m ()
 satoCss_ = L.style_ $ render css ^. strict

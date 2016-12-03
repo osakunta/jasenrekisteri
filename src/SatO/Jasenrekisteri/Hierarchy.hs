@@ -6,7 +6,7 @@ module SatO.Jasenrekisteri.Hierarchy (tags) where
 import Prelude ()
 import Futurice.Prelude
 import Control.Lens              hiding ((...))
-import Data.Maybe                (mapMaybe, listToMaybe)
+import Data.Maybe                (listToMaybe, mapMaybe)
 import Futurice.IdMap            (IdMap)
 import Numeric.Interval.NonEmpty (Interval, inf, sup, (...))
 import SatO.Jasenrekisteri.Tag

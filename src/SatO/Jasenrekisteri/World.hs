@@ -8,9 +8,9 @@ module SatO.Jasenrekisteri.World (
     worldMembers,
     worldTags,
     -- * Getters
-    worldPersonTags,
-    worldTagPersons,
-    worldTagPersonCount,
+    worldMemberTags,
+    worldTagMembers,
+    worldTagMemberCount,
     ) where
 
 import Prelude ()
@@ -23,13 +23,13 @@ import qualified Data.Set       as Set
 import qualified Futurice.Graph as G
 import qualified Futurice.IdMap as IdMap
 
-import SatO.Jasenrekisteri.Person
+import SatO.Jasenrekisteri.Member
 import SatO.Jasenrekisteri.Tag
 
 -- | 'World' contains all the data we display.
 --
 data World = World
-    { _worldMembers :: !(IdMap Person)
+    { _worldMembers :: !(IdMap Member)
     , _worldTags    :: !TagHierarchy
 
     -- Lazy fields, constructed on need:
@@ -37,9 +37,9 @@ data World = World
     , _worldTagClosures    :: Map TagName TagNames
     , _worldRevTagClosures :: Map TagName TagNames
 
-    , _worldPersonTags     :: Map PersonId TagNames
-    , _worldTagPersons     :: Map TagName (Set PersonId)
-    , _worldTagPersonCount :: Map TagName (Sum Int)
+    , _worldMemberTags     :: Map MemberId TagNames
+    , _worldTagMembers     :: Map TagName (Set MemberId)
+    , _worldTagMemberCount :: Map TagName (Sum Int)
     }
 
 -------------------------------------------------------------------------------
@@ -49,16 +49,16 @@ data World = World
 -- TODO: remove cycles,  change to return diagnostics too
 mkWorld
     :: (Foldable f, Foldable f')
-    => f Person
+    => f Member
     -> f' Tag
     -> World
-mkWorld persons tags = mkWorld' persons' (tags' <> personTags' <> childTags)
+mkWorld members tags = mkWorld' members' (tags' <> memberTags' <> childTags)
   where
-    persons'    = IdMap.idMapOf folded persons
+    members'    = IdMap.idMapOf folded members
     tags'       = tagHierarchyOf folded tags
-    personTags' = tagHierarchyOf
-        (folded . personTags . _TagNames . folded . to toTag)
-        persons
+    memberTags' = tagHierarchyOf
+        (folded . memberTags . _TagNames . folded . to toTag)
+        members
     -- children of specified tags
     childTags   = tagHierarchyOf
         (folded . tagChildren . _TagNames . folded . to toTag)
@@ -67,16 +67,16 @@ mkWorld persons tags = mkWorld' persons' (tags' <> personTags' <> childTags)
     toTag :: TagName -> Tag
     toTag tn = Tag tn 0 mempty
 
-mkWorld' :: IdMap Person -> TagHierarchy -> World
-mkWorld' persons tags = World
-    { _worldMembers = persons
+mkWorld' :: IdMap Member -> TagHierarchy -> World
+mkWorld' members tags = World
+    { _worldMembers = members
     , _worldTags    = tags
     -- Lazy fields
     , _worldTagClosures    = tagClosures
     , _worldRevTagClosures = revTagClosures
-    , _worldPersonTags     = personTagsClosure
-    , _worldTagPersons     = tagPersons
-    , _worldTagPersonCount = tagPersonCounts
+    , _worldMemberTags     = memberTagsClosure
+    , _worldTagMembers     = tagMembers
+    , _worldTagMemberCount = tagMemberCounts
     }
   where
     tagClosures = toMapOf (ifoldedTagHierarchy . to tagClosure) tags
@@ -89,24 +89,24 @@ mkWorld' persons tags = World
         (_Just . folded . tagName)
         $ G.revClosure (tags ^. _TagHierarchy) [tag ^. tagName]
 
-    personTagsClosure :: Map PersonId TagNames
-    personTagsClosure = toMapOf (IdMap.ifolded . to personTag) persons
+    memberTagsClosure :: Map MemberId TagNames
+    memberTagsClosure = toMapOf (IdMap.ifolded . to memberTag) members
 
-    personTag :: Person -> TagNames
-    personTag person = person ^.
-        (personTags . _TagNames . folded. to (\tn -> revTagClosures ^? ix tn) . _Just)
+    memberTag :: Member -> TagNames
+    memberTag member = member ^.
+        (memberTags . _TagNames . folded. to (\tn -> revTagClosures ^? ix tn) . _Just)
 
-    tagPersons :: Map TagName (Set PersonId)
-    tagPersons = tagClosures <&> \cl -> setOf
-        (folded . filtered (\p -> overlaps (p ^. personTags) cl) . personUuid)
-        persons
+    tagMembers :: Map TagName (Set MemberId)
+    tagMembers = tagClosures <&> \cl -> setOf
+        (folded . filtered (\p -> overlaps (p ^. memberTags) cl) . memberUuid)
+        members
 
-    tagPersonCounts :: Map TagName (Sum Int)
-    tagPersonCounts = fmap (Sum . length) tagPersons
+    tagMemberCounts :: Map TagName (Sum Int)
+    tagMemberCounts = fmap (Sum . length) tagMembers
 
  {- tagClosures <&> \cl -> Sum $ sumOf
-        (folded . personTags . filtered (overlaps cl) . to (const 1))
-        persons -}
+        (folded . memberTags . filtered (overlaps cl) . to (const 1))
+        members -}
 
 overlaps :: TagNames -> TagNames -> Bool
 overlaps tns tns' = not $ null $ Set.intersection
@@ -116,7 +116,7 @@ overlaps tns tns' = not $ null $ Set.intersection
 -- Lenses
 -------------------------------------------------------------------------------
 
-worldMembers :: Lens' World (IdMap Person)
+worldMembers :: Lens' World (IdMap Member)
 worldMembers = lens _worldMembers $ \world members ->
     mkWorld (members ^.. folded) (world ^.. worldTags . ifoldedTagHierarchy)
 
@@ -127,23 +127,23 @@ worldTags = lens _worldTags $ \world tags ->
 -- |
 --
 -- @
--- worldPersonTags :: Getter World (Map Personid [Tag])
+-- worldMemberTags :: Getter World (Map Memberid [Tag])
 -- @
-worldPersonTags :: (Profunctor p, Functor f, Contravariant f) => Optic' p f World (Map PersonId TagNames)
-worldPersonTags = to _worldPersonTags
+worldMemberTags :: (Profunctor p, Functor f, Contravariant f) => Optic' p f World (Map MemberId TagNames)
+worldMemberTags = to _worldMemberTags
 
 -- |
 --
 -- @
--- worldTagPersonCount :: Getter World (Map TagName (Sum Int))
+-- worldTagMemberCount :: Getter World (Map TagName (Sum Int))
 -- @
-worldTagPersons :: (Profunctor p, Functor f, Contravariant f) => Optic' p f World (Map TagName :$ Set PersonId)
-worldTagPersons = to _worldTagPersons
+worldTagMembers :: (Profunctor p, Functor f, Contravariant f) => Optic' p f World (Map TagName :$ Set MemberId)
+worldTagMembers = to _worldTagMembers
 
 -- |
 --
 -- @
--- worldTagPersonCount :: Getter World (Map TagName (Sum Int))
+-- worldTagMemberCount :: Getter World (Map TagName (Sum Int))
 -- @
-worldTagPersonCount :: (Profunctor p, Functor f, Contravariant f) => Optic' p f World (Map TagName :$ Sum Int)
-worldTagPersonCount = to _worldTagPersonCount
+worldTagMemberCount :: (Profunctor p, Functor f, Contravariant f) => Optic' p f World (Map TagName :$ Sum Int)
+worldTagMemberCount = to _worldTagMemberCount
