@@ -59,11 +59,11 @@ navigation today lu = do
             li_ $ a_ [newMemberHref] "Uusi"
             li_ $ a_ [href_ "/tags"] "Tägit"
             li_ [ class_ "is-dropdown-submenu-parent"] $ do
-                a_ [tagHref ayearTag] ayearTag
+                a_ [tagHref Nothing ayearTag] ayearTag
                 ul_ [ class_ "menu" ] $ do
-                    li_ $ a_ [tagHref ayearTag'] ayearTag'
-                    li_ $ a_ [tagHref ayearTag''] ayearTag''
-                    li_ $ a_ [tagHref "talo"] "Talo"
+                    li_ $ a_ [tagHref Nothing ayearTag'] ayearTag'
+                    li_ $ a_ [tagHref Nothing ayearTag''] ayearTag''
+                    li_ $ a_ [tagHref (Just ColumnRoom) "talo"] "Talo"
             li_ $ a_ [changelogHref Nothing ] "Muutosloki"
             li_ $ a_ [searchHref Nothing Nothing] "Haku"
         div_ [ class_ "top-bar-right" ] $ ul_ [ class_ "menu" ] $ do
@@ -102,7 +102,7 @@ tagNameLink_ world tagname = tagLink_ (world ^. worldTags . att tagname)
 tagLink' :: Monad m => Tag -> Text -> HtmlT m ()
 tagLink' tag t = do
     -- TODO: do colours
-    a_ [tagHref name, class_ $ "jrek-tag label " <> lblColour ] $ toHtml t
+    a_ [tagHref Nothing name, class_ $ "jrek-tag label " <> lblColour ] $ toHtml t
     " "
   where
     name = tag ^. key
@@ -124,10 +124,13 @@ tagnameList_ world ts = traverse_ (tagNameLink_ world) ts
 memberList_
     :: Monad m
     => Day
+    -> (Column -> Attribute)
+    -> Column
+    -> Bool        -- ^ whether to show address
     -> [Tag]       -- ^ tag to show in the list
     -> [Member]
     -> HtmlT m ()
-memberList_ today ts ps = do
+memberList_ today columnHref column hasTalo ts ps = do
     row_ $ do
         largemed_ 6 $ toHtml $  "Yhteensä: " <> (show $ length ps')
         largemed_ 6 $ label_ $ do
@@ -135,10 +138,11 @@ memberList_ today ts ps = do
             input_ [ type_ "text", id_ "member-filter" ]
     row_ . large_ 12 $ table_ [ id_ "member-list", class_ "hover" ] $ do
         thead_ $ tr_ $ do
-            th_ $ "Nimi"
+            th_ $ a_ [ columnHref ColumnName ] $ "Nimi"
             when (isn't _Empty ts) $
-                th_ "Tagit"
+                th_ $ a_ [ columnHref ColumnTags ] $ "Tagit"
             th_ $ ayearTag
+            when hasTalo $ th_ $ a_ [ columnHref ColumnRoom ] $ "Huone"
         tbody_ $ for_ ps' $ \member -> do
             let memberId = member ^. key
             let needle = T.toLower
@@ -146,10 +150,21 @@ memberList_ today ts ps = do
             tr_ [ data_ "member-haystack" needle ] $ do
                 td_ $ a_ [ memberHref memberId ] $ member ^. memberFullNameHtml
                 when (isn't _Empty ts) $ td_ $
-                    tagList_ (ts ^.. folded . filtered (\t -> member ^. memberTags . contains (t ^. key)))
+                    tagList_ (memberTags' member)
                 td_ $ tagCheckbox member ayearTag
+                when hasTalo $ td_ $ toHtml $ modifyTaloAddress $ member ^. memberAddress
   where
-    ps' = sortOn (view memberSortKey) ps
+    sortOnColumn :: [Member] -> [Member]
+    sortOnColumn = case column of
+        ColumnName -> sortOn (view memberSortKey)
+        ColumnTags -> sortOn memberTags'
+        ColumnRoom -> sortOn (view memberAddress)
+
+    memberTags' :: Member -> [Tag]
+    memberTags' member =
+        ts ^.. folded . filtered (\t -> member ^. memberTags . contains (t ^. key))
+
+    ps' = sortOnColumn ps
 
     ayear :: Integer
     ayear = academicYear today

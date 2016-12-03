@@ -34,7 +34,7 @@ type HTMLPageEndpoint sym = Get '[HTML] (HtmlPage sym)
 type JasenrekisteriAuth = BasicAuth "jasenrekisteri" LoginUser
 
 type JasenrekisteriAPI =
-    JasenrekisteriAuth :> HTMLPageEndpoint "members"
+    MembersEndpoint
     :<|> MemberEndpoint
     :<|> NewMemberEndpoint
     :<|> ChangelogEndpoint
@@ -72,6 +72,18 @@ searchHrefText c q =
 searchHref :: Maybe Column -> Maybe SearchQuery' -> Attribute
 searchHref c q = href_ $ searchHrefText c q
 
+type MembersEndpoint = JasenrekisteriAuth :> HTMLPageEndpoint "members"
+
+membersEndpoint :: Proxy MembersEndpoint
+membersEndpoint = Proxy
+
+membersHrefText :: Text
+membersHrefText =
+    uriToText $ safeLink jasenrekisteriAPI membersEndpoint
+
+membersHref :: Attribute
+membersHref = href_ membersHrefText
+
 type MemberEndpoint = JasenrekisteriAuth :> "member" :> Capture "id" MemberId :> HTMLPageEndpoint "member"
 
 memberEndpoint :: Proxy MemberEndpoint
@@ -93,17 +105,22 @@ newMemberHref :: Attribute
 newMemberHref  =
     href_ $ uriToText $ safeLink jasenrekisteriAPI newMemberEndpoint
 
-type TagEndpoint = JasenrekisteriAuth :> "tag" :> Capture "tag" TagName :> HTMLPageEndpoint "tag"
+type TagEndpoint
+    = JasenrekisteriAuth
+    :> "tag"
+    :> QueryParam "order-by" Column
+    :> Capture "tag" TagName
+    :> HTMLPageEndpoint "tag"
 
 tagEndpoint :: Proxy TagEndpoint
 tagEndpoint = Proxy
 
-tagHrefText :: TagName -> Text
-tagHrefText tn =
-    uriToText $ safeLink jasenrekisteriAPI tagEndpoint tn
+tagHrefText :: Maybe Column -> TagName -> Text
+tagHrefText c tn =
+    uriToText $ safeLink jasenrekisteriAPI tagEndpoint c tn
 
-tagHref :: TagName -> Attribute
-tagHref = href_ . tagHrefText
+tagHref :: Maybe Column -> TagName -> Attribute
+tagHref c tn = href_ $ tagHrefText c tn
 
 type ChangelogEndpoint = JasenrekisteriAuth :> "changelog" :> QueryParam "eid" CID :> HTMLPageEndpoint "changelog"
 

@@ -86,7 +86,7 @@ searchDataHandler ctx _ = liftIO $ do
         { searchItemLabel = tn'
         , searchItemValue = tn'
         , searchItemType  = SearchItemTag
-        , searchItemHref  = tagHrefText tn
+        , searchItemHref  = tagHrefText Nothing tn
         }
 
 

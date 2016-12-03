@@ -198,7 +198,7 @@ memberTagList_ today columnHref column world xs = do
                 td_ $ a_ [ memberHref memberId ] $ member ^. memberFullNameHtml
                 td_ $ tagnameList_ world (tns ^.. folded)
                 td_ $ tagCheckbox member ayearTag
-                when hasTalo $ td_ $ toHtml $ modifyAddress $ member ^. memberAddress
+                when hasTalo $ td_ $ toHtml $ modifyTaloAddress $ member ^. memberAddress
   where
     sortOnColumn = case column of
         ColumnName -> sortOn (view memberSortKey . fst)
@@ -213,10 +213,6 @@ memberTagList_ today columnHref column world xs = do
     hasTalo = any (f . snd) xs
       where
         f s = Set.member "talo" s || Set.member "osakehuoneisto" s
-
-    -- todo: use regexp
-    modifyAddress :: Text -> Text
-    modifyAddress = T.replace "Lapinrinne 1 " ""
 
     ayear :: Integer
     ayear = academicYear today
