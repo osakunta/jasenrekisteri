@@ -17,7 +17,7 @@ import qualified Numeric.Interval.NonEmpty as Interval
 tags :: [Tag]
 tags =
     merkit
-    <> [taloTag, osakehuoneistoTag, senioriTag, kuollutTag]
+    <> [taloTag, osakehuoneistoTag, senioriTag, kuollutTag, eiosoitettaTag]
     <> schools
     <> kuraattoriTags
     <> fuksiTags
@@ -208,6 +208,9 @@ merkit =
 
 kuollutTag :: Tag
 kuollutTag = Tag "kuollut" kuollutColour mempty
+
+eiosoitettaTag :: Tag
+eiosoitettaTag = Tag "eiosoitetta" kuollutColour mempty
 
 -------------------------------------------------------------------------------
 -- Schools

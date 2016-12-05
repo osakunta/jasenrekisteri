@@ -123,7 +123,7 @@ instance HasKey Member where
     key = memberUuid
 
 addMagicTags :: Member -> Member
-addMagicTags = addTaloTag . addFuksiTag . addSchoolTag
+addMagicTags = addTaloTag . addFuksiTag . addSchoolTag . addEiOsoitettaTag
 
 -- TODO: use regexp
 addTaloTag :: Member -> Member
@@ -148,6 +148,11 @@ addSchoolTag p = p & memberTags %~ addSchools
   where
     schools = fmap T.strip . T.splitOn "," $ p ^. memberUniversity
     addSchools ts = ts <> tagNamesOf (folded . re _TagName) schools
+
+addEiOsoitettaTag :: Member -> Member
+addEiOsoitettaTag p = p & memberTags . contains "eiosoitetta" .~ hasAddress
+  where
+    hasAddress = T.null $ p ^. memberAddress
 
 memberTaloAddress :: Getter Member Text
 memberTaloAddress = to $ \member -> RE.replace regex (member ^. memberAddress)
