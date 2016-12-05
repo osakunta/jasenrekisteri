@@ -3,7 +3,7 @@ packages:
 - '.'
 - location:
     git: https://github.com/futurice/haskell-futurice-prelude.git
-    commit: 65464311143537a21145877074a264aff704aa38
+    commit: e7b131c7e5155aac7a64931acd3b29bcb1d42ace
   extra-dep: true
 - location:
     git: https://github.com/necrobious/uuid-aeson.git

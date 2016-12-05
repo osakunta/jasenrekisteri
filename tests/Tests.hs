@@ -1,6 +1,5 @@
 import Prelude ()
 import Futurice.Prelude
-import Data.Functor.Identity
 import Data.Aeson
 import SatO.Jasenrekisteri.Command
 import Test.Tasty
