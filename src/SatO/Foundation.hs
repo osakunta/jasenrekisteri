@@ -21,6 +21,7 @@ module SatO.Foundation (
     -- * Lucid
     module Lucid,
     attrfor_,
+    forWith_,
     ) where
 
 import Prelude ()
@@ -29,6 +30,7 @@ import Futurice.Prelude
 import Control.Monad.Morph   (hoist)
 import Data.FileEmbed        (embedStringFile)
 import Data.Functor.Identity (runIdentity)
+import Data.Foldable (foldl')
 import Data.Swagger          (NamedSchema (..), ToSchema (..))
 import GHC.TypeLits          (KnownSymbol, Symbol, symbolVal)
 import Lucid                 hiding (for_)
@@ -38,6 +40,14 @@ import qualified Lucid as L
 
 attrfor_ :: Text -> Attribute
 attrfor_ = L.for_
+
+-- | 'intersperse'd 'for_'.
+forWith_ :: (Foldable t, Applicative f) => f () -> t a ->  (a -> f b) -> f ()
+forWith_ sep xs f = case toList xs of
+    []        -> pure ()
+    (x : xs') -> foldl' g (void $ f x) xs'
+  where
+    g = \a b -> a *> sep *> f b *> pure ()
 
 -------------------------------------------------------------------------------
 -- Grid

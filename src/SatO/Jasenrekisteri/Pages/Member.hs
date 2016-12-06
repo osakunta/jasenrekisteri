@@ -6,9 +6,10 @@ module SatO.Jasenrekisteri.Pages.Member (memberPage) where
 
 import Prelude ()
 import Futurice.Prelude
-import Control.Lens         ((<&>))
+import Control.Lens         (filtered, (<&>))
 import Control.Monad.Reader (ask)
 import Futurice.IdMap       (HasKey (..))
+import Text.Printf          (printf)
 
 import qualified Data.UUID    as UUID
 import qualified Generics.SOP as SOP
@@ -21,6 +22,9 @@ import SatO.Jasenrekisteri.MemberEdit
 import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
+
+import qualified Text.Regex.Applicative.Common as RE
+import qualified Text.Regex.Applicative.Text   as RE
 
 memberPage :: LoginUser -> MemberId -> QueryM (HtmlPage "member")
 memberPage lu memberId = ask <&> \(world, today) -> case world ^? worldMembers . ix memberId of
@@ -59,6 +63,48 @@ memberPage lu memberId = ask <&> \(world, today) -> case world ^? worldMembers .
             hr_ []
             div_ [ class_ "button-group" ] $ do
                 button_ [ data_ "jrek-action" "submit", class_ "button" ] "Tallenna"
+
+        subheader_ "Matrikkeli"
+        row_ $ large_ 12 $ do
+            let mpage = p ^. memberMatrikkeli
+            case parseMatrikkeliPage mpage of
+                Nothing -> do
+                    toHtml $ mpage <> ": "
+                    forWith_ " | " (matrikkeliSamePage world mpage) $ \m' ->
+                        a_ [ memberHref $ m' ^. key ] $ m' ^. memberFullNameHtml
+                Just (myear, mpage') -> do
+                    let prevPage = textMatrikkeliPage myear (mpage' - 1)
+                    let nextPage = textMatrikkeliPage myear (mpage' + 1)
+
+                    toHtml $ prevPage <> ": "
+                    forWith_ " | " (matrikkeliSamePage world prevPage) $ \m' ->
+                        a_ [ memberHref $ m' ^. key ] $ m' ^. memberFullNameHtml
+                    br_ []
+
+                    toHtml $ mpage <> ": "
+                    forWith_ " | " (matrikkeliSamePage world mpage) $ \m' ->
+                        a_ [ memberHref $ m' ^. key ] $ m' ^. memberFullNameHtml
+                    br_ []
+
+                    toHtml $ nextPage <> ": "
+                    forWith_ " | " (matrikkeliSamePage world nextPage) $ \m' ->
+                        a_ [ memberHref $ m' ^. key ] $ m' ^. memberFullNameHtml
+
+-------------------------------------------------------------------------------
+-- Same matrikkeli page
+-------------------------------------------------------------------------------
+
+matrikkeliSamePage :: World -> Text -> [Member]
+matrikkeliSamePage world page =
+    world ^.. worldMembers . folded . filtered (\m -> page == m ^. memberMatrikkeli)
+
+parseMatrikkeliPage :: Text -> Maybe (Int, Int)
+parseMatrikkeliPage = RE.match regex
+  where
+    regex = (,) <$> RE.decimal <* "-" <*> RE.decimal
+
+textMatrikkeliPage :: Int -> Int -> Text
+textMatrikkeliPage y p = printf "%04d-%04d" y p ^. packed
 
 -------------------------------------------------------------------------------
 -- Editbox
