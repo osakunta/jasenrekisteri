@@ -2,8 +2,14 @@
 -- set schema 'jasen2';
 
 create table jasen2.credentials (
-  username text not null primary key,
-  password text not null
+  email text not null primary key,
+  username text not null
+);
+
+create table jasen2.tokencache (
+  token text not null primary key,
+  created timestamp with time zone not null  default current_timestamp,
+  username text not null
 );
 
 create sequence jasen2.event_id_seq;

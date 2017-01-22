@@ -8,12 +8,14 @@ import Prelude ()
 import Futurice.Prelude
 import Control.Lens           (to)
 import Control.Concurrent.STM (atomically, writeTVar)
+import Control.Monad          (unless)
 import Data.Aeson.Compat
 import Data.List              (foldl')
 import Data.Pool              (withResource)
 import Futurice.IdMap         (key)
 import Network.Wai
 import Servant
+import Servant.GoogleAuth
 import System.Environment     (getArgs)
 
 import qualified Data.ByteString.Lazy     as LBS
@@ -28,6 +30,7 @@ import SatO.Jasenrekisteri.Hierarchy       (tags)
 import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Member
 import SatO.Jasenrekisteri.Pages.Changelog
+import SatO.Jasenrekisteri.Pages.Login
 import SatO.Jasenrekisteri.Pages.Member
 import SatO.Jasenrekisteri.Pages.Members
 import SatO.Jasenrekisteri.Pages.NewMember
@@ -39,8 +42,6 @@ import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-import qualified Data.Text.Encoding         as TE
-import qualified Data.Text.Encoding.Error   as TE
 import qualified Data.UUID                  as UUID
 import qualified Data.UUID.V4               as UUID
 import qualified Database.PostgreSQL.Simple as P
@@ -56,15 +57,17 @@ memberlogHandler ctx lu memberId = liftIO $ do
     cmds <- ctxFetchCmds ctx memberId
     world <- ctxReadWorld ctx
     today <- currentDay
+    let gcid = ctxGcid ctx
     let origWorld = ctxOrigWorld ctx
-    pure $ memberlogPage today lu memberId origWorld world cmds
+    pure $ memberlogPage gcid today lu memberId origWorld world cmds
 
 changelogHandler :: Ctx -> LoginUser -> Maybe CID -> Handler (HtmlPage "changelog")
 changelogHandler ctx lu cid = liftIO $ do
     cmds <- ctxFetchAllCmds ctx cid
     world <- ctxReadWorld ctx
     today <- currentDay
-    pure $ changelogPage today lu cmds world
+    let gcid = ctxGcid ctx
+    pure $ changelogPage gcid today lu cmds world
 
 searchDataHandler :: Ctx -> LoginUser -> Handler [SearchItem]
 searchDataHandler ctx _ = liftIO $ do
@@ -89,21 +92,54 @@ searchDataHandler ctx _ = liftIO $ do
         , searchItemHref  = tagHrefText Nothing tn
         }
 
+logoutHandler :: Ctx -> LoginUser -> Handler Bool
+logoutHandler ctx (LoginUser lu) = withResource (ctxPostgres ctx) $ \conn -> do
+    _ <- liftIO $ P.execute conn
+        "DELETE FROM jasen2.tokencache WHERE username = ?"
+        (P.Only lu)
+    pure True
 
-authCheck :: Ctx -> BasicAuthCheck LoginUser
-authCheck ctx = BasicAuthCheck check
+loginHandler :: Ctx -> Handler (HtmlPage "login")
+loginHandler ctx = pure $ loginPage $ ctxGcid ctx
+
+googleAuthCheck :: Ctx -> GoogleAuthHandler LoginUser
+googleAuthCheck ctx = GoogleAuthHandler handler unauthorizedErr
   where
-    check (BasicAuthData username' password') =
-        withResource (ctxPostgres ctx) $ \conn -> do
-            let username = TE.decodeUtf8With TE.lenientDecode username'
-                password = TE.decodeUtf8With TE.lenientDecode password'
-            r <- P.query conn "SELECT 1 FROM jasen2.credentials where username = ? and password = ?;" (username, password)  :: IO [P.Only Int]
-            pure $ case r of
-                [] -> Unauthorized
-                _  -> Authorized $ LoginUser username
+    gcid = ctxGcid ctx
 
-basicAuthServerContext :: Ctx -> Context (BasicAuthCheck LoginUser ': '[])
-basicAuthServerContext ctx = authCheck ctx :. EmptyContext
+    unauthorizedErr = err403 { errBody = renderBS $ toHtml $ loginPage gcid }
+
+    handler :: Text -> ExceptT ServantErr IO LoginUser
+    handler token = withResource (ctxPostgres ctx) $ \conn -> do
+        r <- liftIO $ P.query conn
+            "SELECT username FROM jasen2.tokencache WHERE token = ? AND created > current_timestamp - '1 day' :: interval;"
+            (P.Only token)
+        case r of
+            (P.Only username : _) -> pure $ LoginUser username
+            _                     -> do
+                mgr <- liftIO $ newManager tlsManagerSettings
+                ti <- liftIO $ validateToken mgr token
+
+                -- Check it's token for us
+                unless (tokenInfoAud ti == gcid) $ throwError unauthorizedErr
+
+                r' <- liftIO $ P.query conn
+                    "SELECT username FROM jasen2.credentials WHERE email = ?;"
+                    (P.Only $ tokenInfoEmail ti)
+                case r' of
+                    []                    -> throwError unauthorizedErr
+                        { errBody = "Not allowed email"
+                        }
+                    (P.Only username : _) -> do
+                        _ <- liftIO $ P.execute_ conn
+                            "DELETE FROM jasen2.tokencache WHERE created < current_timestamp - '23 hours' :: interval;"
+                        _ <- liftIO $ P.execute conn
+                            "INSERT INTO jasen2.tokencache (token, username) VALUES (?, ?);"
+                            (token, username)
+                        pure $ LoginUser username
+
+basicAuthServerContext :: Ctx -> Context (GoogleAuthHandler LoginUser ': '[])
+basicAuthServerContext ctx = googleAuthCheck ctx :. EmptyContext
 
 server :: Ctx -> Server JasenrekisteriAPI
 server ctx = queryEndpoint ctx membersPage
@@ -118,6 +154,8 @@ server ctx = queryEndpoint ctx membersPage
     :<|> commandEndpoint ctx
     :<|> memberlogHandler ctx
     :<|> searchDataHandler ctx
+    :<|> loginHandler ctx
+    :<|> logoutHandler ctx
     :<|> serveDirectory "static"
 
 app :: Ctx -> Application
@@ -135,7 +173,8 @@ defaultMain = do
             -- mapM_ print $ V.filter (not . (== mempty) . _memberTags) members
             let world = mkWorld members tags
             cfg <- readConfig
-            ctx <- newCtx (cfgConnectInfo cfg) world
+            let gcid = "198725857640-tl7c0h3o7mgon7h901rocnm4jfe3nlak.apps.googleusercontent.com"
+            ctx <- newCtx (GoogleClientId gcid) (cfgConnectInfo cfg) world
             -- Query stored commands, and apply to the initial world
             cmds <- withResource (ctxPostgres ctx) $ \conn ->
                 P.fromOnly <$$> P.query_ conn "SELECT edata FROM jasen2.events ORDER BY eid;"

@@ -19,9 +19,81 @@ document.addEventListener("DOMContentLoaded", function () {
   memberEdit();
   memberCreate();
   searchBox();
+  logoutLink();
   var overlay = addOverlay();
 
   // "components"
+
+  function logoutLink() {
+    var el = document.querySelector("a#logout-link");
+    if (!el) return;
+
+    console.info("Initialising logout link");
+
+    el.addEventListener("click", function (e) {
+      e.preventDefault();
+
+      var url = "/logout";
+
+      var headers = new Headers();
+      headers.append("Accept", "application/json");
+
+      var opts = {
+        method: "POST",
+        headers: headers,
+        credentials: "same-origin",
+      };
+
+      fetch(url, opts)
+        .then(function (res) {
+          var contentType = res.headers.get("content-type");
+          console.debug("res", url, contentType, res.ok);
+          if (contentType && contentType.indexOf("application/json") !== -1) {
+            return res.json();
+          } else {
+            return res.text().then(function (txt) {
+              throw new Error("Not a JSON" + txt);
+            });
+          }
+        })
+        .then(function (loggedOut) {
+          if (!loggedOut) {
+            throw new Error("Logging out failed");
+          }
+        })
+        .then(function () {
+          console.log("Loading auth2");
+          return new Promise(function (complete) {
+            gapi.load("auth2", complete);
+          });
+        })
+        .then(function () {
+          console.log("Initialising auth2");
+          return new Promise(function (complete) {
+            gapi.auth2.init().then(function () {
+              complete(true);
+            });
+          });
+        })
+        .then(function () {
+          console.log("Signing out");
+          return gapi.auth2.getAuthInstance().signOut();
+        })
+        .then(function () {
+          console.info("logged out");
+          Cookies.remove("GOOGLE_TOKEN");
+          location.reload();
+        })
+        .catch(function (exc) {
+          overlay.message.classList.add("alert");
+          overlay.message.classList.remove("primary");
+          overlay.message.innerHTML = "Tapahtui virhe!<br />" + exc
+          overlay.overlay.style.display = "";
+          throw exc;
+        });
+
+    });
+  }
 
   function memberFilter () {
     // needle
@@ -467,3 +539,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+
+function onSignIn(googleUser) {
+  var profile = googleUser.getBasicProfile();
+  var id_token = googleUser.getAuthResponse().id_token;
+  Cookies.set("GOOGLE_TOKEN", id_token, {
+    path: "/",
+    expires: 7,
+  });
+  if (location.href === "/login") {
+    location.href = "/";
+  } else {
+    location.reload();
+  }
+}

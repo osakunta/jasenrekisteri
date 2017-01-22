@@ -36,6 +36,7 @@ dependencies:
 - http-media
 - hashable
 - http-api-data
+- http-client
 - intervals
 - lens
 - lucid

@@ -16,6 +16,6 @@ import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.World
 
 membersPage :: LoginUser -> QueryM (HtmlPage "members")
-membersPage lu = ask <&> \(world, today) -> template' today lu "Jäsenet" $ do
+membersPage lu = ask <&> \(world, today, gcid) -> template' gcid today lu "Jäsenet" $ do
     memberList_ today (\_ -> membersHref) ColumnName False [] (world ^.. worldMembers . folded)
 -- TODO: use top tags?

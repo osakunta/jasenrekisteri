@@ -8,6 +8,7 @@ import Control.Concurrent.STM
 import Crypto.Random          (newGenIO)
 import Crypto.Random.DRBG     (HmacDRBG)
 import Data.Pool              (Pool, createPool, withResource)
+import Servant.GoogleAuth     (GoogleClientId)
 
 import qualified Database.PostgreSQL.Simple as P
 
@@ -21,17 +22,19 @@ data Ctx = Ctx
     , ctxOrigWorld :: World
     , ctxPostgres  :: Pool P.Connection
     , ctxPRNGs     :: Pool (TVar HmacDRBG)
+    , ctxGcid      :: GoogleClientId
     }
 
 ctxReadWorld :: Ctx -> IO World
 ctxReadWorld = readTVarIO . ctxWorld
 
-newCtx :: P.ConnectInfo -> World -> IO Ctx
-newCtx ci w = Ctx
+newCtx :: GoogleClientId -> P.ConnectInfo -> World -> IO Ctx
+newCtx gcid ci w = Ctx
     <$> newTVarIO w
     <*> pure w
     <*> createPool (P.connect ci) P.close 1 60 5
     <*> createPool (newGenIO >>= newTVarIO) (\_ -> return()) 1 3600 5
+    <*> pure gcid
 
 -- TODO: log
 ctxApplyCmd :: LoginUser -> Command I -> Ctx -> IO ()
@@ -40,7 +43,7 @@ ctxApplyCmd lu cmd ctx = do
     atomically $ modifyTVar' (ctxWorld ctx) (applyCommand cmd)
     withResource (ctxPostgres ctx) $ \conn -> do
         _ <- P.execute conn "INSERT INTO jasen2.events (username, edata) VALUES (?, ?)" (lu, cmd)
-        -- | TODO: log what happened?
+        -- TODO: log what happened?
         pure ()
 
 ctxFetchCmds :: Ctx -> MemberId -> IO [(LoginUser, UTCTime, Command I)]

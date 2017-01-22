@@ -17,7 +17,7 @@ import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
 tagsPage :: LoginUser -> QueryM (HtmlPage "tags")
-tagsPage lu = ask <&> \(world, today) -> template' today lu "Tagit" $ do
+tagsPage lu = ask <&> \(world, today, gcid) -> template' gcid today lu "Tagit" $ do
     let withCount :: Tag -> (Tag, Sum Int)
         withCount tag = (tag, world ^. worldTagMemberCount . ix (tag ^. key))
 
