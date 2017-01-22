@@ -43,7 +43,7 @@ ctxApplyCmd lu cmd ctx = do
     atomically $ modifyTVar' (ctxWorld ctx) (applyCommand cmd)
     withResource (ctxPostgres ctx) $ \conn -> do
         _ <- P.execute conn "INSERT INTO jasen2.events (username, edata) VALUES (?, ?)" (lu, cmd)
-        -- | TODO: log what happened?
+        -- TODO: log what happened?
         pure ()
 
 ctxFetchCmds :: Ctx -> MemberId -> IO [(LoginUser, UTCTime, Command I)]
