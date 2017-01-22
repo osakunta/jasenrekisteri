@@ -16,6 +16,7 @@ import Servant
 import Servant.CSV.Cassava
 import Servant.HTML.Lucid
 import Servant.Xlsx
+import Servant.GoogleAuth
 
 import SatO.Jasenrekisteri.Command
 import SatO.Jasenrekisteri.Contact
@@ -31,7 +32,7 @@ type HTMLPageEndpoint sym = Get '[HTML] (HtmlPage sym)
 -- API
 -------------------------------------------------------------------------------
 
-type JasenrekisteriAuth = BasicAuth "jasenrekisteri" LoginUser
+type JasenrekisteriAuth = GoogleAuth LoginUser
 
 type JasenrekisteriAPI =
     MembersEndpoint
@@ -46,6 +47,8 @@ type JasenrekisteriAPI =
     :<|> JasenrekisteriAuth :> "command" :> ReqBody '[JSON] (Command Proxy) :> Post '[JSON] Text
     :<|> MemberlogEndpoint
     :<|> JasenrekisteriAuth :> "search-data" :> Get '[JSON] [SearchItem]
+    :<|> "login" :> HTMLPageEndpoint "login"
+    :<|> "logout" :> JasenrekisteriAuth :> Post '[JSON] Bool
     :<|> Raw
 
 jasenrekisteriAPI :: Proxy JasenrekisteriAPI
@@ -186,7 +189,7 @@ uriToText :: URI -> Text
 uriToText uri = view packed $ "/" <> uriPath uri <> uriQuery uri
 
 -------------------------------------------------------------------------------
--- Cassave
+-- Cassava
 -------------------------------------------------------------------------------
 
 data SemiColonOpts

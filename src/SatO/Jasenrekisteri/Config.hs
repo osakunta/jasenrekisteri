@@ -3,14 +3,18 @@ module SatO.Jasenrekisteri.Config (
     readConfig,
     ) where
 
+import Prelude ()
+import Futurice.Prelude
 import Database.PostgreSQL.Simple     (ConnectInfo)
 import Database.PostgreSQL.Simple.URL (parseDatabaseUrl)
+import Servant.GoogleAuth             (GoogleClientId (..))
 import System.Environment             (lookupEnv)
 import Text.Read                      (readMaybe)
 
 data Config = Config
     { cfgConnectInfo :: !ConnectInfo
     , cfgPort        :: !Int
+    , cfgGcid        :: !GoogleClientId
     }
 
 readConfig :: IO Config
@@ -23,7 +27,12 @@ readConfig = do
     p1 <- maybe (error "No PORT specified") pure p0
     p2 <- maybe (error "Invalid port") pure $ readMaybe p1
 
+    g0 <- lookupEnv "GOOGLE_CLIENT_ID"
+    g1 <- maybe (error "No GOOGLE_CLIENT_ID specified") pure g0
+    let g2 = GoogleClientId (g1 ^. packed)
+
     pure $ Config
         { cfgConnectInfo = c2
         , cfgPort        = p2
+        , cfgGcid        = g2
         }

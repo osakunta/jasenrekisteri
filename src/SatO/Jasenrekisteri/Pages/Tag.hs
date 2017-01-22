@@ -24,13 +24,13 @@ import SatO.Jasenrekisteri.World
 
 tagPage :: LoginUser -> Maybe Column -> TagName -> QueryM (HtmlPage "tag")
 tagPage lu mcolumn tn = do
-    (world, today) <- ask
+    (world, today, gcid) <- ask
     let tag = world ^. worldTags . att tn
-    pure $ tagPage' today lu world mcolumn tag
+    pure $ tagPage' gcid today lu world mcolumn tag
 
 -- TODO: use closure fields
-tagPage' :: Day -> LoginUser -> World -> Maybe Column -> Tag -> HtmlPage "tag"
-tagPage' today lu world mcolumn tag = template' today lu ("Tagi: " <> toHtml (tn ^. _TagName)) $ do
+tagPage' :: GoogleClientId -> Day -> LoginUser -> World -> Maybe Column -> Tag -> HtmlPage "tag"
+tagPage' gcid today lu world mcolumn tag = template' gcid today lu ("Tagi: " <> toHtml (tn ^. _TagName)) $ do
     when (not $ null tags) $ do
         subheader_ "Alatägit"
         tagList_ tags

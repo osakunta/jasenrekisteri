@@ -1,4 +1,4 @@
--- This file has been generated from package.yaml by hpack version 0.14.1.
+-- This file has been generated from package.yaml by hpack version 0.15.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -51,6 +51,7 @@ library
     , http-media
     , hashable
     , http-api-data
+    , http-client
     , intervals
     , lens
     , lucid
@@ -101,7 +102,7 @@ library
       SatO.Jasenrekisteri.Member
       SatO.Jasenrekisteri.MemberEdit
       SatO.Jasenrekisteri.Pages.Changelog
-      SatO.Jasenrekisteri.Pages.Logout
+      SatO.Jasenrekisteri.Pages.Login
       SatO.Jasenrekisteri.Pages.Member
       SatO.Jasenrekisteri.Pages.Members
       SatO.Jasenrekisteri.Pages.NewMember
@@ -114,6 +115,7 @@ library
       SatO.Jasenrekisteri.Session
       SatO.Jasenrekisteri.Tag
       SatO.Jasenrekisteri.World
+      Servant.GoogleAuth
       Servant.Xlsx
   default-language: Haskell2010
 
@@ -145,6 +147,7 @@ executable excel
     , http-media
     , hashable
     , http-api-data
+    , http-client
     , intervals
     , lens
     , lucid
@@ -208,6 +211,7 @@ executable jasenrekisteri-server
     , http-media
     , hashable
     , http-api-data
+    , http-client
     , intervals
     , lens
     , lucid
@@ -272,6 +276,7 @@ test-suite unit-tests
     , http-media
     , hashable
     , http-api-data
+    , http-client
     , intervals
     , lens
     , lucid

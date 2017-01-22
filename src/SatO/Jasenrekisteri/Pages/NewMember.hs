@@ -16,8 +16,8 @@ import SatO.Jasenrekisteri.Session
 
 newMemberPage :: LoginUser -> QueryM (HtmlPage "new-member")
 newMemberPage lu = do
-    (_, today) <- ask
-    pure $ template' today lu "Uusi jäsen" $ do
+    (_, today, gcid) <- ask
+    pure $ template' gcid today lu "Uusi jäsen" $ do
         row_ $ large_ 12 $ div_ [ class_ "callout" ] $ div_ [ data_ "jrek-member-new" ""] $ do
             for_ (SOP.hcollapse memberEdits) editbox
 

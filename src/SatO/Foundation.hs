@@ -22,6 +22,8 @@ module SatO.Foundation (
     module Lucid,
     attrfor_,
     forWith_,
+    -- * GoogleClientId
+    GoogleClientId (..),
     ) where
 
 import Prelude ()
@@ -29,12 +31,13 @@ import Futurice.Prelude
 
 import Control.Monad.Morph   (hoist)
 import Data.FileEmbed        (embedStringFile)
+import Data.Foldable         (foldl')
 import Data.Functor.Identity (runIdentity)
-import Data.Foldable (foldl')
 import Data.Swagger          (NamedSchema (..), ToSchema (..))
 import GHC.TypeLits          (KnownSymbol, Symbol, symbolVal)
 import Lucid                 hiding (for_)
 import SatO.Clay             (satoCss_)
+import Servant.GoogleAuth    (GoogleClientId (..))
 
 import qualified Lucid as L
 
@@ -96,8 +99,8 @@ instance ToHtml (HtmlPage a) where
 -- PageParams
 -------------------------------------------------------------------------------
 
-page_ :: Html () -> Html () -> HtmlPage k
-page_ t b = HtmlPage $ doctypehtml_ $ do
+page_ :: GoogleClientId -> Html () -> Html () -> HtmlPage k
+page_ gcid t b = HtmlPage $ doctypehtml_ $ do
     head_ $ do
         title_  t -- todo: strip tags
         meta_ [charset_ "utf-8"]
@@ -109,9 +112,12 @@ page_ t b = HtmlPage $ doctypehtml_ $ do
         script_ ($(embedStringFile "menrva.standalone.js") :: Text)
         script_ ($(embedStringFile "jquery-3.1.1.slim.min.js") :: Text)
         script_ ($(embedStringFile "jquery-ui.min.js") :: Text)
+        script_ ($(embedStringFile "js.cookie.js") :: Text)
         script_ ($(embedStringFile "foundation.min.js") :: Text)
         -- TODO: add fetch
         script_ ($(embedStringFile "jasenrekisteri.js") :: Text)
+        script_ [ src_ "https://apis.google.com/js/platform.js" ] ("" :: Text)
+        meta_ [ name_ "google-signin-client_id", content_ $ getGoogleClientId gcid ]
         satoCss_
     body_ b
 

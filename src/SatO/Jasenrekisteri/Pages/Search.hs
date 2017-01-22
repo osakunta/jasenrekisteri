@@ -29,11 +29,11 @@ import SatO.Jasenrekisteri.World
 
 searchPage :: LoginUser -> Maybe Column -> Maybe SearchQuery' -> QueryM (HtmlPage "search")
 searchPage lu mcolumn mquery = do
-    (world, today) <- ask
-    pure $ searchPage' today lu world mcolumn mquery
+    (world, today, gcid) <- ask
+    pure $ searchPage' gcid today lu world mcolumn mquery
 
-searchPage' :: Day -> LoginUser -> World -> Maybe Column -> Maybe SearchQuery' -> HtmlPage "search"
-searchPage' today lu world mcolumn mquery = template' today lu title $ do
+searchPage' :: GoogleClientId -> Day -> LoginUser -> World -> Maybe Column -> Maybe SearchQuery' -> HtmlPage "search"
+searchPage' gcid today lu world mcolumn mquery = template' gcid today lu title $ do
     row_ $ large_ 12 $ div_ [ class_ "jrek-search callout secondary" ] $ do
         div_ [ class_ "button-group" ] $ for_ (exampleQueries today) $ \q -> do
             let pq = prettySearchQuery q
@@ -80,12 +80,12 @@ searchPage' today lu world mcolumn mquery = template' today lu title $ do
 
 searchCsv :: LoginUser -> Maybe SearchQuery -> QueryM [Contact]
 searchCsv _ mquery = do
-    (world, today) <- ask
+    (world, today, _) <- ask
     pure $ searchContacts world $ fromMaybe (defaultSearchQuery today) mquery
 
 searchXlsx :: LoginUser -> Maybe SearchQuery -> QueryM SearchResult
 searchXlsx _ mquery = do
-    (world, today) <- ask
+    (world, today, _) <- ask
     let query = fromMaybe (defaultSearchQuery today) mquery
     pure $ SearchResult query $ searchContacts world query
 

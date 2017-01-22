@@ -27,10 +27,10 @@ import qualified Text.Regex.Applicative.Common as RE
 import qualified Text.Regex.Applicative.Text   as RE
 
 memberPage :: LoginUser -> MemberId -> QueryM (HtmlPage "member")
-memberPage lu memberId = ask <&> \(world, today) -> case world ^? worldMembers . ix memberId of
+memberPage lu memberId = ask <&> \(world, today, gcid) -> case world ^? worldMembers . ix memberId of
     -- TODO: not found page
-    Nothing -> page404 today lu
-    Just p@Member {..} -> template' today lu (p ^. memberFullNameHtml) $ do
+    Nothing -> page404 gcid today lu
+    Just p@Member {..} -> template' gcid today lu (p ^. memberFullNameHtml) $ do
         let pid = p ^. key
 
         row_ $ large_ 12 $ dl_ $ do

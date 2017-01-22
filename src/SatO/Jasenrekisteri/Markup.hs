@@ -36,16 +36,16 @@ import SatO.Jasenrekisteri.Session
 import SatO.Jasenrekisteri.Tag
 import SatO.Jasenrekisteri.World
 
-template :: Html () -> Html () -> Html () -> HtmlPage sym
-template title nav inner = page_ title $ do
+template :: GoogleClientId -> Html () -> Html () -> Html () -> HtmlPage sym
+template gcid title nav inner = page_ gcid title $ do
     body_ $ do
         header_ $ do
             nav
             row_ $ large_ 12 $ h1_ title
         section_ inner
 
-template' :: Day -> LoginUser -> Html () -> Html () -> HtmlPage sym
-template' today lu title = template title $ navigation today lu
+template' :: GoogleClientId -> Day -> LoginUser -> Html () -> Html () -> HtmlPage sym
+template' gcid today lu title = template gcid title $ navigation today lu
 
 -- http://foundation.zurb.com/sites/docs/top-bar.html
 navigation :: Monad m => Day -> LoginUser -> HtmlT m ()
@@ -69,6 +69,8 @@ navigation today lu = do
         div_ [ class_ "top-bar-right" ] $ ul_ [ class_ "menu" ] $ do
             li_ $ input_ [ class_ "search", placeholder_ "hae käyttäjä tai tägi" ]
             li_ [ class_ "menu-text" ] $ toHtml $ "Terve " <> getLoginUser lu
+            -- li_ $ div_ [ class_ "g-signin2", data_ "onsuccess" "onSignIn" ] $ pure ()
+            li_ $ a_ [ href_ "#", id_ "logout-link" ] "Ulos"
   where
     ayear :: Integer
     ayear = academicYear today
@@ -82,8 +84,8 @@ navigation today lu = do
     ayearTag'' :: IsString a => a
     ayearTag'' = fromString $ show (pred $ pred ayear) ++ "-" ++ show (pred ayear)
 
-page404 :: Day -> LoginUser -> HtmlPage sym
-page404 today lu = template' today lu "ei löydy" $ pure ()
+page404 :: GoogleClientId -> Day -> LoginUser -> HtmlPage sym
+page404 gcid today lu = template' gcid today lu "ei löydy" $ pure ()
 
 -------------------------------------------------------------------------------
 -- Subheader
