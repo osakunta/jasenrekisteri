@@ -43,9 +43,10 @@ tagPage' gcid today lu world mcolumn tag = template' gcid today lu ("Tagi: " <> 
     tn = tag ^. tagName
 
     column = case mcolumn of
-        Just ColumnRoom | hasTalo           -> ColumnRoom
-        Just ColumnTags | isn't _Empty tags -> ColumnTags
-        _                                   -> ColumnName
+        Just ColumnRoom | hasTalo               -> ColumnRoom
+        Just ColumnTags | isn't _Empty tags     -> ColumnTags
+        Just ColumnTagsDesc | isn't _Empty tags -> ColumnTagsDesc
+        _                                       -> ColumnName
 
     tags :: [Tag]
     tags = world ^.. subtagsFold . filtered (\subtag -> subtag ^. tagName /= tn)
