@@ -119,6 +119,7 @@ tagList_ = row_ . large_ 12 . traverse_ tagLink_
 
 tagnameList_ :: Monad m => World -> [TagName] -> HtmlT m ()
 tagnameList_ world ts = traverse_ (tagNameLink_ world) ts
+
 -------------------------------------------------------------------------------
 -- Members
 -------------------------------------------------------------------------------
@@ -142,7 +143,7 @@ memberList_ today columnHref column hasTalo ts ps = do
         thead_ $ tr_ $ do
             th_ $ a_ [ columnHref ColumnName ] $ "Nimi"
             when (isn't _Empty ts) $
-                th_ $ a_ [ columnHref ColumnTags ] $ "Tagit"
+                th_ $ a_ [ columnHref columnTags ] $ "Tagit"
             th_ $ ayearTag
             when hasTalo $ th_ $ a_ [ columnHref ColumnRoom ] $ "Huone"
         tbody_ $ for_ ps' $ \member -> do
@@ -150,17 +151,23 @@ memberList_ today columnHref column hasTalo ts ps = do
             let needle = T.toLower
                   $ member ^. memberFullName
             tr_ [ data_ "member-haystack" needle ] $ do
-                td_ $ a_ [ memberHref memberId ] $ member ^. memberFullNameHtml
+                td_ $ a_ [ memberHref memberId ] $ member ^. memberShortNameHtml
                 when (isn't _Empty ts) $ td_ $
                     tagList_ (memberTags' member)
                 td_ $ tagCheckbox member ayearTag
                 when hasTalo $ td_ $ toHtml $ member ^. memberTaloAddress
   where
+    columnTags = case column of
+        ColumnTags -> ColumnTagsDesc
+        _          -> ColumnTags
+
+
     sortOnColumn :: [Member] -> [Member]
     sortOnColumn = case column of
-        ColumnName -> sortOn (view memberSortKey)
-        ColumnTags -> sortOn memberTags'
-        ColumnRoom -> sortOn (view memberAddress)
+        ColumnName     -> sortOn (view memberSortKey)
+        ColumnTags     -> sortOn memberTags'
+        ColumnTagsDesc -> reverse . sortOn memberTags'
+        ColumnRoom     -> sortOn (view memberAddress)
 
     memberTags' :: Member -> [Tag]
     memberTags' member =

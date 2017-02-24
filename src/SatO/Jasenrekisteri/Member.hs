@@ -15,6 +15,7 @@ module SatO.Jasenrekisteri.Member (
     -- * Getters
     memberFullName,
     memberFullNameHtml,
+    memberShortNameHtml,
     memberSortKey,
     memberTaloAddress,
     -- * Lenses
@@ -97,6 +98,10 @@ memberFullNameHtml :: Monad m => Getter Member (HtmlT m ())
 memberFullNameHtml = to $ \member -> formatName $
     member ^. memberFirstNames <> " " <> member ^. memberLastName
 
+memberShortNameHtml :: Monad m => Getter Member (HtmlT m ())
+memberShortNameHtml = to $ \member -> toHtml $
+    extractFirstName (member ^. memberFirstNames) <> " " <> member ^. memberLastName
+
 formatName :: Monad m => Text -> HtmlT m ()
 formatName = either (const $ i_ "<???>") id . Atto.parseOnly (p <* Atto.endOfInput)
   where
@@ -108,6 +113,24 @@ formatName = either (const $ i_ "<???>") id . Atto.parseOnly (p <* Atto.endOfInp
     -- *Foo
     asterisk     = span_ [ class_ "underline" ] . toHtml <$> asterisk'
     asterisk'    = Atto.char '*' *> many (Atto.satisfy isLetter)
+
+extractFirstName :: Text -> Text
+extractFirstName t = maybe t (view packed) $ RE.match regex t
+  where
+    regex = underscored <|> asterisk <|> firstName
+    underscored =
+        fewAny *> RE.sym '_' *>
+        fewAny <* RE.sym '_' <* manyAny
+
+    asterisk =
+        fewAny *> RE.sym '*' *>
+        many (RE.psym isLetter) <* manyAny
+
+    firstName =
+        many (RE.psym (/= ' ')) <* manyAny
+
+    manyAny = many RE.anySym
+    fewAny = RE.few RE.anySym
 
 instance Csv.FromRecord Member
 instance Csv.ToRecord Member

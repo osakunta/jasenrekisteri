@@ -61,6 +61,9 @@ document.addEventListener("DOMContentLoaded", function () {
             throw new Error("Logging out failed");
           }
         })
+        .catch(function (err) {
+          console.log("Token clearaace cahe failed; continuing logout procedure.", err);
+        })
         .then(function () {
           console.log("Loading auth2");
           return new Promise(function (complete) {
@@ -547,7 +550,7 @@ function onSignIn(googleUser) {
     path: "/",
     expires: 7,
   });
-  if (location.href === "/login") {
+  if (location.pathname === "/login") {
     location.href = "/";
   } else {
     location.reload();

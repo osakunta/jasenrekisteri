@@ -107,7 +107,12 @@ googleAuthCheck ctx = GoogleAuthHandler handler unauthorizedErr
   where
     gcid = ctxGcid ctx
 
-    unauthorizedErr = err403 { errBody = renderBS $ toHtml $ loginPage gcid }
+    unauthorizedErr  = err403 { errBody = renderBS $ toHtml $ loginPage gcid }
+    unauthorizedErr' = err403 { errBody = body }
+      where
+        body = renderBS $ toHtml $ template gcid "Väärä tunnus" (pure ()) $ do
+            row_ $ large_ 12 $
+                a_ [ href_ "#", id_ "logout-link" ] "Kirjaudu ulos (jos kirjauduit väärällä tunnuksella)"
 
     handler :: Text -> ExceptT ServantErr IO LoginUser
     handler token = withResource (ctxPostgres ctx) $ \conn -> do
@@ -127,9 +132,7 @@ googleAuthCheck ctx = GoogleAuthHandler handler unauthorizedErr
                     "SELECT username FROM jasen2.credentials WHERE email = ?;"
                     (P.Only $ tokenInfoEmail ti)
                 case r' of
-                    []                    -> throwError unauthorizedErr
-                        { errBody = "Not allowed email"
-                        }
+                    []                    -> throwError unauthorizedErr'
                     (P.Only username : _) -> do
                         _ <- liftIO $ P.execute_ conn
                             "DELETE FROM jasen2.tokencache WHERE created < current_timestamp - '23 hours' :: interval;"
@@ -137,6 +140,7 @@ googleAuthCheck ctx = GoogleAuthHandler handler unauthorizedErr
                             "INSERT INTO jasen2.tokencache (token, username) VALUES (?, ?);"
                             (token, username)
                         pure $ LoginUser username
+
 
 basicAuthServerContext :: Ctx -> Context (GoogleAuthHandler LoginUser ': '[])
 basicAuthServerContext ctx = googleAuthCheck ctx :. EmptyContext
