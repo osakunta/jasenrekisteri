@@ -168,18 +168,21 @@ searchXlsxHref query =
 data Column
     = ColumnName
     | ColumnTags
+    | ColumnTagsDesc
     | ColumnRoom
 
 instance ToHttpApiData Column where
-    toUrlPiece ColumnName = "name"
-    toUrlPiece ColumnTags = "tags"
-    toUrlPiece ColumnRoom = "room"
+    toUrlPiece ColumnName     = "name"
+    toUrlPiece ColumnTags     = "tags"
+    toUrlPiece ColumnTagsDesc = "tags-desc"
+    toUrlPiece ColumnRoom     = "room"
 
 instance FromHttpApiData Column where
-    parseUrlPiece "name" = pure ColumnName
-    parseUrlPiece "tags" = pure ColumnTags
-    parseUrlPiece "room" = pure ColumnRoom
-    parseUrlPiece _      = throwError "unknown"
+    parseUrlPiece "name"      = pure ColumnName
+    parseUrlPiece "tags"      = pure ColumnTags
+    parseUrlPiece "tags-desc" = pure ColumnTagsDesc
+    parseUrlPiece "room"      = pure ColumnRoom
+    parseUrlPiece _           = throwError "unknown"
 
 -------------------------------------------------------------------------------
 -- Utilities

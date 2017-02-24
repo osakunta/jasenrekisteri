@@ -201,9 +201,10 @@ memberTagList_ today columnHref column world xs = do
                 when hasTalo $ td_ $ toHtml $ member ^. memberTaloAddress
   where
     sortOnColumn = case column of
-        ColumnName -> sortOn (view memberSortKey . fst)
-        ColumnTags -> sortOn (view memberSortKey . fst)
-        ColumnRoom -> sortOn (view memberAddress . fst)
+        ColumnName     -> sortOn (view memberSortKey . fst)
+        ColumnTags     -> sortOn (view memberSortKey . fst)
+        ColumnTagsDesc -> reverse . sortOn (view memberSortKey . fst)
+        ColumnRoom     -> sortOn (view memberAddress . fst)
 
     xs' = sortOnColumn $ mapMaybe lookupMember xs
 
