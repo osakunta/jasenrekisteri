@@ -119,6 +119,7 @@ tagList_ = row_ . large_ 12 . traverse_ tagLink_
 
 tagnameList_ :: Monad m => World -> [TagName] -> HtmlT m ()
 tagnameList_ world ts = traverse_ (tagNameLink_ world) ts
+
 -------------------------------------------------------------------------------
 -- Members
 -------------------------------------------------------------------------------
@@ -150,7 +151,7 @@ memberList_ today columnHref column hasTalo ts ps = do
             let needle = T.toLower
                   $ member ^. memberFullName
             tr_ [ data_ "member-haystack" needle ] $ do
-                td_ $ a_ [ memberHref memberId ] $ member ^. memberFullNameHtml
+                td_ $ a_ [ memberHref memberId ] $ member ^. memberShortNameHtml
                 when (isn't _Empty ts) $ td_ $
                     tagList_ (memberTags' member)
                 td_ $ tagCheckbox member ayearTag
