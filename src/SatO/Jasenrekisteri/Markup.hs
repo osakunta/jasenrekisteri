@@ -148,8 +148,10 @@ memberList_ today columnHref column hasTalo ts ps = do
             when hasTalo $ th_ $ a_ [ columnHref ColumnRoom ] $ "Huone"
         tbody_ $ for_ ps' $ \member -> do
             let memberId = member ^. key
-            let needle = T.toLower
-                  $ member ^. memberFullName
+            let needle = T.toLower $ T.unwords $
+                  T.words (member ^. memberFullName) ++
+                  [ member ^. memberBirthplace
+                  ]
             tr_ [ data_ "member-haystack" needle ] $ do
                 td_ $ a_ [ memberHref memberId ] $ member ^. memberShortNameHtml
                 when (isn't _Empty ts) $ td_ $
