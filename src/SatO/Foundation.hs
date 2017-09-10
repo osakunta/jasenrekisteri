@@ -26,8 +26,8 @@ module SatO.Foundation (
     GoogleClientId (..),
     ) where
 
-import Prelude ()
 import Futurice.Prelude
+import Prelude ()
 
 import Control.Monad.Morph   (hoist)
 import Data.FileEmbed        (embedStringFile)
@@ -106,15 +106,15 @@ page_ gcid t b = HtmlPage $ doctypehtml_ $ do
         meta_ [charset_ "utf-8"]
         meta_ [name_ "viewport", content_ "width=device-width, initial-scale=1.0"]
         meta_ [httpEquiv_ "x-ua-compatible", content_"ie=edge"]
-        style_ [type_ "text/css"] ($(embedStringFile "foundation.min.css") :: String)
-        style_ [type_ "text/css"] ($(embedStringFile "jquery-ui.min.css") :: String)
-        script_ ($(embedStringFile "lodash.fp.min.js") :: Text)
-        script_ ($(embedStringFile "menrva.standalone.js") :: Text)
-        script_ ($(embedStringFile "jquery-3.1.1.slim.min.js") :: Text)
-        script_ ($(embedStringFile "jquery-ui.min.js") :: Text)
-        script_ ($(embedStringFile "js.cookie.js") :: Text)
-        script_ ($(embedStringFile "foundation.min.js") :: Text)
-        -- TODO: add fetch
+        style_ [type_ "text/css"] ($(embedStringFile "vendor/foundation.min.css") :: String)
+        style_ [type_ "text/css"] ($(embedStringFile "vendor/jquery-ui.min.css") :: String)
+        script_ ($(embedStringFile "vendor/lodash.fp.min.js") :: Text)
+        script_ ($(embedStringFile "vendor/menrva.standalone.js") :: Text)
+        script_ ($(embedStringFile "vendor/jquery-3.1.1.slim.min.js") :: Text)
+        script_ ($(embedStringFile "vendor/jquery-ui.min.js") :: Text)
+        script_ ($(embedStringFile "vendor/js.cookie.js") :: Text)
+        script_ ($(embedStringFile "vendor/foundation.min.js") :: Text)
+        script_ ($(embedStringFile "vendor/fetch.js") :: Text)
         script_ ($(embedStringFile "jasenrekisteri.js") :: Text)
         script_ [ src_ "https://apis.google.com/js/platform.js" ] ("" :: Text)
         meta_ [ name_ "google-signin-client_id", content_ $ getGoogleClientId gcid ]

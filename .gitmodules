@@ -1,0 +1,3 @@
+[submodule "futurice-prelude"]
+	path = futurice-prelude
+	url = https://github.com/futurice/haskell-futurice-prelude.git

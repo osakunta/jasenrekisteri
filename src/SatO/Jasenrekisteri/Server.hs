@@ -160,7 +160,7 @@ server ctx = queryEndpoint ctx membersPage
     :<|> searchDataHandler ctx
     :<|> loginHandler ctx
     :<|> logoutHandler ctx
-    :<|> serveDirectory "static"
+    :<|> serveDirectoryFileServer "static"
 
 app :: Ctx -> Application
 app ctx = serveWithContext jasenrekisteriAPI

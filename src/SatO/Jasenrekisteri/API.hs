@@ -70,7 +70,7 @@ searchEndpoint = Proxy
 
 searchHrefText :: Maybe Column -> Maybe SearchQuery' -> Text
 searchHrefText c q =
-    uriToText $ safeLink jasenrekisteriAPI searchEndpoint c q
+    linkToText $ safeLink jasenrekisteriAPI searchEndpoint c q
 
 searchHref :: Maybe Column -> Maybe SearchQuery' -> Attribute
 searchHref c q = href_ $ searchHrefText c q
@@ -82,7 +82,7 @@ membersEndpoint = Proxy
 
 membersHrefText :: Text
 membersHrefText =
-    uriToText $ safeLink jasenrekisteriAPI membersEndpoint
+    linkToText $ safeLink jasenrekisteriAPI membersEndpoint
 
 membersHref :: Attribute
 membersHref = href_ membersHrefText
@@ -94,7 +94,7 @@ memberEndpoint = Proxy
 
 memberHrefText :: MemberId -> Text
 memberHrefText memberId =
-    uriToText $ safeLink jasenrekisteriAPI memberEndpoint memberId
+    linkToText $ safeLink jasenrekisteriAPI memberEndpoint memberId
 
 memberHref :: MemberId -> Attribute
 memberHref = href_ . memberHrefText
@@ -106,7 +106,7 @@ newMemberEndpoint = Proxy
 
 newMemberHref :: Attribute
 newMemberHref  =
-    href_ $ uriToText $ safeLink jasenrekisteriAPI newMemberEndpoint
+    href_ $ linkToText $ safeLink jasenrekisteriAPI newMemberEndpoint
 
 type TagEndpoint
     = JasenrekisteriAuth
@@ -120,7 +120,7 @@ tagEndpoint = Proxy
 
 tagHrefText :: Maybe Column -> TagName -> Text
 tagHrefText c tn =
-    uriToText $ safeLink jasenrekisteriAPI tagEndpoint c tn
+    linkToText $ safeLink jasenrekisteriAPI tagEndpoint c tn
 
 tagHref :: Maybe Column -> TagName -> Attribute
 tagHref c tn = href_ $ tagHrefText c tn
@@ -132,7 +132,7 @@ changelogEndpoint = Proxy
 
 changelogHref :: Maybe CID -> Attribute
 changelogHref cid =
-    href_ $ uriToText $ safeLink jasenrekisteriAPI changelogEndpoint cid
+    href_ $ linkToText $ safeLink jasenrekisteriAPI changelogEndpoint cid
 
 type MemberlogEndpoint = JasenrekisteriAuth :> "member-log" :> Capture "id" MemberId :> HTMLPageEndpoint "memberlog"
 
@@ -141,16 +141,16 @@ memberlogEndpoint = Proxy
 
 memberlogHref :: MemberId -> Attribute
 memberlogHref memberId =
-    href_ $ uriToText $ safeLink jasenrekisteriAPI memberlogEndpoint memberId
+    href_ $ linkToText $ safeLink jasenrekisteriAPI memberlogEndpoint memberId
 
-type SearchCsvEndpoint = JasenrekisteriAuth :> "search.csv" :> QueryParam "query" SearchQuery :> Get '[(CSV', SemiColonOpts)] [Contact]
+type SearchCsvEndpoint = JasenrekisteriAuth :> "search.csv" :> QueryParam "query" SearchQuery :> Get '[CSV' 'HasHeader SemiColonOpts] [Contact]
 
 searchCsvEndpoint :: Proxy SearchCsvEndpoint
 searchCsvEndpoint = Proxy
 
 searchCsvHref :: SearchQuery -> Attribute
 searchCsvHref query =
-    href_ $ uriToText $ safeLink jasenrekisteriAPI searchCsvEndpoint (Just query)
+    href_ $ linkToText $ safeLink jasenrekisteriAPI searchCsvEndpoint (Just query)
 
 type SearchXlsxEndpoint = JasenrekisteriAuth :> "search.xlsx" :> QueryParam "query" SearchQuery :> Get '[XLSX] SearchResult
 
@@ -159,7 +159,7 @@ searchXlsxEndpoint = Proxy
 
 searchXlsxHref :: SearchQuery -> Attribute
 searchXlsxHref query =
-    href_ $ uriToText $ safeLink jasenrekisteriAPI searchXlsxEndpoint (Just query)
+    href_ $ linkToText $ safeLink jasenrekisteriAPI searchXlsxEndpoint (Just query)
 
 -------------------------------------------------------------------------------
 -- Columns
@@ -188,8 +188,8 @@ instance FromHttpApiData Column where
 -- Utilities
 -------------------------------------------------------------------------------
 
-uriToText :: URI -> Text
-uriToText uri = view packed $ "/" <> uriPath uri <> uriQuery uri
+linkToText :: Link -> Text
+linkToText l = view packed $ "/" <> uriPath uri <> uriQuery uri where uri = linkURI l
 
 -------------------------------------------------------------------------------
 -- Cassava
