@@ -125,6 +125,7 @@ kaikkiVirat =
     , mk "lehtihuoneenhoitaja"          (past ... 2011) []
     , mk "urho"                         (past ... 2011) []
     , mk "otso"                         (past ... 2011) []
+    , mk "kamreeri"                     (2018 ... future) []
     ]
   where
     mk = (,,)
@@ -135,7 +136,7 @@ virkailijatFrom :: Int
 virkailijatFrom = 2008
 
 virkailijatTo :: Int
-virkailijatTo = 2017
+virkailijatTo = 2019
 
 -------------------------------------------------------------------------------
 -- Kuraattori
