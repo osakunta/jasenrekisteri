@@ -2,4 +2,4 @@ packages:
   "."
   futurice-prelude
 
-with-compiler: ghc-8.2.2
+with-compiler: ghc-8.4.4

@@ -40,8 +40,8 @@ data GoogleAuthHandler usr = GoogleAuthHandler
     }
 
 instance HasLink api => HasLink (GoogleAuth user :> api) where
-    type MkLink (GoogleAuth user :> api) = MkLink api
-    toLink Proxy link = toLink (Proxy :: Proxy api) link
+    type MkLink (GoogleAuth user :> api) a = MkLink api a
+    toLink f Proxy link = toLink f (Proxy :: Proxy api) link
 
 instance
     ( HasServer api context
@@ -51,6 +51,9 @@ instance
   where
     type ServerT (GoogleAuth usr :> api) m =
         usr -> ServerT api m
+
+    hoistServerWithContext _ pctx nt s =
+        hoistServerWithContext (Proxy :: Proxy api) pctx nt . s
 
     route Proxy context subserver =
         route (Proxy :: Proxy api) context $ subserver `addAuthCheck` authCheck

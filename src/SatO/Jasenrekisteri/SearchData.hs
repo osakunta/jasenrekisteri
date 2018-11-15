@@ -8,10 +8,11 @@ module SatO.Jasenrekisteri.SearchData (
     SearchItemType (..),
     ) where
 
-import Prelude ()
-import Futurice.Prelude
-import Data.Swagger      (NamedSchema (..))
+import Data.Swagger          (NamedSchema (..))
 import Futurice.Generics
+import Futurice.Generics.SOP (sopToEncoding, sopToJSON)
+import Futurice.Prelude
+import Prelude ()
 
 data SearchItemType
     = SearchItemMember
@@ -24,7 +25,6 @@ instance ToJSON SearchItemType where
 
 instance ToSchema SearchItemType where
     declareNamedSchema _ = pure $ NamedSchema (Just "Search item type") mempty
-
 
 data SearchItem = SearchItem
     { searchItemLabel :: !Text

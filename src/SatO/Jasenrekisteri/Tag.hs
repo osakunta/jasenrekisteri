@@ -31,6 +31,7 @@ module SatO.Jasenrekisteri.Tag (
 import Control.Lens
 import Control.Lens.Att
 import Futurice.Generics
+import Futurice.Generics.SOP  (sopToEncoding, sopToJSON)
 import Futurice.IdMap         (HasKey (..))
 import Futurice.Prelude
 import Lucid                  (ToHtml (..))
@@ -165,7 +166,10 @@ instance HasKey Tag where
 instance Graph.IsNode Tag where
     nodeNeighbors = toList . getTagNames . _tagChildren
 
-instance A.ToJSON Tag where toJSON = sopToJSON
+instance A.ToJSON Tag where
+    toJSON = sopToJSON
+    toEncoding = sopToEncoding
+
 instance A.FromJSON Tag where
     parseJSON = A.withObject "Tag" $ \obj -> Tag
         <$> obj A..: "name"

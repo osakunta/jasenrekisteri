@@ -5,16 +5,16 @@
 {-# LANGUAGE UndecidableInstances #-}
 module SatO.Jasenrekisteri.Command where
 
-import Prelude ()
-import Futurice.Prelude
-import Control.Lens         hiding ((.=))
+import Control.Lens          hiding ((.=))
 import Data.Aeson
-import Data.Aeson.Encoding  (pair)
-import Data.Functor.Classes
-       (Eq1 (..), Show1 (..), eq1, showsBinaryWith)
-import Data.Monoid          (mconcat)
+import Data.Aeson.Encoding   (pair)
+import Data.Functor.Classes  (Eq1 (..), Show1 (..), eq1, showsBinaryWith)
+import Data.Monoid           (mconcat)
 import Futurice.Generics
-import Web.HttpApiData      (FromHttpApiData (..), ToHttpApiData (..))
+import Futurice.Generics.SOP (sopArbitrary)
+import Futurice.Prelude
+import Prelude ()
+import Web.HttpApiData       (FromHttpApiData (..), ToHttpApiData (..))
 
 import SatO.Jasenrekisteri.Member
 import SatO.Jasenrekisteri.MemberEdit

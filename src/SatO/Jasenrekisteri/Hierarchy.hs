@@ -46,12 +46,12 @@ virkailijat = IdMap.fromFoldable $ virat ++ virat2 ++ hallitus
 
             -- Colour of the parent tag, e.g. "hpj"
             parentColour  =
-                if maybe False (intervalEq years) $ listToMaybe $ mapMaybe pick hallitusVirat
+                if maybe False (intervalEq years) $ listToMaybe $ mapMaybe pickk hallitusVirat
                     then hallitusColour
                     else virkailijaColour
               where
                 -- pick years for this duty
-                pick (n, ys)
+                pickk (n, ys)
                     | n == name = Just ys
                     | otherwise = Nothing
 

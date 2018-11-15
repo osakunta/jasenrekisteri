@@ -1,17 +1,19 @@
+cabal-version:  2.2
 name:           jasenrekisteri
 version:        0
+
 synopsis:       Member registry of Satakuntalainen Osakunta
 description:    Member registry of Satakuntalainen Osakunta. See README
 category:       Web
+
 homepage:       https://github.com/satakuntalainen-osakunta/jasenrekisteri#readme
 bug-reports:    https://github.com/satakuntalainen-osakunta/jasenrekisteri/issues
 author:         Oleg Grenrus <oleg.grenrus@iki.fi>
 maintainer:     Oleg Grenrus <oleg.grenrus@iki.fi>
-license:        BSD3
+license:        BSD-3-Clause
 license-file:   LICENSE
-tested-with:    GHC==8.2.2
 build-type:     Simple
-cabal-version:  >= 1.10
+tested-with:    GHC==8.4.4
 
 extra-source-files:
     README.md
@@ -25,8 +27,8 @@ library
       src/
   ghc-options: -Wall
   build-depends:
-      base ==4.10.*
-    , aeson ==1.2.*
+      base ==4.11.*
+    , aeson ^>=1.4.1
     , aeson-compat
     , aeson-extra
     , ansi-wl-pprint
@@ -63,7 +65,7 @@ library
     , regex-applicative-text
     , resource-pool
     , semigroups
-    , servant ==0.12.*
+    , servant ^>=0.15
     , servant-cassava
     , servant-lucid
     , servant-server
@@ -124,8 +126,8 @@ executable excel
       excel/
   ghc-options: -Wall -threaded
   build-depends:
-      base ==4.10.*
-    , aeson ==1.2.*
+      base
+    , aeson
     , aeson-compat
     , aeson-extra
     , ansi-wl-pprint

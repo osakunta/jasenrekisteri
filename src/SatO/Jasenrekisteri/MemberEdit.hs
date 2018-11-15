@@ -20,10 +20,12 @@ module SatO.Jasenrekisteri.MemberEdit (
     UnSingleton,
     ) where
 
-import Control.Applicative (liftA2)
-import Data.Monoid         (Endo (..))
+import Control.Applicative   (liftA2)
+import Data.Monoid           (Endo (..))
 import Data.Type.Equality
 import Futurice.Generics
+import Futurice.Generics.SOP
+       (sopArbitrary, sopParseJSON, sopToEncoding, sopToJSON)
 import Futurice.Prelude
 import Prelude ()
 

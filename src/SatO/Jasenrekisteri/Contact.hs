@@ -8,12 +8,13 @@ module SatO.Jasenrekisteri.Contact (
     SearchResult (..),
     ) where
 
-import Prelude ()
-import Futurice.Prelude
-import Control.Lens                     ((?=))
 import Codec.Xlsx
+import Control.Lens                     ((?=))
 import Control.Monad.Trans.State.Strict (execState)
 import Futurice.Generics
+import Futurice.Generics.SOP            (sopHeaderOrder, sopToNamedRecord)
+import Futurice.Prelude
+import Prelude ()
 import Servant.Xlsx                     (ToXlsx (..))
 
 import SatO.Jasenrekisteri.Member
