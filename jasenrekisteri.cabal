@@ -17,6 +17,16 @@ tested-with:    GHC==8.4.4
 
 extra-source-files:
     README.md
+    jasenrekisteri.js
+    vendor/jquery-ui.min.js
+    vendor/jquery-3.1.1.slim.min.js
+    vendor/foundation.min.css
+    vendor/jquery-ui.min.css
+    vendor/foundation.min.js
+    vendor/fetch.js
+    vendor/js.cookie.js
+    vendor/lodash.fp.min.js
+    vendor/menrva.standalone.js
 
 source-repository head
   type: git
