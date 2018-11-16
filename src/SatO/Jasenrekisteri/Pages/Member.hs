@@ -111,11 +111,11 @@ textMatrikkeliPage y p = printf "%04d-%04d" y p ^. packed
 -------------------------------------------------------------------------------
 
 editbox :: Member -> PE -> Html ()
-editbox p (MkPE i l getter _) = label_ $ do
+editbox p (MkPE i l g _) = label_ $ do
     toHtml l
     input_
         [ type_ "text"
         , data_ "jrek-field-name" i
-        , data_ "jrek-field-value" $ p ^. getter
-        , value_ $ p ^. getter
+        , data_ "jrek-field-value" $ p ^. g
+        , value_ $ p ^. g
         ]

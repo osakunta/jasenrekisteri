@@ -28,14 +28,16 @@ module SatO.Jasenrekisteri.Tag (
     ifoldedTagHierarchy,
     ) where
 
-import Prelude ()
-import Futurice.Prelude
 import Control.Lens
 import Control.Lens.Att
 import Futurice.Generics
-import Futurice.IdMap    (HasKey (..))
-import Lucid             (ToHtml (..))
-import Web.HttpApiData   (FromHttpApiData (..), ToHttpApiData (..))
+import Futurice.Generics.SOP  (sopToEncoding, sopToJSON)
+import Futurice.IdMap         (HasKey (..))
+import Futurice.Prelude
+import Lucid                  (ToHtml (..))
+import Network.HTTP.Types.URI (urlDecode)
+import Prelude ()
+import Web.HttpApiData        (FromHttpApiData (..), ToHttpApiData (..))
 
 import           Data.Set.Lens  (setOf)
 import           Futurice.Graph (Graph)
@@ -83,7 +85,7 @@ instance ToHttpApiData TagName where
     toUrlPiece = getTagName
 
 instance FromHttpApiData TagName where
-    parseUrlPiece = pure . TagName
+    parseUrlPiece = pure . TagName . decodeUtf8Lenient . urlDecode False . encodeUtf8
 
 instance Arbitrary TagName where
     arbitrary = TagName <$> arbitrary
@@ -164,7 +166,10 @@ instance HasKey Tag where
 instance Graph.IsNode Tag where
     nodeNeighbors = toList . getTagNames . _tagChildren
 
-instance A.ToJSON Tag where toJSON = sopToJSON
+instance A.ToJSON Tag where
+    toJSON = sopToJSON
+    toEncoding = sopToEncoding
+
 instance A.FromJSON Tag where
     parseJSON = A.withObject "Tag" $ \obj -> Tag
         <$> obj A..: "name"
@@ -206,10 +211,10 @@ instance Ixed TagHierarchy where
     ix = att
 
 instance Att TagHierarchy where
-    att name = lens getter setter
+    att name = lens getter' setter
       where
         emptyTag = Tag name 0 mempty
-        getter (TagHierarchy g) = fromMaybe emptyTag $ Graph.lookup name g
+        getter' (TagHierarchy g) = fromMaybe emptyTag $ Graph.lookup name g
         setter (TagHierarchy g) tag = TagHierarchy $ Graph.insert tag g
 {-
 We could strip empty flags out, but then we couldn't find them while iterating.

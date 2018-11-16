@@ -5,7 +5,6 @@ module SatO.Jasenrekisteri.Pages.Members (membersPage) where
 
 import Prelude ()
 import Futurice.Prelude
-import Control.Lens
 
 import Control.Monad.Reader (ask)
 

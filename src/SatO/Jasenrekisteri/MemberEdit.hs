@@ -20,14 +20,16 @@ module SatO.Jasenrekisteri.MemberEdit (
     UnSingleton,
     ) where
 
-import Prelude ()
-import Futurice.Prelude
-import Control.Applicative (liftA2)
-import Data.Monoid         (Endo (..))
+import Control.Applicative   (liftA2)
+import Data.Monoid           (Endo (..))
 import Data.Type.Equality
 import Futurice.Generics
-import Futurice.Peano
+import Futurice.Generics.SOP
+       (sopArbitrary, sopParseJSON, sopToEncoding, sopToJSON)
+import Futurice.Prelude
+import Prelude ()
 
+import qualified Data.Nat     as Nat
 import qualified Generics.SOP as SOP
 
 import SatO.Jasenrekisteri.Member
@@ -127,13 +129,13 @@ fieldEndos pe = SOP.hmap (K . mk . unK) memberEdits
 -- | Check that we have two fields less in MemberEdit than in Member
 _proof
     :: Length (UnSingleton (SOP.Code Member))
-    :~: 'PS ('PS (Length (UnSingleton (SOP.Code MemberEdit))))
+    :~: 'Nat.S ('Nat.S (Length (UnSingleton (SOP.Code MemberEdit))))
 _proof = Refl
 
 -- Move to futurice-prelude
-type family Length xs :: Peano where
-    Length '[]       = 'PZ
-    Length (x ': xs) = 'PS (Length xs)
+type family Length xs :: Nat.Nat where
+    Length '[]       = 'Nat.Z
+    Length (x ': xs) = 'Nat.S (Length xs)
 
 type family UnSingleton (xs :: [k]) :: k where
     UnSingleton '[x] = x

@@ -1,5 +1,7 @@
 /dist/
 /dist-newstyle/
+.ghc.environment.*
+run.sh
 .stack-work/
 /data/
 /data.json

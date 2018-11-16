@@ -1,24 +1,32 @@
--- This file has been generated from package.yaml by hpack version 0.15.0.
---
--- see: https://github.com/sol/hpack
-
+cabal-version:  2.2
 name:           jasenrekisteri
 version:        0
+
 synopsis:       Member registry of Satakuntalainen Osakunta
 description:    Member registry of Satakuntalainen Osakunta. See README
 category:       Web
+
 homepage:       https://github.com/satakuntalainen-osakunta/jasenrekisteri#readme
 bug-reports:    https://github.com/satakuntalainen-osakunta/jasenrekisteri/issues
 author:         Oleg Grenrus <oleg.grenrus@iki.fi>
 maintainer:     Oleg Grenrus <oleg.grenrus@iki.fi>
-license:        BSD3
+license:        BSD-3-Clause
 license-file:   LICENSE
-tested-with:    GHC==8.0.1
 build-type:     Simple
-cabal-version:  >= 1.10
+tested-with:    GHC==8.4.4
 
 extra-source-files:
     README.md
+    jasenrekisteri.js
+    vendor/jquery-ui.min.js
+    vendor/jquery-3.1.1.slim.min.js
+    vendor/foundation.min.css
+    vendor/jquery-ui.min.css
+    vendor/foundation.min.js
+    vendor/fetch.js
+    vendor/js.cookie.js
+    vendor/lodash.fp.min.js
+    vendor/menrva.standalone.js
 
 source-repository head
   type: git
@@ -29,8 +37,8 @@ library
       src/
   ghc-options: -Wall
   build-depends:
-      base >=4.9 && <4.10
-    , aeson ==1.0.*
+      base ==4.11.*
+    , aeson ^>=1.4.1
     , aeson-compat
     , aeson-extra
     , ansi-wl-pprint
@@ -46,12 +54,14 @@ library
     , DRBG
     , exceptions
     , file-embed
+    , fin
     , futurice-prelude
     , generics-sop
     , http-media
     , hashable
     , http-api-data
     , http-client
+    , http-types
     , intervals
     , lens
     , lucid
@@ -65,10 +75,10 @@ library
     , regex-applicative-text
     , resource-pool
     , semigroups
-    , servant        ==0.9.*
+    , servant ^>=0.15
     , servant-cassava
     , servant-lucid
-    , servant-server ==0.9.*
+    , servant-server
     , stm
     , strict-base-types
     , swagger2
@@ -78,7 +88,6 @@ library
     , trifecta
     , unordered-containers
     , uuid
-    , uuid-aeson
     , vector
     , vector-instances
     , wai
@@ -125,8 +134,8 @@ executable excel
       excel/
   ghc-options: -Wall -threaded
   build-depends:
-      base >=4.9 && <4.10
-    , aeson ==1.0.*
+      base
+    , aeson
     , aeson-compat
     , aeson-extra
     , ansi-wl-pprint
@@ -148,6 +157,7 @@ executable excel
     , hashable
     , http-api-data
     , http-client
+    , http-types
     , intervals
     , lens
     , lucid
@@ -161,10 +171,10 @@ executable excel
     , regex-applicative-text
     , resource-pool
     , semigroups
-    , servant        ==0.9.*
+    , servant
     , servant-cassava
     , servant-lucid
-    , servant-server ==0.9.*
+    , servant-server
     , stm
     , strict-base-types
     , swagger2
@@ -174,7 +184,6 @@ executable excel
     , trifecta
     , unordered-containers
     , uuid
-    , uuid-aeson
     , vector
     , vector-instances
     , wai
@@ -189,62 +198,8 @@ executable jasenrekisteri-server
       server/
   ghc-options: -Wall -threaded
   build-depends:
-      base >=4.9 && <4.10
-    , aeson ==1.0.*
-    , aeson-compat
-    , aeson-extra
-    , ansi-wl-pprint
-    , array
-    , attoparsec
-    , base-compat
-    , bytestring
-    , cassava
-    , clay
-    , containers
-    , cookie
-    , crypto-api
-    , DRBG
-    , exceptions
-    , file-embed
-    , futurice-prelude
-    , generics-sop
-    , http-media
-    , hashable
-    , http-api-data
-    , http-client
-    , intervals
-    , lens
-    , lucid
-    , mmorph
-    , monadcryptorandom
-    , mtl
-    , postgresql-simple
-    , postgresql-simple-url
-    , reflection
-    , regex-applicative
-    , regex-applicative-text
-    , resource-pool
-    , semigroups
-    , servant        ==0.9.*
-    , servant-cassava
-    , servant-lucid
-    , servant-server ==0.9.*
-    , stm
-    , strict-base-types
-    , swagger2
-    , text
-    , time
-    , transformers
-    , trifecta
-    , unordered-containers
-    , uuid
-    , uuid-aeson
-    , vector
-    , vector-instances
-    , wai
-    , warp
-    , xlsx
-    , jasenrekisteri
+    base,
+    jasenrekisteri
   default-language: Haskell2010
 
 test-suite unit-tests
@@ -254,61 +209,9 @@ test-suite unit-tests
       tests/
   ghc-options: -Wall
   build-depends:
-      base >=4.9 && <4.10
-    , aeson ==1.0.*
-    , aeson-compat
-    , aeson-extra
-    , ansi-wl-pprint
-    , array
-    , attoparsec
-    , base-compat
-    , bytestring
-    , cassava
-    , clay
-    , containers
-    , cookie
-    , crypto-api
-    , DRBG
-    , exceptions
-    , file-embed
+      base
     , futurice-prelude
-    , generics-sop
-    , http-media
-    , hashable
-    , http-api-data
-    , http-client
-    , intervals
-    , lens
-    , lucid
-    , mmorph
-    , monadcryptorandom
-    , mtl
-    , postgresql-simple
-    , postgresql-simple-url
-    , reflection
-    , regex-applicative
-    , regex-applicative-text
-    , resource-pool
-    , semigroups
-    , servant        ==0.9.*
-    , servant-cassava
-    , servant-lucid
-    , servant-server ==0.9.*
-    , stm
-    , strict-base-types
-    , swagger2
-    , text
-    , time
-    , transformers
-    , trifecta
-    , unordered-containers
-    , uuid
-    , uuid-aeson
-    , vector
-    , vector-instances
-    , wai
-    , warp
-    , xlsx
+    , aeson
     , tasty
     , tasty-quickcheck
     , jasenrekisteri

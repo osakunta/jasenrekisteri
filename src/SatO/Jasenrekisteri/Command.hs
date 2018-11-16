@@ -3,19 +3,18 @@
 {-# LANGUAGE TemplateHaskell      #-}
 {-# LANGUAGE TypeFamilies         #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 module SatO.Jasenrekisteri.Command where
 
-import Prelude ()
-import Futurice.Prelude
-import Control.Lens         hiding ((.=))
+import Control.Lens          hiding ((.=))
 import Data.Aeson
-import Data.Aeson.Encoding  (pair)
-import Data.Functor.Classes
-       (Eq1 (..), Show1 (..), eq1, showsBinaryWith, showsUnaryWith)
-import Data.Monoid          (mconcat)
+import Data.Aeson.Encoding   (pair)
+import Data.Functor.Classes  (Eq1 (..), Show1 (..), eq1, showsBinaryWith)
+import Data.Monoid           (mconcat)
 import Futurice.Generics
-import Web.HttpApiData      (FromHttpApiData (..), ToHttpApiData (..))
+import Futurice.Generics.SOP (sopArbitrary)
+import Futurice.Prelude
+import Prelude ()
+import Web.HttpApiData       (FromHttpApiData (..), ToHttpApiData (..))
 
 import SatO.Jasenrekisteri.Member
 import SatO.Jasenrekisteri.MemberEdit
@@ -64,14 +63,6 @@ instance Show1 f => Show (Command f) where
     showsPrec d (CmdNewMember memberId edit) =
         showsBinaryWith (liftShowsPrec showsPrec showList) showsPrec
         "CmdNewMember" d memberId edit
-
-instance Show1 I where
-    liftShowsPrec sp _ d (I x) =
-        showsUnaryWith sp "I" d x
-
-instance FromJSON1 Proxy where
-    liftParseJSON _ _ Null = pure Proxy
-    liftParseJSON _ _ _    = fail "Proxy should be encoded as Null"
 
 commandMemberId :: Getter (Command I) MemberId
 commandMemberId = to $ \cmd -> case cmd of

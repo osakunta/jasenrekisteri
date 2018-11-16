@@ -37,13 +37,14 @@ module SatO.Jasenrekisteri.Member (
     memberPhone,
     ) where
 
-import Prelude ()
-import Futurice.Prelude
-import Control.Lens        (Getter, contains, re, to, (%~))
-import Data.Char           (isLetter)
-import Data.Maybe          (mapMaybe)
+import Control.Lens          (Getter, contains, re, to, (%~))
+import Data.Char             (isLetter)
+import Data.Maybe            (mapMaybe)
 import Futurice.Generics
-import Futurice.IdMap      (HasKey (..))
+import Futurice.Generics.SOP (sopParseJSON, sopToEncoding, sopToJSON)
+import Futurice.IdMap        (HasKey (..))
+import Futurice.Prelude
+import Prelude ()
 
 import qualified Data.Attoparsec.Text          as Atto
 import qualified Data.Csv                      as Csv

@@ -32,7 +32,7 @@ virkailijat :: IdMap Tag
 virkailijat = IdMap.fromFoldable $ virat ++ virat2 ++ hallitus
   where
     virat :: [Tag]
-    virat = flip concatMap kaikkiVirat $ \(name, years) ->
+    virat = flip concatMap kaikkiVirat $ \(name, years, additionalChildren) ->
         let years'        = intervalSpan years
             tagName'      = TagName name
             childTags     = map makeTag years'
@@ -42,26 +42,26 @@ virkailijat = IdMap.fromFoldable $ virat ++ virat2 ++ hallitus
                 colour = if any p hallitusVirat
                     then hallitusColour
                     else virkailijaColour
-                p (n, ys) = n == name && Interval.elem y ys
+                p (n, ys) = n == name && Interval.member y ys
 
             -- Colour of the parent tag, e.g. "hpj"
             parentColour  =
-                if maybe False (intervalEq years) $ listToMaybe $ mapMaybe pick hallitusVirat
+                if maybe False (intervalEq years) $ listToMaybe $ mapMaybe pickk hallitusVirat
                     then hallitusColour
                     else virkailijaColour
               where
                 -- pick years for this duty
-                pick (n, ys)
+                pickk (n, ys)
                     | n == name = Just ys
                     | otherwise = Nothing
 
-        in Tag tagName' parentColour (tagNamesOf (folded . tagName) childTags) : childTags
+        in Tag tagName' parentColour (tagNamesOf (folded . tagName) childTags <> tagNamesOf folded additionalChildren) : childTags
 
     virat2 :: [Tag]
     virat2 = flip map [virkailijatFrom .. virkailijatTo] $ \year ->
         Tag (TagName $ "virkailijat" <> textShow year) virkailijaColour $ tagNamesOf folded $
-            (:) (TagName $ "hallitus" <> textShow year) $ flip mapMaybe kaikkiVirat $ \(name, years) ->
-                if Interval.elem year years
+            (:) (TagName $ "hallitus" <> textShow year) $ flip mapMaybe kaikkiVirat $ \(name, years, _) ->
+                if Interval.member year years
                     then Just $ TagName $ name <> textShow year
                     else Nothing
 
@@ -69,7 +69,7 @@ virkailijat = IdMap.fromFoldable $ virat ++ virat2 ++ hallitus
     hallitus = flip map [virkailijatFrom .. virkailijatTo] $ \year ->
         Tag (TagName $ "hallitus" <> textShow year) hallitusColour $ tagNamesOf folded $
             flip mapMaybe hallitusVirat $ \(name, years) ->
-                if Interval.elem year years
+                if Interval.member year years
                     then Just $ TagName $ name <> textShow year
                     else Nothing
 
@@ -87,47 +87,48 @@ hallitusVirat =
     future = virkailijatTo
     past   = virkailijatFrom
 
-kaikkiVirat :: [(Text, Interval Int)]
+kaikkiVirat :: [(Text, Interval Int, [TagName])]
 kaikkiVirat =
-    [ mk "hpj"                          (past ... future)
-    , mk "pääsihteeri"                  (past ... future)
-    , mk "isäntä"                       (past ... future)
-    , mk "emäntä"                       (past ... future)
-    , mk "tiedotussihteeri"             (past ... future)
-    , mk "päätoimittaja"                (past ... future)
-    , mk "taloudenhoitaja"              (past ... future)
-    , mk "urheiluohjaaja"               (past ... future)
-    , mk "kulttuurisihteeri"            (past ... future)
-    , mk "kappalainen"                  (past ... future)
-    , mk "yhteiskuntasihteeri"          (past ... future)
-    , mk "kirjastonhoitaja"             (past ... future)
-    , mk "opastussihteeri"              (past ... future)
-    , mk "jäsensihteeri"                (2012 ... future)
-    , mk "mainossihteeri"               (past ... future)
-    , mk "historioitsija"               (past ... future)
-    , mk "galleristi"                   (2012 ... future)
-    , mk "valokuvaaja"                  (past ... future)
-    , mk "laulunjohtaja"                (past ... future)
-    , mk "tietotekniikkavastaava"       (2012 ... future)
-    , mk "verkkovastaava"               (2012 ... future)
-    , mk "musiikkihuoneenhoitaja"       (past ... future)
-    , mk "haronmäenisäntä"              (past ... future)
-    , mk "valvontatilintarkastaja"      (past ... future)
-    , mk "varavalvontatilintarkastaja"  (past ... future)
-    , mk "seniorisihteeri"              (2017 ... future)
-    , mk "juhlamestari"                 (past ... future)
-    , mk "apulaissihteeri"              (past ... 2011)
-    , mk "ulkoasiainsihteeri"           (past ... 2011)
-    , mk "naistenurheiluohjaaja"        (past ... 2011)
-    , mk "miestenurheiluohjaaja"        (past ... 2011)
-    , mk "arkistonhoitaja"              (past ... 2011)
-    , mk "julkaisuvarastonhoitaja"      (past ... 2011)
-    , mk "lehtihuoneenhoitaja"          (past ... 2011)
-    , mk "urho"                         (past ... 2011)
-    , mk "otso"                         (past ... 2011)
+    [ mk "hpj"                          (past ... future) []
+    , mk "pääsihteeri"                  (past ... future) []
+    , mk "isäntä"                       (past ... future) []
+    , mk "emäntä"                       (past ... future) []
+    , mk "tiedotussihteeri"             (past ... future) []
+    , mk "päätoimittaja"                (past ... future) []
+    , mk "taloudenhoitaja"              (past ... future) []
+    , mk "urheiluohjaaja"               (past ... future) ["naistenurheiluohjaaja", "mistenurheiluohjaaja"]
+    , mk "kulttuurisihteeri"            (past ... future) []
+    , mk "kappalainen"                  (past ... future) []
+    , mk "yhteiskuntasihteeri"          (past ... future) []
+    , mk "kirjastonhoitaja"             (past ... future) []
+    , mk "opastussihteeri"              (past ... future) []
+    , mk "jäsensihteeri"                (2012 ... future) ["apulaissihteeri"]
+    , mk "mainossihteeri"               (past ... future) []
+    , mk "historioitsija"               (past ... future) []
+    , mk "galleristi"                   (2012 ... future) ["arkistonhoitaja"]
+    , mk "valokuvaaja"                  (past ... future) []
+    , mk "laulunjohtaja"                (past ... future) []
+    , mk "tietotekniikkavastaava"       (2012 ... future) ["otso"]
+    , mk "verkkovastaava"               (2012 ... future) ["urho"]
+    , mk "musiikkihuoneenhoitaja"       (past ... future) []
+    , mk "haronmäenisäntä"              (past ... future) []
+    , mk "valvontatilintarkastaja"      (past ... future) []
+    , mk "varavalvontatilintarkastaja"  (past ... future) []
+    , mk "seniorisihteeri"              (2017 ... future) []
+    , mk "juhlamestari"                 (past ... future) []
+    , mk "apulaissihteeri"              (past ... 2011) []
+    , mk "ulkoasiainsihteeri"           (past ... 2011) []
+    , mk "naistenurheiluohjaaja"        (past ... 2011) []
+    , mk "miestenurheiluohjaaja"        (past ... 2011) []
+    , mk "arkistonhoitaja"              (past ... 2011) []
+    , mk "julkaisuvarastonhoitaja"      (past ... 2011) []
+    , mk "lehtihuoneenhoitaja"          (past ... 2011) []
+    , mk "urho"                         (past ... 2011) []
+    , mk "otso"                         (past ... 2011) []
+    , mk "kamreeri"                     (2018 ... future) []
     ]
   where
-    mk = (,)
+    mk = (,,)
     future = virkailijatTo
     past   = virkailijatFrom
 
@@ -135,7 +136,7 @@ virkailijatFrom :: Int
 virkailijatFrom = 2008
 
 virkailijatTo :: Int
-virkailijatTo = 2017
+virkailijatTo = 2019
 
 -------------------------------------------------------------------------------
 -- Kuraattori
@@ -145,7 +146,7 @@ kuraattoriTags :: [Tag]
 kuraattoriTags = t : ts
   where
     t = Tag "kuraattori" merkkiColour (tagNamesOf (folded . tagName) ts)
-    ts = kuraattoriTag <$> [ 2001, 2003 .. 2019 ]
+    ts = kuraattoriTag <$> [ 1997, 1999 .. 2019 ]
 
     kuraattoriTag :: Int -> Tag
     kuraattoriTag year = Tag (_TagName # ("kuraattori" <> textShow year <> "-" <> textShow (year + 1))) merkkiColour mempty
