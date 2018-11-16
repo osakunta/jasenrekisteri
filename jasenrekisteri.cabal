@@ -126,8 +126,6 @@ library
       SatO.Jasenrekisteri.World
       Servant.GoogleAuth
       Servant.Xlsx
-  other-modules:
-      Paths_jasenrekisteri
   default-language: Haskell2010
 
 executable excel
