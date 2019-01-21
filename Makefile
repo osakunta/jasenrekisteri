@@ -3,7 +3,7 @@
 all : build
 
 run : 
-	PORT=8000 POSTGRES_URL=postgres://$(USER)@/$(USER) stack exec jasenrekisteri-server data.json
+	PORT=8000 GOOGLE_CLIENT_ID=198725857640-tl7c0h3o7mgon7h901rocnm4jfe3nlak.apps.googleusercontent.com POSTGRES_URL=postgres://$(USER)@/$(USER) cabal new-run jasenrekisteri-server data.json
 
 build :
-	stack build --pedantic
+	cabal new-build

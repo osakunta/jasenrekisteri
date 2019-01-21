@@ -76,7 +76,7 @@ instance
 data TokenInfo = TokenInfo
     { tokenInfoEmail         :: !(Maybe Text)
     -- , tokenInfoEmailVerified :: !Bool
-    , tokenInfoName          :: !Text
+    , tokenInfoName          :: !(Maybe Text)
     , tokenInfoAud           :: !GoogleClientId
     }
   deriving
@@ -86,7 +86,7 @@ instance FromJSON TokenInfo where
     parseJSON = withObject "TokenInfo" $ \obj -> TokenInfo
         <$> obj .:? "email"
         -- <*> obj .: "email_verified"
-        <*> obj .: "name"
+        <*> obj .:? "name"
         <*> obj .: "aud"
 
 -- |

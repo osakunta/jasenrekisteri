@@ -4,19 +4,23 @@
 {-# LANGUAGE TypeOperators     #-}
 module SatO.Jasenrekisteri.Server (defaultMain) where
 
-import Prelude ()
-import Futurice.Prelude
-import Control.Lens           (to)
-import Control.Concurrent.STM (atomically, writeTVar)
-import Control.Monad          (unless)
+import Control.Concurrent.STM    (atomically, writeTVar)
+import Control.Lens              (to)
+import Control.Monad             (unless)
 import Data.Aeson.Compat
-import Data.List              (foldl')
-import Data.Pool              (withResource)
-import Futurice.IdMap         (key)
+import Data.List                 (foldl')
+import Data.Pool                 (withResource)
+import Futurice.IdMap            (key)
+import Futurice.Prelude
+import Lucid
+import Network.HTTP.Types.Status (status500)
 import Network.Wai
+import Prelude ()
 import Servant
 import Servant.GoogleAuth
-import System.Environment     (getArgs)
+import System.Environment        (getArgs)
+
+-- import Control.Exception (displayException)
 
 import qualified Data.ByteString.Lazy     as LBS
 import qualified Network.Wai.Handler.Warp as Warp
@@ -167,6 +171,22 @@ app ctx = serveWithContext jasenrekisteriAPI
     (basicAuthServerContext ctx)
     (server ctx)
 
+exceptionResponse :: SomeException -> Response
+exceptionResponse (SomeException _exc) = responseLBS status500 hdrs $ renderBS $
+    doctypehtml_ $ do
+        head_ $
+            title_ "Error"
+        body_ $ pre_ $ toHtml $ unlines
+            [ "Error:"
+            , replicate 72 '-'
+            , "Some error" -- displayException exc
+            ]
+  where
+    hdrs =
+        [ ("Content-Type", "text/html;encoding=utf8")
+        ]
+
+
 defaultMain :: IO ()
 defaultMain = do
     args <- getArgs
@@ -177,12 +197,15 @@ defaultMain = do
             -- mapM_ print $ V.filter (not . (== mempty) . _memberTags) members
             let world = mkWorld members tags
             cfg <- readConfig
-            let gcid = "198725857640-tl7c0h3o7mgon7h901rocnm4jfe3nlak.apps.googleusercontent.com"
-            ctx <- newCtx (GoogleClientId gcid) (cfgConnectInfo cfg) world
+            ctx <- newCtx (cfgGcid cfg) (cfgConnectInfo cfg) world
             -- Query stored commands, and apply to the initial world
             cmds <- withResource (ctxPostgres ctx) $ \conn ->
                 P.fromOnly <$$> P.query_ conn "SELECT edata FROM jasen2.events ORDER BY eid;"
             let world' = foldl' (flip applyCommand) world cmds
             atomically $ writeTVar (ctxWorld ctx) world'
-            Warp.run (cfgPort cfg) $ app ctx
+            let settings :: Warp.Settings
+                settings = Warp.defaultSettings
+                    & Warp.setPort (cfgPort cfg)
+                    & Warp.setOnExceptionResponse exceptionResponse
+            Warp.runSettings settings $ app ctx
         _ -> putStrLn "Usage: ./jasenrekisteri-server data.json"
