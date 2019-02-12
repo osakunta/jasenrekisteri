@@ -11,9 +11,10 @@ module SatO.Jasenrekisteri.Session (
     LoginData (..),
     ) where
 
-import Prelude ()
+import Data.Aeson       (ToJSON (..))
 import Futurice.Prelude
 import Lucid            (ToHtml (..))
+import Prelude ()
 
 import qualified Database.PostgreSQL.Simple.FromField as P
 import qualified Database.PostgreSQL.Simple.ToField   as P
@@ -42,3 +43,7 @@ data LoginData = LoginData
     { loginUser :: !LoginUser
     , loginPass :: !Text
     }
+
+instance ToJSON LoginUser where
+    toJSON = toJSON . getLoginUser
+    toEncoding = toEncoding . getLoginUser

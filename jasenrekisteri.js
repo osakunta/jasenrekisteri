@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         })
         .catch(function (err) {
-          console.log("Token clearaace cahe failed; continuing logout procedure.", err);
+          console.log("Token cleanup failed; continuing logout procedure.", err);
         })
         .then(function () {
           console.log("Loading auth2");
@@ -84,8 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .then(function () {
           console.info("logged out");
-          Cookies.remove("GOOGLE_TOKEN");
-          location.reload();
+          location.href = '/';
         })
         .catch(function (exc) {
           overlay.message.classList.add("alert");
@@ -546,13 +545,111 @@ document.addEventListener("DOMContentLoaded", function () {
 function onSignIn(googleUser) {
   var profile = googleUser.getBasicProfile();
   var id_token = googleUser.getAuthResponse().id_token;
-  Cookies.set("GOOGLE_TOKEN", id_token, {
-    path: "/",
-    expires: 7,
-  });
-  if (location.pathname === "/login") {
-    location.href = "/";
-  } else {
-    location.reload();
+
+  var headers = new Headers();
+  headers.append("Accept", "application/json");
+  headers.append("Content-Type", "application/json");
+
+  var opts = {
+    method: "POST",
+    headers: headers,
+    credentials: "same-origin",
+    body: JSON.stringify(id_token),
+  };
+
+  var url = "/tokensignin";
+
+  fetch(url, opts)
+    .then(function (res) {
+      var contentType = res.headers.get("content-type");
+      console.debug("res", url, contentType, res.ok);
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        return res.json();
+      } else {
+        return res.text().then(function (txt) {
+          throw new Error("Not a JSON" + txt);
+        });
+      }
+    })
+    .then(function (res) {
+      switch (res.tag || "Unknown") {
+        case "InvalidToken":
+          throw "Google sekoilee."
+        case "InvalidUser":
+          throw "Väärä tunnus. <a href='/logout'>Kirjaudu ulos (jos kirjauduit väärällä tunnuksella)"
+        case "LoginOK":
+          if (location.pathname === "/login") {
+            location.href = "/";
+          } else {
+            location.reload();
+          }          
+          break;
+        default:
+          console.log(res.tag);
+      }
+    })
+    .catch(function (exc) {
+      var overlay = addOverlay();
+      overlay.message.classList.add("alert");
+      overlay.message.classList.remove("primary");
+      overlay.message.innerHTML = "Tapahtui virhe!<br />" + exc
+      overlay.overlay.style.display = "";
+      throw exc;
+    });
+
+  // copy pasted
+  var eventNames = [ "click", "change" ];
+  var eachWithKey = _.each.convert({ 'cap': false });
+
+  function addOverlay() {
+    var overlay = document.createElement("DIV");
+    overlay.className = "jrek-overlay";
+    overlay.style.display = "none";
+    document.body.appendChild(overlay);
+
+    var message = dom("div", { className: "jrek-message callout primary" }, [ "placeholder-message" ]);
+
+    overlay.appendChild(dom("div", { className: "row" }, [
+      dom("div", { className: "large-12 columns" },  [ message ]),
+    ]));
+
+    return {
+      overlay: overlay,
+      message: message,
+    };
+  }
+
+  function dom(elName, args, children) {
+    if (_.isArray(args)) {
+      children = args;
+      args = {};
+    }
+
+    children = children || [];
+    args = args || {};
+
+    var el = document.createElement(elName);
+
+    eachWithKey(function (value, key) {
+      if (eventNames.indexOf(key) === -1) {
+        el[key] = value;
+      } else {
+        el.addEventListener(key, value);
+      }
+    }, args);
+
+    children.forEach(function (child) {
+      if (_.isString(child)) {
+        el.appendChild(domText(child));
+      } else {
+        el.appendChild(child);
+      }
+    });
+
+    return el;
+  }
+
+  function domText(t) {
+    return document.createTextNode(t);
   }
 }
