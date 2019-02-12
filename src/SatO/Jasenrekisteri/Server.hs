@@ -6,10 +6,10 @@ module SatO.Jasenrekisteri.Server (defaultMain) where
 
 import Control.Concurrent.STM    (atomically, writeTVar)
 import Control.Lens              (to)
-import Control.Monad             (unless)
 import Data.Aeson.Compat
 import Data.List                 (foldl')
 import Data.Pool                 (withResource)
+import Data.Text.Encoding        (decodeUtf8)
 import Futurice.IdMap            (key)
 import Futurice.Prelude
 import Lucid
@@ -18,10 +18,13 @@ import Network.Wai
 import Prelude ()
 import Servant
 import Servant.GoogleAuth
+import System.Entropy            (getEntropy)
 import System.Environment        (getArgs)
+import Web.Cookie
 
 -- import Control.Exception (displayException)
 
+import qualified Data.ByteString.Base16   as Base16
 import qualified Data.ByteString.Lazy     as LBS
 import qualified Network.Wai.Handler.Warp as Warp
 
@@ -96,15 +99,58 @@ searchDataHandler ctx _ = liftIO $ do
         , searchItemHref  = tagHrefText Nothing tn
         }
 
-logoutHandler :: Ctx -> LoginUser -> Handler Bool
-logoutHandler ctx (LoginUser lu) = withResource (ctxPostgres ctx) $ \conn -> do
+logoutPostHandler :: Ctx -> LoginUser -> Handler Bool
+logoutPostHandler ctx (LoginUser lu) = withResource (ctxPostgres ctx) $ \conn -> do
     _ <- liftIO $ P.execute conn
         "DELETE FROM jasen2.tokencache WHERE username = ?"
         (P.Only lu)
     pure True
 
+logoutGetHandler :: Ctx -> Handler (HtmlPage "logout")
+logoutGetHandler ctx = pure $ logoutPage $ ctxGcid ctx
+
 loginHandler :: Ctx -> Handler (HtmlPage "login")
 loginHandler ctx = pure $ loginPage $ ctxGcid ctx
+
+
+tokensigninHandler :: Ctx -> Text -> Handler (Headers '[Header "Set-Cookie" SetCookie] LoginResponse)
+tokensigninHandler ctx idtoken = do
+    mgr <- liftIO $ newManager tlsManagerSettings
+    eti <- liftIO $ validateToken mgr idtoken
+
+    case eti of
+        Left _err -> return $ noHeader InvalidToken
+        Right ti -> withResource (ctxPostgres ctx) $ \conn -> do
+            -- Check that token is for us
+            if (tokenInfoAud ti /= ctxGcid ctx)
+            then return $ noHeader InvalidToken
+            else do
+                r' <- liftIO $ P.query conn
+                    "SELECT username FROM jasen2.credentials WHERE email = ?;"
+                    (P.Only $ tokenInfoEmail ti)
+                case r' of
+                    []                    -> return $ noHeader InvalidUser
+                    (P.Only username : _) -> do
+                        -- delete old sessions
+                        _ <- liftIO $ P.execute_ conn
+                            "DELETE FROM jasen2.tokencache WHERE created < current_timestamp - '23 hours' :: interval;"
+
+                        tokenBS <- liftIO $ Base16.encode <$> getEntropy 32
+                        let tokenT = decodeUtf8 tokenBS
+
+                        _ <- liftIO $ P.execute conn
+                            "INSERT INTO jasen2.tokencache (token, username) VALUES (?, ?);"
+                            (tokenT, username)
+
+                        let setCookie :: SetCookie
+                            setCookie = defaultSetCookie
+                                { setCookieName   = "JASENREKISTERI_TOKEN"
+                                , setCookieValue  = tokenBS
+                                , setCookiePath   = Just "/"
+                                , setCookieMaxAge = Just 76800
+                                }
+                        return $ addHeader setCookie $ LoginOK $ LoginUser username
+
 
 googleAuthCheck :: Ctx -> GoogleAuthHandler LoginUser
 googleAuthCheck ctx = GoogleAuthHandler handler unauthorizedErr
@@ -112,11 +158,6 @@ googleAuthCheck ctx = GoogleAuthHandler handler unauthorizedErr
     gcid = ctxGcid ctx
 
     unauthorizedErr  = err403 { errBody = renderBS $ toHtml $ loginPage gcid }
-    unauthorizedErr' = err403 { errBody = body }
-      where
-        body = renderBS $ toHtml $ template gcid "Väärä tunnus" (pure ()) $ do
-            row_ $ large_ 12 $
-                a_ [ href_ "#", id_ "logout-link" ] "Kirjaudu ulos (jos kirjauduit väärällä tunnuksella)"
 
     handler :: Text -> ExceptT ServantErr IO LoginUser
     handler token = withResource (ctxPostgres ctx) $ \conn -> do
@@ -125,26 +166,7 @@ googleAuthCheck ctx = GoogleAuthHandler handler unauthorizedErr
             (P.Only token)
         case r of
             (P.Only username : _) -> pure $ LoginUser username
-            _                     -> do
-                mgr <- liftIO $ newManager tlsManagerSettings
-                ti <- liftIO $ validateToken mgr token
-
-                -- Check it's token for us
-                unless (tokenInfoAud ti == gcid) $ throwError unauthorizedErr
-
-                r' <- liftIO $ P.query conn
-                    "SELECT username FROM jasen2.credentials WHERE email = ?;"
-                    (P.Only $ tokenInfoEmail ti)
-                case r' of
-                    []                    -> throwError unauthorizedErr'
-                    (P.Only username : _) -> do
-                        _ <- liftIO $ P.execute_ conn
-                            "DELETE FROM jasen2.tokencache WHERE created < current_timestamp - '23 hours' :: interval;"
-                        _ <- liftIO $ P.execute conn
-                            "INSERT INTO jasen2.tokencache (token, username) VALUES (?, ?);"
-                            (token, username)
-                        pure $ LoginUser username
-
+            _                     -> throwError unauthorizedErr
 
 basicAuthServerContext :: Ctx -> Context (GoogleAuthHandler LoginUser ': '[])
 basicAuthServerContext ctx = googleAuthCheck ctx :. EmptyContext
@@ -162,8 +184,10 @@ server ctx = queryEndpoint ctx membersPage
     :<|> commandEndpoint ctx
     :<|> memberlogHandler ctx
     :<|> searchDataHandler ctx
+    :<|> tokensigninHandler ctx
     :<|> loginHandler ctx
-    :<|> logoutHandler ctx
+    :<|> logoutGetHandler ctx
+    :<|> logoutPostHandler ctx
     :<|> serveDirectoryFileServer "static"
 
 app :: Ctx -> Application
@@ -207,5 +231,6 @@ defaultMain = do
                 settings = Warp.defaultSettings
                     & Warp.setPort (cfgPort cfg)
                     & Warp.setOnExceptionResponse exceptionResponse
+            putStrLn $ "http://localhost:" ++ show (cfgPort cfg)
             Warp.runSettings settings $ app ctx
         _ -> putStrLn "Usage: ./jasenrekisteri-server data.json"

@@ -157,7 +157,7 @@ kuraattoriTags = t : ts
 -------------------------------------------------------------------------------
 
 fuksiTags :: [Tag]
-fuksiTags = fuksiTag <$> [ 2000 .. 2017 ]
+fuksiTags = fuksiTag <$> [ 2000 .. 2019 ]
   where
     fuksiTag :: Int -> Tag
     fuksiTag year = Tag (_TagName # ("fuksi" <> textShow year)) fuksiColour mempty
@@ -167,7 +167,7 @@ fuksiTags = fuksiTag <$> [ 2000 .. 2017 ]
 -------------------------------------------------------------------------------
 
 jasenTags :: [Tag]
-jasenTags = jasenTag <$> [ 1996..2017 ]
+jasenTags = jasenTag <$> [ 1996..2019 ]
   where
     jasenTag :: Int -> Tag
     jasenTag year = Tag (_TagName # name) jasenColour mempty

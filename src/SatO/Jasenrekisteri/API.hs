@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE DeriveGeneric         #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
@@ -7,16 +8,18 @@
 {-# LANGUAGE TypeOperators         #-}
 module SatO.Jasenrekisteri.API where
 
-import Prelude ()
-import Futurice.Prelude
+import Data.Aeson          (ToJSON)
 import Data.Csv            (EncodeOptions (..), defaultEncodeOptions)
+import Futurice.Prelude
 import Lucid
+import Prelude ()
 import SatO.Foundation     (HtmlPage)
 import Servant
 import Servant.CSV.Cassava
+import Servant.GoogleAuth
 import Servant.HTML.Lucid
 import Servant.Xlsx
-import Servant.GoogleAuth
+import Web.Cookie          (SetCookie)
 
 import SatO.Jasenrekisteri.Command
 import SatO.Jasenrekisteri.Contact
@@ -47,12 +50,26 @@ type JasenrekisteriAPI =
     :<|> JasenrekisteriAuth :> "command" :> ReqBody '[JSON] (Command Proxy) :> Post '[JSON] Text
     :<|> MemberlogEndpoint
     :<|> JasenrekisteriAuth :> "search-data" :> Get '[JSON] [SearchItem]
+    :<|> "tokensignin" :> ReqBody '[JSON] Text :> Post '[JSON] (Headers '[Header "Set-Cookie" SetCookie] LoginResponse)
     :<|> "login" :> HTMLPageEndpoint "login"
+    :<|> "logout" :> HTMLPageEndpoint "logout"
     :<|> "logout" :> JasenrekisteriAuth :> Post '[JSON] Bool
     :<|> Raw
 
 jasenrekisteriAPI :: Proxy JasenrekisteriAPI
 jasenrekisteriAPI = Proxy
+
+-------------------------------------------------------------------------------
+-- Login response
+-------------------------------------------------------------------------------
+
+data LoginResponse
+    = LoginOK LoginUser
+    | InvalidToken
+    | InvalidUser
+  deriving (Generic)
+
+instance ToJSON LoginResponse
 
 -------------------------------------------------------------------------------
 -- Endpoints

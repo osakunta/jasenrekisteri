@@ -12,14 +12,14 @@
 -- * <https://developers.google.com/identity/sign-in/web/backend-auth Backend auth>
 module Servant.GoogleAuth where
 
-import Prelude ()
-import Futurice.Prelude
 import Data.Aeson
-       (FromJSON (..), withObject, withText, (.:), (.:?))
-import Data.Aeson.Compat                          (decode)
+       (FromJSON (..), eitherDecode, withObject, withText, (.:), (.:?))
+import Futurice.Prelude
 import Network.HTTP.Client
-       (Manager, httpLbs, parseRequest, responseBody)
+       (Manager, httpLbs, parseRequest, responseBody, responseStatus)
+import Network.HTTP.Types.Status                  (statusIsSuccessful)
 import Network.Wai                                (requestHeaders)
+import Prelude ()
 import Servant
 import Servant.Server.Internal                    (getContextEntry)
 import Servant.Server.Internal.RoutingApplication
@@ -65,7 +65,7 @@ instance
             lu <- liftIO $ runExceptT $ do
                 let hdrs = requestHeaders req
                 cookie <- maybe (throwError $ unauthorizedError handler ) return $ lookup "Cookie" hdrs
-                token <- maybe (throwError $ unauthorizedError handler ) return $ lookup "GOOGLE_TOKEN" $ parseCookiesText cookie
+                token <- maybe (throwError $ unauthorizedError handler ) return $ lookup "JASENREKISTERI_TOKEN" $ parseCookiesText cookie
                 unGoogleAuthHandler handler token
             either delayedFailFatal return lu
 
@@ -92,9 +92,12 @@ instance FromJSON TokenInfo where
 -- |
 validateToken
     :: Manager
-    -> Text          -- ^ auth token
-    -> IO TokenInfo  -- ^ email address
+    -> Text                          -- ^ auth token
+    -> IO (Either String TokenInfo)  -- ^ email address
 validateToken mgr token = do
     req <- parseRequest $ "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=" <> token ^. unpacked
     res <- httpLbs req mgr
-    decode $ responseBody res
+    let status = responseStatus res
+    if statusIsSuccessful status
+    then return $ eitherDecode $ responseBody res
+    else return $ Left $ show status
