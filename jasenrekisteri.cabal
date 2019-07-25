@@ -15,10 +15,11 @@ maintainer:         Oleg Grenrus <oleg.grenrus@iki.fi>
 license:            BSD-3-Clause
 license-file:       LICENSE
 build-type:         Simple
-tested-with:        ghc ==8.4.4
+tested-with:        GHC ==8.4.4
 extra-source-files:
   README.md
   jasenrekisteri.js
+  encrypted/initial.json.enc
   vendor/jquery-ui.min.js
   vendor/jquery-3.1.1.slim.min.js
   vendor/foundation.min.css
@@ -46,6 +47,7 @@ library
     , base                    ^>=4.11
     , base-compat
     , base16-bytestring
+    , base64-bytestring
     , bytestring
     , cassava
     , clay
@@ -56,10 +58,12 @@ library
     , entropy
     , exceptions
     , file-embed
+    , file-embed-lzma
     , fin
     , futurice-prelude
     , generics-sop
     , hashable
+    , HsOpenSSL
     , http-api-data
     , http-client
     , http-media
@@ -88,6 +92,7 @@ library
     , time
     , transformers
     , trifecta
+    , unix
     , unordered-containers
     , uuid
     , vector
@@ -108,6 +113,7 @@ library
     SatO.Jasenrekisteri.Config
     SatO.Jasenrekisteri.Contact
     SatO.Jasenrekisteri.Ctx
+    SatO.Jasenrekisteri.Data
     SatO.Jasenrekisteri.Endpoints
     SatO.Jasenrekisteri.Hierarchy
     SatO.Jasenrekisteri.Markup

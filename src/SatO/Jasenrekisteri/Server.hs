@@ -6,7 +6,6 @@ module SatO.Jasenrekisteri.Server (defaultMain) where
 
 import Control.Concurrent.STM    (atomically, writeTVar)
 import Control.Lens              (to)
-import Data.Aeson.Compat
 import Data.List                 (foldl')
 import Data.Pool                 (withResource)
 import Data.Text.Encoding        (decodeUtf8)
@@ -14,24 +13,23 @@ import Futurice.IdMap            (key)
 import Futurice.Prelude
 import Lucid
 import Network.HTTP.Types.Status (status500)
-import Network.Wai
+
+import Network.Wai        (Response, responseLBS)
+import OpenSSL            (withOpenSSL)
 import Prelude ()
 import Servant
 import Servant.GoogleAuth
-import System.Entropy            (getEntropy)
-import System.Environment        (getArgs)
+import System.Entropy     (getEntropy)
 import Web.Cookie
 
--- import Control.Exception (displayException)
-
 import qualified Data.ByteString.Base16   as Base16
-import qualified Data.ByteString.Lazy     as LBS
 import qualified Network.Wai.Handler.Warp as Warp
 
 import SatO.Jasenrekisteri.API
 import SatO.Jasenrekisteri.Command
 import SatO.Jasenrekisteri.Config
 import SatO.Jasenrekisteri.Ctx
+import SatO.Jasenrekisteri.Data
 import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Hierarchy       (tags)
 import SatO.Jasenrekisteri.Markup
@@ -212,25 +210,29 @@ exceptionResponse (SomeException _exc) = responseLBS status500 hdrs $ renderBS $
 
 
 defaultMain :: IO ()
-defaultMain = do
-    args <- getArgs
-    case args of
-        [filepathData] -> do
-            contentsData <- LBS.readFile filepathData
-            members <- decode contentsData :: IO [Member]
-            -- mapM_ print $ V.filter (not . (== mempty) . _memberTags) members
-            let world = mkWorld members tags
-            cfg <- readConfig
-            ctx <- newCtx (cfgGcid cfg) (cfgConnectInfo cfg) world
-            -- Query stored commands, and apply to the initial world
-            cmds <- withResource (ctxPostgres ctx) $ \conn ->
-                P.fromOnly <$$> P.query_ conn "SELECT edata FROM jasen2.events ORDER BY eid;"
-            let world' = foldl' (flip applyCommand) world cmds
-            atomically $ writeTVar (ctxWorld ctx) world'
-            let settings :: Warp.Settings
-                settings = Warp.defaultSettings
-                    & Warp.setPort (cfgPort cfg)
-                    & Warp.setOnExceptionResponse exceptionResponse
-            putStrLn $ "http://localhost:" ++ show (cfgPort cfg)
-            Warp.runSettings settings $ app ctx
-        _ -> putStrLn "Usage: ./jasenrekisteri-server data.json"
+defaultMain = withOpenSSL $ do
+    cfg <- readConfig
+
+    -- read initial members
+    members <- getContentsData (cfgDataPassword cfg)
+
+    -- make world
+    -- mapM_ print $ V.filter (not . (== mempty) . _memberTags) members
+    let world = mkWorld members tags
+
+    -- make initial context
+    ctx <- newCtx (cfgGcid cfg) (cfgConnectInfo cfg) world
+
+    -- Query stored commands, and apply to the initial world
+    cmds <- withResource (ctxPostgres ctx) $ \conn ->
+        P.fromOnly <$$> P.query_ conn "SELECT edata FROM jasen2.events ORDER BY eid;"
+    let world' = foldl' (flip applyCommand) world cmds
+    atomically $ writeTVar (ctxWorld ctx) world'
+
+    -- start HTTP server
+    let settings :: Warp.Settings
+        settings = Warp.defaultSettings
+            & Warp.setPort (cfgPort cfg)
+            & Warp.setOnExceptionResponse exceptionResponse
+    putStrLn $ "http://localhost:" ++ show (cfgPort cfg)
+    Warp.runSettings settings $ app ctx
