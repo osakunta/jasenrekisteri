@@ -43,6 +43,7 @@ RUN apt-get -yq --no-install-suggests --no-install-recommends install \
     liblapack-dev \
     liblzma-dev \
     libpq-dev \
+    libssl-dev \
     libyaml-dev \
     netbase \
     openssh-client \
@@ -112,6 +113,7 @@ RUN apt-get -yq update && apt-get -yq --no-install-suggests --no-install-recomme
     liblapack3 \
     liblzma5 \
     libpq5 \
+    libssl1.1 \
     libyaml-0-2 \
     msmtp \
     netbase \
@@ -126,7 +128,8 @@ ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
 # Config msmtp to use G Suite relay for email sending
-RUN echo 'host smtp-relay.gmail.com\n\
+RUN echo 'domain satakuntatalo.fi\n\
+host smtp-relay.gmail.com\n\
 port 587\n\
 tls on\n\
 tls_trust_file /etc/ssl/certs/ca-certificates.crt\n\
