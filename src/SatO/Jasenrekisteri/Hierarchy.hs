@@ -136,7 +136,7 @@ virkailijatFrom :: Int
 virkailijatFrom = 2008
 
 virkailijatTo :: Int
-virkailijatTo = 2019
+virkailijatTo = 2020
 
 -------------------------------------------------------------------------------
 -- Kuraattori
