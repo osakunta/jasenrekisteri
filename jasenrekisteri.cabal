@@ -17,15 +17,15 @@ license-file:       LICENSE
 build-type:         Simple
 tested-with:        GHC ==8.4.4
 extra-source-files:
-  README.md
-  jasenrekisteri.js
   encrypted/initial.json.enc
-  vendor/jquery-ui.min.js
-  vendor/jquery-3.1.1.slim.min.js
-  vendor/foundation.min.css
-  vendor/jquery-ui.min.css
-  vendor/foundation.min.js
+  jasenrekisteri.js
+  README.md
   vendor/fetch.js
+  vendor/foundation.min.css
+  vendor/foundation.min.js
+  vendor/jquery-3.1.1.slim.min.js
+  vendor/jquery-ui.min.css
+  vendor/jquery-ui.min.js
   vendor/js.cookie.js
   vendor/lodash.fp.min.js
   vendor/menrva.standalone.js
@@ -75,7 +75,7 @@ library
     , monadcryptorandom
     , mtl
     , postgresql-simple
-    , postgresql-simple-url
+    , postgresql-simple-url   ^>=0.2.1.0
     , reflection
     , regex-applicative
     , regex-applicative-text
