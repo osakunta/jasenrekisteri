@@ -136,7 +136,7 @@ virkailijatFrom :: Int
 virkailijatFrom = 2008
 
 virkailijatTo :: Int
-virkailijatTo = 2021
+virkailijatTo = 2022
 
 -------------------------------------------------------------------------------
 -- Kuraattori
@@ -146,7 +146,7 @@ kuraattoriTags :: [Tag]
 kuraattoriTags = t : ts
   where
     t = Tag "kuraattori" merkkiColour (tagNamesOf (folded . tagName) ts)
-    ts = kuraattoriTag <$> [ 1997, 1999 .. 2019 ]
+    ts = kuraattoriTag <$> [ 1997, 1999 .. 2023 ]
 
     kuraattoriTag :: Int -> Tag
     kuraattoriTag year = Tag (_TagName # ("kuraattori" <> textShow year <> "-" <> textShow (year + 1))) merkkiColour mempty
@@ -157,7 +157,7 @@ kuraattoriTags = t : ts
 -------------------------------------------------------------------------------
 
 fuksiTags :: [Tag]
-fuksiTags = fuksiTag <$> [ 2000 .. 2019 ]
+fuksiTags = fuksiTag <$> [ 2000 .. 2022 ]
   where
     fuksiTag :: Int -> Tag
     fuksiTag year = Tag (_TagName # ("fuksi" <> textShow year)) fuksiColour mempty
@@ -167,7 +167,7 @@ fuksiTags = fuksiTag <$> [ 2000 .. 2019 ]
 -------------------------------------------------------------------------------
 
 jasenTags :: [Tag]
-jasenTags = jasenTag <$> [ 1996..2019 ]
+jasenTags = jasenTag <$> [ 1996..2022 ]
   where
     jasenTag :: Int -> Tag
     jasenTag year = Tag (_TagName # name) jasenColour mempty
