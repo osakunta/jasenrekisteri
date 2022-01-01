@@ -16,6 +16,7 @@ module SatO.Jasenrekisteri.Tag (
     TagNames (..),
     _TagNames,
     tagNamesOf,
+    tagNamesToText,
     -- * Full Tag
     Tag (..),
     tagName,
@@ -107,6 +108,9 @@ makePrisms ''TagNames
 tagNamesOf :: Getting _ s TagName -> s -> TagNames
 tagNamesOf l s = TagNames $ setOf (l . filtered (/= TagName "")) s
 
+tagNamesToText :: TagNames -> Text
+tagNamesToText = T.intercalate "," . map getTagName . Set.toList . getTagNames
+
 instance Semigroup TagNames where
     TagNames a <> TagNames b = TagNames (a <> b)
 
@@ -120,8 +124,7 @@ instance Csv.FromField TagNames where
         ts = TagName . T.strip <$> T.splitOn "," (TE.decodeUtf8 bs)
 
 instance Csv.ToField TagNames where
-    toField =
-        TE.encodeUtf8 . T.intercalate "," . map getTagName . Set.toList . getTagNames
+    toField = TE.encodeUtf8 . tagNamesToText
 
 instance A.FromJSON TagNames where
     parseJSON = fmap (tagNamesOf folded) . (A.parseJSON :: A.Value -> A.Parser [TagName])

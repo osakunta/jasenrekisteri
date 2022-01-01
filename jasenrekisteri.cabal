@@ -114,11 +114,13 @@ library
     SatO.Jasenrekisteri.Contact
     SatO.Jasenrekisteri.Ctx
     SatO.Jasenrekisteri.Data
+    SatO.Jasenrekisteri.DumpMember
     SatO.Jasenrekisteri.Endpoints
     SatO.Jasenrekisteri.Hierarchy
     SatO.Jasenrekisteri.Markup
     SatO.Jasenrekisteri.Member
     SatO.Jasenrekisteri.MemberEdit
+    SatO.Jasenrekisteri.Pages.Admin
     SatO.Jasenrekisteri.Pages.Changelog
     SatO.Jasenrekisteri.Pages.Login
     SatO.Jasenrekisteri.Pages.Member

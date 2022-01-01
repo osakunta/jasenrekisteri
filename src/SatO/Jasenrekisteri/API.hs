@@ -23,6 +23,7 @@ import Web.Cookie          (SetCookie)
 
 import SatO.Jasenrekisteri.Command
 import SatO.Jasenrekisteri.Contact
+import SatO.Jasenrekisteri.DumpMember
 import SatO.Jasenrekisteri.Member
 import SatO.Jasenrekisteri.SearchData
 import SatO.Jasenrekisteri.SearchQuery
@@ -47,6 +48,9 @@ type JasenrekisteriAPI =
     :<|> SearchEndpoint
     :<|> SearchCsvEndpoint
     :<|> SearchXlsxEndpoint
+    :<|> JasenrekisteriAuth :> "admin" :> HTMLPageEndpoint "admin"
+    :<|> JasenrekisteriAuth :> "admin" :> "sato-jasenet.csv" :> Get '[CSV' 'HasHeader SemiColonOpts] [DumpMember]
+    :<|> JasenrekisteriAuth :> "admin" :> "sato-jasenet.xlsx" :> Get '[XLSX] DumpMembers
     :<|> JasenrekisteriAuth :> "command" :> ReqBody '[JSON] (Command Proxy) :> Post '[JSON] Text
     :<|> MemberlogEndpoint
     :<|> JasenrekisteriAuth :> "search-data" :> Get '[JSON] [SearchItem]
