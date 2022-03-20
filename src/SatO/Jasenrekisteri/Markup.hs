@@ -66,6 +66,7 @@ navigation today lu = do
                     li_ $ a_ [tagHref (Just ColumnRoom) "talo"] "Talo"
             li_ $ a_ [changelogHref Nothing ] "Muutosloki"
             li_ $ a_ [searchHref Nothing Nothing] "Haku"
+            li_ $ a_ [href_ "/admin"] "Admin"
         div_ [ class_ "top-bar-right" ] $ ul_ [ class_ "menu" ] $ do
             li_ $ input_ [ class_ "search", placeholder_ "hae käyttäjä tai tägi" ]
             li_ [ class_ "menu-text" ] $ toHtml $ "Terve " <> getLoginUser lu

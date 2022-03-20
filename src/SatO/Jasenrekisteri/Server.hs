@@ -34,6 +34,7 @@ import SatO.Jasenrekisteri.Endpoints
 import SatO.Jasenrekisteri.Hierarchy       (tags)
 import SatO.Jasenrekisteri.Markup
 import SatO.Jasenrekisteri.Member
+import SatO.Jasenrekisteri.Pages.Admin
 import SatO.Jasenrekisteri.Pages.Changelog
 import SatO.Jasenrekisteri.Pages.Login
 import SatO.Jasenrekisteri.Pages.Member
@@ -179,6 +180,9 @@ server ctx = queryEndpoint ctx membersPage
     :<|> queryEndpoint ctx searchPage
     :<|> queryEndpoint ctx searchCsv
     :<|> queryEndpoint ctx searchXlsx
+    :<|> queryEndpoint ctx adminPage
+    :<|> queryEndpoint ctx dumpMembersCsv
+    :<|> queryEndpoint ctx dumpMembersXlsx
     :<|> commandEndpoint ctx
     :<|> memberlogHandler ctx
     :<|> searchDataHandler ctx
