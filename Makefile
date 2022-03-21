@@ -15,10 +15,14 @@ docker-rm:
 	sudo docker rm ${EXEC}
 
 docker-push:
-	sudo docker push ${NAME}
+	sudo docker push ${NAME}:${TAG}
 
 docker-bash:
 	sudo docker exec -it ${EXEC} /bin/bash
+
+docker-info:
+	@echo NAME=${NAME}
+	@echo TAG=${TAG}
 
 .PHONY : all build run
 
